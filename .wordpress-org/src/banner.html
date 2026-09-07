@@ -1,0 +1,131 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+	html, body { margin: 0; padding: 0; }
+
+	#stage {
+		width: 1544px;
+		height: 500px;
+		position: relative;
+		overflow: hidden;
+		background: linear-gradient( 115deg, #0b1a45 0%, #1e3a8a 55%, #1d4ed8 100% );
+		font-family: Inter, -apple-system, "Segoe UI", Roboto, sans-serif;
+		color: #fff;
+		display: flex;
+		align-items: center;
+	}
+
+	/* Soft light behind the mark. */
+	#stage::before {
+		content: "";
+		position: absolute;
+		left: -180px;
+		top: -160px;
+		width: 760px;
+		height: 760px;
+		border-radius: 50%;
+		background: radial-gradient( circle, rgba( 56, 189, 248, 0.20 ) 0%, rgba( 56, 189, 248, 0 ) 68% );
+	}
+
+	.mark {
+		flex: 0 0 auto;
+		margin-left: 104px;
+		position: relative;
+		z-index: 2;
+	}
+
+	.copy {
+		position: relative;
+		z-index: 2;
+		margin-left: 56px;
+	}
+
+	h1 {
+		margin: 0;
+		font-size: 74px;
+		font-weight: 700;
+		letter-spacing: -1.6px;
+		line-height: 1.04;
+	}
+
+	h1 .accent { color: #7dd3fc; }
+
+	p {
+		margin: 22px 0 0;
+		font-size: 27px;
+		font-weight: 400;
+		line-height: 1.45;
+		color: rgba( 255, 255, 255, 0.82 );
+		max-width: 640px;
+	}
+
+	/* Abstract job cards on the right. */
+	.cards {
+		position: absolute;
+		right: 74px;
+		top: 50%;
+		transform: translateY( -50% ) rotate( -4deg );
+		display: flex;
+		flex-direction: column;
+		gap: 20px;
+		z-index: 1;
+	}
+
+	.card {
+		width: 300px;
+		border-radius: 16px;
+		background: rgba( 255, 255, 255, 0.09 );
+		border: 1px solid rgba( 255, 255, 255, 0.16 );
+		padding: 20px 22px;
+	}
+
+	.card .t {
+		height: 13px;
+		border-radius: 7px;
+		background: rgba( 255, 255, 255, 0.72 );
+		width: 74%;
+	}
+
+	.card .m {
+		height: 9px;
+		border-radius: 5px;
+		background: rgba( 125, 211, 252, 0.62 );
+		width: 48%;
+		margin-top: 13px;
+	}
+
+	.card .m2 { width: 34%; background: rgba( 255, 255, 255, 0.26 ); margin-top: 9px; }
+</style>
+</head>
+<body>
+<div id="stage">
+	<div class="mark">
+		<svg width="196" height="196" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+			<g fill="none" stroke="#7dd3fc" stroke-width="26" stroke-linecap="round">
+				<path d="M 118 232 A 138 138 0 0 1 330 124"/>
+				<path d="M 394 280 A 138 138 0 0 1 182 388"/>
+			</g>
+			<path d="M 330 92 L 388 128 L 326 160 Z" fill="#7dd3fc"/>
+			<path d="M 182 420 L 124 384 L 186 352 Z" fill="#7dd3fc"/>
+			<path d="M 214 196 h 84 a 14 14 0 0 1 14 14 v 18 h -32 v -12 h -48 v 12 h -32 v -18 a 14 14 0 0 1 14 -14 z" fill="#ffffff"/>
+			<rect x="164" y="232" width="184" height="120" rx="18" fill="#ffffff"/>
+			<rect x="236" y="278" width="40" height="28" rx="8" fill="#1e3a8a"/>
+		</svg>
+	</div>
+
+	<div class="copy">
+		<h1>Jobs Sync<br><span class="accent">for Zoho Recruit</span></h1>
+		<p>Publish your Zoho Recruit job openings on WordPress &mdash; automatically, and without a single call to Zoho while a visitor is on the page.</p>
+	</div>
+
+	<div class="cards">
+		<div class="card"><div class="t"></div><div class="m"></div><div class="m m2"></div></div>
+		<div class="card"><div class="t" style="width:60%"></div><div class="m" style="width:56%"></div><div class="m m2" style="width:28%"></div></div>
+		<div class="card"><div class="t" style="width:82%"></div><div class="m" style="width:40%"></div><div class="m m2" style="width:44%"></div></div>
+	</div>
+</div>
+</body>
+</html>

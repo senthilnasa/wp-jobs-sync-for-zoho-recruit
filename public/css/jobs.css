@@ -8,17 +8,34 @@
 .jszr-jobs {
 	--jszr-gap: 1.25rem;
 	--jszr-radius: 6px;
-	--jszr-border: 1px solid rgba(0, 0, 0, 0.12);
-	--jszr-muted: rgba(0, 0, 0, 0.62);
 	--jszr-columns: 3;
+
+	/*
+	 * Borders are derived from the inherited text colour rather than from the
+	 * visitor's operating system preference. A theme is not obliged to follow
+	 * prefers-color-scheme, so keying off it painted white borders and white
+	 * secondary text onto light themes for anyone with dark mode enabled.
+	 * currentcolor always matches the theme actually in front of the visitor.
+	 */
+	--jszr-border-color: rgba(128, 128, 128, 0.35);
+	--jszr-border: 1px solid var(--jszr-border-color);
 }
 
-@media (prefers-color-scheme: dark) {
+@supports (color: color-mix(in srgb, currentcolor 20%, transparent)) {
 
 	.jszr-jobs {
-		--jszr-border: 1px solid rgba(255, 255, 255, 0.18);
-		--jszr-muted: rgba(255, 255, 255, 0.7);
+		--jszr-border-color: color-mix(in srgb, currentcolor 24%, transparent);
 	}
+}
+
+/* Secondary text: the theme's colour, stepped back. */
+.jszr-jobs__count,
+.jszr-job-card__meta,
+.jszr-job-card__remote,
+.jszr-job-card__closing,
+.jszr-no-results {
+	color: inherit;
+	opacity: 0.72;
 }
 
 .jszr-jobs__list {
@@ -39,7 +56,6 @@
 
 .jszr-jobs__count {
 	margin: 0 0 var(--jszr-gap);
-	color: var(--jszr-muted);
 	font-size: 0.9em;
 }
 
@@ -72,7 +88,6 @@
 .jszr-job-card__remote,
 .jszr-job-card__closing {
 	margin: 0;
-	color: var(--jszr-muted);
 	font-size: 0.9em;
 }
 
@@ -214,10 +229,6 @@
 .jszr-job-card__title a:focus-visible {
 	outline: 2px solid currentcolor;
 	outline-offset: 2px;
-}
-
-.jszr-no-results {
-	color: var(--jszr-muted, inherit);
 }
 
 /* Block style variation --------------------------------------------------- */

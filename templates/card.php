@@ -54,8 +54,14 @@ $jszr_facts = array_filter(
 		</p>
 	<?php endif; ?>
 
-	<?php if ( '' !== $jszr_remote && ! in_array( strtolower( $jszr_remote ), array( 'no', 'false', '0' ), true ) ) : ?>
-		<p class="jszr-job-card__remote"><?php echo esc_html( $jszr_remote ); ?></p>
+	<?php
+	/*
+	 * The stored value is a flag, not a label: printing it raw put a bare
+	 * "Yes" on the card. Show a word that means something on its own.
+	 */
+	if ( '' !== $jszr_remote && ! in_array( strtolower( $jszr_remote ), array( 'no', 'false', '0' ), true ) ) :
+		?>
+		<p class="jszr-job-card__remote"><?php esc_html_e( 'Remote', 'jobs-sync-for-zoho-recruit' ); ?></p>
 	<?php endif; ?>
 
 	<?php if ( ! empty( $show_excerpt ) ) : ?>

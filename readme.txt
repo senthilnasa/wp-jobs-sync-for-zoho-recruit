@@ -132,11 +132,11 @@ No. Every write path resolves the job by its Zoho record ID through a single loo
 
 == Screenshots ==
 
-1. The dashboard, showing connection status, job counts and live sync progress.
-2. The connection settings, with the redirect URI to register in the Zoho API console.
-3. The field mapping screen, populated from the real field list in your Zoho account.
-4. The sync log, with per-run statistics and the errors behind a failed run.
-5. A job listing on the front end, rendered by the block.
+1. A job listing on the front end, rendered by the block, with search and filters.
+2. A single job page: the mapped meta, the description and the Apply button.
+3. The jobs list in the admin, with Zoho status, job code, closing date and last sync.
+4. The field mapping screen, where each Zoho field is pointed at a WordPress field.
+5. The connection settings, with the redirect URI to register in the Zoho API console.
 
 == Changelog ==
 

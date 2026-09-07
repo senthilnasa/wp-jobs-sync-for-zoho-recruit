@@ -9,7 +9,8 @@ reflects the repository as it actually stands, not the plan.
   WP-CLI — everything that needs it goes through `wp-env run cli`.
 - **Status:** the plugin has been installed, activated and exercised in a real
   WordPress (7.1, PHP 8.1, via wp-env). PHPCS, PHPUnit, Plugin Check, ESLint and
-  Stylelint all pass. It has **never talked to a live Zoho account.**
+  Stylelint all pass. The WordPress.org listing artwork and screenshots exist.
+  It has **never talked to a live Zoho account** — that is the one real gap.
 
 ---
 
@@ -111,6 +112,23 @@ Three invariants the code is built around:
 `bin/install-wp-tests.sh`, `bin/smoke-test.php`, `.github/workflows/ci.yml`,
 `tests/phpunit/{bootstrap,field-mapper-test,sync-logic-test,rest-api-test}.php`
 
+### WordPress.org listing assets (`.wordpress-org/`, not shipped in the ZIP)
+`banner-1544x500.png`, `banner-772x250.png`, `icon-256x256.png`,
+`icon-128x128.png`, `screenshot-1..5.png` — all generated, none hand-drawn:
+
+| Source | Produces |
+| --- | --- |
+| `src/icon.html`, `src/banner.html` | The artwork, as editable HTML/SVG |
+| `src/render-assets.mjs` | Renders both to PNG at every required size via Chrome |
+| `src/seed-demo.php` | Six realistic jobs, pushed through the real sync path |
+| `src/render-screenshots.mjs` | Captures the five screenshots from the live wp-env site |
+
+Re-running them is `node .wordpress-org/src/render-assets.mjs` and
+`node .wordpress-org/src/render-screenshots.mjs` (seed the demo jobs first).
+Both need Chrome; set `CHROME_PATH` if it is not at the default Windows
+location. The artwork is original — no Zoho logo or brand mark is used
+anywhere, deliberately.
+
 ---
 
 ## 4. Decisions worth knowing before you change anything
@@ -138,6 +156,10 @@ Three invariants the code is built around:
   suite supports; 10 cannot discover the test classes.
 - **TypeScript is pinned to `^5`** because TypeScript 7 breaks the ts-api-utils
   version `@typescript-eslint` 6 depends on, which makes ESLint refuse to start.
+- **Front-end colours never key off `prefers-color-scheme`.** They derive from
+  `currentcolor` instead. A theme is not obliged to follow the OS preference, and
+  keying off it painted white secondary text and white card borders onto light
+  themes for any visitor with dark mode enabled.
 - **Shell heredocs mangle backslashes in this environment.** Write PHP with the
   file tools, not `cat > file.php <<'EOF'`.
 
@@ -158,6 +180,8 @@ Three invariants the code is built around:
   Twenty Twenty-One (classic) with a clean `debug.log`.
 - No-JS filtering, keyword search matching a job code, REST filtering,
   schema validation (400s), and inactive-job 404s all confirmed over HTTP.
+- The five listing screenshots are photographs of these real screens, seeded
+  with six demo jobs written through the plugin's own sync path.
 
 **Not verified — the remaining risk**
 - **Never talked to Zoho.** OAuth, pagination, `If-Modified-Since`, the
@@ -175,17 +199,22 @@ Three invariants the code is built around:
    secondary to this. Watch for: the exact publish-field name, the real field
    API names, whether `Job_Opening_ID` is what your account calls the job code,
    and how the status values map.
-2. `.wordpress-org/` assets — `banner-1544x500.png`, `banner-772x250.png`,
-   `icon-256x256.png`, `icon-128x128.png`, `screenshot-1..5.png`. The directory
-   exists but is empty, and `readme.txt` already describes five screenshots.
-   These need design, not code.
-3. Decide the real `Author` / `Plugin URI` / `Contributors` values before
-   submitting to WordPress.org. They currently point at the GitHub repo and
-   `senthilnasa`.
+2. **`Contributors: senthilnasa` in `readme.txt` must be a real WordPress.org
+   account**, or the readme will not parse on the directory. Decide the final
+   `Author` and `Plugin URI` values at the same time — they currently point at
+   the GitHub repo.
+3. Two more screenshots are worth adding once you are connected: the dashboard
+   with a real sync in progress, and the sync log with real per-run statistics.
+   Neither can be photographed honestly until a sync has actually run. Add them
+   as `screenshot-6/7.png` with matching captions in `readme.txt`.
 4. Confirm "Tested up to" in `readme.txt` against whatever WordPress is current
    at submission time. It says 7.1 because that is what it was tested on.
 5. Multisite pass: network activate, create a site, confirm tables and schedule
    appear, uninstall.
+6. Consider renaming the shortcodes to `[jszr_jobs]` etc., keeping the current
+   `[zoho_*]` names as aliases. Shortcode names are effectively permanent once
+   sites have them in post content, and `[zoho_jobs]` is generic enough that
+   another Zoho plugin could plausibly claim it. Cheap now, breaking later.
 
 ---
 
@@ -211,6 +240,11 @@ npx wp-env run cli wp eval-file wp-content/plugins/jobs-sync-for-zoho-recruit/bi
 # Plugin Check
 npx wp-env run cli wp plugin install plugin-check --activate
 npx wp-env run cli wp plugin check jobs-sync-for-zoho-recruit
+
+# Regenerate the WordPress.org listing artwork and screenshots
+node .wordpress-org/src/render-assets.mjs
+npx wp-env run cli wp eval-file   wp-content/plugins/jobs-sync-for-zoho-recruit/.wordpress-org/src/seed-demo.php
+node .wordpress-org/src/render-screenshots.mjs
 ```
 
 On Windows, prefix `wp-env run` calls that contain a path-like argument with
