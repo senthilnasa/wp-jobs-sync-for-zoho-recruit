@@ -1,0 +1,2414 @@
+# Copyright (C) 2026 senthilnasa
+# This file is distributed under the GPL-2.0-or-later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Jobs Sync for Zoho Recruit 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/jobs-sync-for-zoho-recruit\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-09-07T13:08:54+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: jobs-sync-for-zoho-recruit\n"
+
+#. Plugin Name of the plugin
+#: jobs-sync-for-zoho-recruit.php
+#: includes/class-privacy.php:52
+#: includes/class-site-health.php:288
+msgid "Jobs Sync for Zoho Recruit"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: jobs-sync-for-zoho-recruit.php
+msgid "https://github.com/senthilnasa/wp-jobs-sync-for-zoho-recruit"
+msgstr ""
+
+#. Description of the plugin
+#: jobs-sync-for-zoho-recruit.php
+msgid "Synchronizes Job Openings from Zoho Recruit into WordPress as a custom post type, with OAuth 2.0, field mapping, background sync, REST API, shortcode and block."
+msgstr ""
+
+#. Author of the plugin
+#: jobs-sync-for-zoho-recruit.php
+msgid "senthilnasa"
+msgstr ""
+
+#. Author URI of the plugin
+#: jobs-sync-for-zoho-recruit.php
+msgid "https://github.com/senthilnasa"
+msgstr ""
+
+#: admin/views/dashboard.php:22
+msgid "Zoho Recruit Jobs"
+msgstr ""
+
+#: admin/views/dashboard.php:26
+#: admin/views/settings.php:210
+#: includes/class-admin.php:343
+msgid "Connection"
+msgstr ""
+
+#: admin/views/dashboard.php:30
+#: includes/class-settings.php:506
+msgid "Status"
+msgstr ""
+
+#: admin/views/dashboard.php:33
+#: admin/views/settings.php:214
+#: includes/class-site-health.php:295
+msgid "Connected"
+msgstr ""
+
+#: admin/views/dashboard.php:35
+msgid "Not connected"
+msgstr ""
+
+#: admin/views/dashboard.php:40
+#: admin/views/settings.php:187
+#: includes/class-site-health.php:299
+msgid "Data center"
+msgstr ""
+
+#: admin/views/dashboard.php:44
+msgid "API endpoint"
+msgstr ""
+
+#: admin/views/dashboard.php:49
+msgid "Access token expires"
+msgstr ""
+
+#: admin/views/dashboard.php:54
+msgid "Unknown"
+msgstr ""
+
+#: admin/views/dashboard.php:66
+#: admin/views/settings.php:220
+msgid "Connect to Zoho Recruit"
+msgstr ""
+
+#: admin/views/dashboard.php:70
+msgid "Add Zoho credentials"
+msgstr ""
+
+#: admin/views/dashboard.php:77
+msgid "Test Connection"
+msgstr ""
+
+#: admin/views/dashboard.php:80
+#: admin/views/settings.php:216
+msgid "Disconnect Zoho"
+msgstr ""
+
+#: admin/views/dashboard.php:87
+msgid "Jobs"
+msgstr ""
+
+#: admin/views/dashboard.php:92
+msgid "Total"
+msgstr ""
+
+#: admin/views/dashboard.php:93
+#: admin/views/settings.php:468
+#: admin/views/settings.php:518
+#: includes/class-admin.php:1045
+#: includes/class-admin.php:1085
+msgid "Active"
+msgstr ""
+
+#: admin/views/dashboard.php:94
+#: admin/views/dashboard.php:213
+#: admin/views/logs.php:34
+#: admin/views/settings.php:471
+#: includes/class-admin.php:1047
+#: includes/class-admin.php:1087
+msgid "Expired"
+msgstr ""
+
+#: admin/views/dashboard.php:95
+#: admin/views/settings.php:469
+#: admin/views/settings.php:519
+#: includes/class-admin.php:1046
+#: includes/class-admin.php:1086
+msgid "Inactive"
+msgstr ""
+
+#: admin/views/dashboard.php:96
+#: admin/views/settings.php:470
+#: includes/class-admin.php:1048
+#: includes/class-admin.php:1088
+msgid "Closed"
+msgstr ""
+
+#: admin/views/dashboard.php:97
+#: admin/views/settings.php:472
+#: admin/views/settings.php:520
+#: includes/class-admin.php:1049
+#: includes/class-admin.php:1089
+msgid "Draft"
+msgstr ""
+
+#: admin/views/dashboard.php:111
+msgid "View all jobs"
+msgstr ""
+
+#: admin/views/dashboard.php:117
+msgid "Synchronization"
+msgstr ""
+
+#: admin/views/dashboard.php:121
+msgid "Last sync"
+msgstr ""
+
+#: admin/views/dashboard.php:133
+#: admin/views/dashboard.php:144
+#: includes/class-site-health.php:314
+msgid "Never"
+msgstr ""
+
+#: admin/views/dashboard.php:139
+#: includes/class-site-health.php:311
+msgid "Last successful sync"
+msgstr ""
+
+#: admin/views/dashboard.php:149
+msgid "Next scheduled sync"
+msgstr ""
+
+#: admin/views/dashboard.php:154
+msgid "Not scheduled"
+msgstr ""
+
+#: admin/views/dashboard.php:167
+msgid "Full Sync"
+msgstr ""
+
+#: admin/views/dashboard.php:170
+msgid "Incremental Sync"
+msgstr ""
+
+#: admin/views/dashboard.php:177
+msgid "Dry run (report changes without writing anything)"
+msgstr ""
+
+#: admin/views/dashboard.php:186
+msgid "Cancel running sync"
+msgstr ""
+
+#: admin/views/dashboard.php:196
+msgid "Sync progress"
+msgstr ""
+
+#: admin/views/dashboard.php:203
+msgid "Recent syncs"
+msgstr ""
+
+#: admin/views/dashboard.php:208
+#: admin/views/logs.php:28
+msgid "Started"
+msgstr ""
+
+#: admin/views/dashboard.php:209
+#: admin/views/logs.php:29
+msgid "Type"
+msgstr ""
+
+#: admin/views/dashboard.php:210
+#: admin/views/logs.php:30
+#: includes/class-field-mapper.php:78
+#: includes/class-settings.php:510
+msgid "State"
+msgstr ""
+
+#: admin/views/dashboard.php:211
+#: admin/views/logs.php:32
+msgid "Added"
+msgstr ""
+
+#: admin/views/dashboard.php:212
+#: admin/views/logs.php:33
+msgid "Updated"
+msgstr ""
+
+#: admin/views/dashboard.php:214
+#: admin/views/logs.php:35
+msgid "Deactivated"
+msgstr ""
+
+#: admin/views/dashboard.php:215
+#: admin/views/logs.php:36
+msgid "Errors"
+msgstr ""
+
+#: admin/views/dashboard.php:221
+#: admin/views/logs.php:43
+msgid "No syncs have run yet."
+msgstr ""
+
+#: admin/views/dashboard.php:243
+msgid "View full sync log"
+msgstr ""
+
+#: admin/views/logs.php:23
+#: includes/class-admin.php:195
+#: includes/class-admin.php:196
+msgid "Sync Logs"
+msgstr ""
+
+#: admin/views/logs.php:31
+#: includes/class-admin.php:259
+msgid "Processed"
+msgstr ""
+
+#: admin/views/logs.php:37
+msgid "Details"
+msgstr ""
+
+#: admin/views/logs.php:50
+msgid "dry run"
+msgstr ""
+
+#: admin/views/logs.php:65
+msgid "View entries"
+msgstr ""
+
+#. translators: %d: sync run ID.
+#: admin/views/logs.php:100
+#, php-format
+msgid "Entries for sync #%d"
+msgstr ""
+
+#: admin/views/logs.php:105
+msgid "Recent log entries"
+msgstr ""
+
+#: admin/views/logs.php:110
+msgid "&larr; All entries"
+msgstr ""
+
+#: admin/views/logs.php:116
+msgid "Time"
+msgstr ""
+
+#: admin/views/logs.php:117
+msgid "Level"
+msgstr ""
+
+#: admin/views/logs.php:118
+msgid "Event"
+msgstr ""
+
+#: admin/views/logs.php:119
+msgid "Message"
+msgstr ""
+
+#: admin/views/logs.php:120
+msgid "Context"
+msgstr ""
+
+#: admin/views/logs.php:126
+msgid "Nothing logged yet."
+msgstr ""
+
+#: admin/views/logs.php:139
+msgid "Show"
+msgstr ""
+
+#: admin/views/logs.php:152
+msgid "Maintenance"
+msgstr ""
+
+#: admin/views/logs.php:158
+msgid "Clear all sync logs"
+msgstr ""
+
+#: admin/views/mapping.php:37
+#: admin/views/mapping.php:138
+msgid "Zoho field"
+msgstr ""
+
+#: admin/views/mapping.php:41
+msgid "— Select a Zoho field —"
+msgstr ""
+
+#. translators: %s: Zoho field API name.
+#: admin/views/mapping.php:47
+#, php-format
+msgid "%s (not found in this account)"
+msgstr ""
+
+#: admin/views/mapping.php:68
+#: admin/views/mapping.php:139
+msgid "WordPress target"
+msgstr ""
+
+#: admin/views/mapping.php:81
+#: admin/views/mapping.php:140
+msgid "Transform"
+msgstr ""
+
+#: admin/views/mapping.php:94
+msgid "Remove"
+msgstr ""
+
+#: admin/views/mapping.php:102
+#: includes/class-admin.php:186
+#: includes/class-admin.php:187
+msgid "Field Mapping"
+msgstr ""
+
+#: admin/views/mapping.php:105
+msgid "Decide where each Zoho Recruit field is stored in WordPress. Fields you do not map are left alone, and unmapped WordPress content is never overwritten."
+msgstr ""
+
+#: admin/views/mapping.php:112
+msgid "Showing the standard Zoho Recruit fields. Load the real field list from your account to include custom fields."
+msgstr ""
+
+#: admin/views/mapping.php:114
+msgid "Showing the standard Zoho Recruit fields. Connect the site to load the real field list, including custom fields, from your account."
+msgstr ""
+
+#: admin/views/mapping.php:123
+msgid "Reload fields from Zoho"
+msgstr ""
+
+#: admin/views/mapping.php:127
+msgid "Export mapping"
+msgstr ""
+
+#: admin/views/mapping.php:141
+msgid "Actions"
+msgstr ""
+
+#: admin/views/mapping.php:152
+msgid "Add mapping row"
+msgstr ""
+
+#: admin/views/mapping.php:155
+msgid "Save mapping"
+msgstr ""
+
+#: admin/views/mapping.php:164
+#: admin/views/mapping.php:171
+msgid "Import mapping"
+msgstr ""
+
+#: admin/views/mapping.php:169
+msgid "Mapping JSON file"
+msgstr ""
+
+#: admin/views/mapping.php:174
+#: templates/filters.php:96
+msgid "Reset"
+msgstr ""
+
+#: admin/views/mapping.php:180
+msgid "Reset to the default mapping"
+msgstr ""
+
+#: admin/views/meta-box.php:20
+msgid "This job was created in WordPress. It is not linked to a Zoho Recruit record and will never be changed or deactivated by a sync."
+msgstr ""
+
+#: admin/views/meta-box.php:24
+msgid "Synced from Zoho Recruit"
+msgstr ""
+
+#: admin/views/meta-box.php:30
+msgid "Zoho ID"
+msgstr ""
+
+#: admin/views/meta-box.php:34
+msgid "Job status"
+msgstr ""
+
+#: admin/views/meta-box.php:42
+#: admin/views/settings.php:461
+#: includes/class-field-mapper.php:76
+msgid "Zoho status"
+msgstr ""
+
+#: admin/views/meta-box.php:46
+msgid "Modified in Zoho"
+msgstr ""
+
+#: admin/views/meta-box.php:57
+msgid "Last synced"
+msgstr ""
+
+#: admin/views/meta-box.php:89
+#: includes/class-admin.php:1180
+msgid "Resync from Zoho"
+msgstr ""
+
+#: admin/views/meta-box.php:99
+msgid "View in Zoho Recruit"
+msgstr ""
+
+#: admin/views/meta-box.php:100
+#: templates/single.php:65
+msgid "(opens in a new tab)"
+msgstr ""
+
+#: admin/views/meta-box.php:107
+msgid "Mapped Zoho values"
+msgstr ""
+
+#: admin/views/meta-box.php:130
+msgid "Mapped fields are refreshed on every sync. The Zoho ID is not editable."
+msgstr ""
+
+#: admin/views/settings.php:115
+msgid "Zoho Recruit Jobs Settings"
+msgstr ""
+
+#: admin/views/settings.php:117
+msgid "Settings sections"
+msgstr ""
+
+#: admin/views/settings.php:130
+msgid "Zoho application credentials"
+msgstr ""
+
+#: admin/views/settings.php:133
+msgid "Create a Server-based Application in the Zoho API console, then paste its credentials here. The redirect URI below must be registered on that application exactly as shown."
+msgstr ""
+
+#: admin/views/settings.php:139
+msgid "Redirect URI"
+msgstr ""
+
+#: admin/views/settings.php:144
+msgid "Copy this into the \"Authorized Redirect URIs\" field in the Zoho API console."
+msgstr ""
+
+#: admin/views/settings.php:148
+msgid "Required scopes"
+msgstr ""
+
+#: admin/views/settings.php:161
+msgid "Client ID"
+msgstr ""
+
+#: admin/views/settings.php:165
+msgid "Defined by the JSZR_CLIENT_ID constant in wp-config.php."
+msgstr ""
+
+#: admin/views/settings.php:169
+msgid "Leave blank to keep the stored value."
+msgstr ""
+
+#: admin/views/settings.php:174
+msgid "Client Secret"
+msgstr ""
+
+#: admin/views/settings.php:178
+msgid "Defined by the JSZR_CLIENT_SECRET constant in wp-config.php."
+msgstr ""
+
+#: admin/views/settings.php:182
+msgid "Leave blank to keep the stored value. The secret is encrypted before it is stored."
+msgstr ""
+
+#: admin/views/settings.php:191
+msgid "Defined by the JSZR_DATA_CENTER constant in wp-config.php."
+msgstr ""
+
+#: admin/views/settings.php:200
+msgid "Choose the region your Zoho Recruit account is hosted in. The wrong region will reject the connection."
+msgstr ""
+
+#: admin/views/settings.php:207
+msgid "Save credentials"
+msgstr ""
+
+#: admin/views/settings.php:223
+msgid "Save your credentials to enable the connect button."
+msgstr ""
+
+#: admin/views/settings.php:236
+msgid "Sync frequency"
+msgstr ""
+
+#: admin/views/settings.php:240
+msgid "Scheduled sync type"
+msgstr ""
+
+#: admin/views/settings.php:247
+msgid "Incremental (with periodic full syncs)"
+msgstr ""
+
+#: admin/views/settings.php:248
+msgid "Always full"
+msgstr ""
+
+#: admin/views/settings.php:255
+msgid "Days between full syncs"
+msgstr ""
+
+#: admin/views/settings.php:262
+msgid "A full sync is the only thing that can deactivate jobs missing from Zoho. Set to 0 to never force one."
+msgstr ""
+
+#: admin/views/settings.php:272
+msgid "Records per API request"
+msgstr ""
+
+#: admin/views/settings.php:279
+msgid "Zoho allows up to 200."
+msgstr ""
+
+#: admin/views/settings.php:289
+msgid "Records per background batch"
+msgstr ""
+
+#: admin/views/settings.php:296
+msgid "Lower this on small hosting plans so each background request stays well within its time limit."
+msgstr ""
+
+#: admin/views/settings.php:306
+msgid "Request timeout (seconds)"
+msgstr ""
+
+#: admin/views/settings.php:323
+msgid "Publish filter"
+msgstr ""
+
+#: admin/views/settings.php:329
+msgid "Only publish jobs that Zoho marks for the careers website"
+msgstr ""
+
+#: admin/views/settings.php:330
+msgid "Jobs that lose the flag are deactivated locally, never deleted."
+msgstr ""
+
+#: admin/views/settings.php:336
+msgid "Publish flag field"
+msgstr ""
+
+#: admin/views/settings.php:343
+msgid "The Zoho API name of the checkbox that controls website publishing. The Field Mapping screen lists the API names available in your account."
+msgstr ""
+
+#: admin/views/settings.php:349
+msgid "When a job is closed or expires"
+msgstr ""
+
+#: admin/views/settings.php:356
+msgid "Keep the page published and mark it closed"
+msgstr ""
+
+#: admin/views/settings.php:357
+#: admin/views/settings.php:374
+msgid "Move to draft"
+msgstr ""
+
+#: admin/views/settings.php:358
+#: admin/views/settings.php:375
+msgid "Make private"
+msgstr ""
+
+#: admin/views/settings.php:359
+#: admin/views/settings.php:376
+msgid "Move to trash"
+msgstr ""
+
+#: admin/views/settings.php:361
+msgid "Closed jobs never appear in listings or the public API regardless of this setting."
+msgstr ""
+
+#: admin/views/settings.php:367
+msgid "When a job is deleted in Zoho"
+msgstr ""
+
+#: admin/views/settings.php:377
+msgid "Delete permanently"
+msgstr ""
+
+#: admin/views/settings.php:378
+msgid "Do nothing"
+msgstr ""
+
+#: admin/views/settings.php:380
+msgid "Jobs created by hand in WordPress are never touched."
+msgstr ""
+
+#: admin/views/settings.php:386
+msgid "Deactivation safety threshold (%)"
+msgstr ""
+
+#: admin/views/settings.php:393
+msgid "If a full sync would deactivate more than this share of jobs, nothing is deactivated and the run is marked partial."
+msgstr ""
+
+#: admin/views/settings.php:403
+msgid "Conflict handling"
+msgstr ""
+
+#: admin/views/settings.php:410
+msgid "Zoho updates mapped fields only (recommended)"
+msgstr ""
+
+#: admin/views/settings.php:411
+msgid "Zoho always overwrites"
+msgstr ""
+
+#: admin/views/settings.php:412
+msgid "Preserve fields edited in WordPress"
+msgstr ""
+
+#: admin/views/settings.php:419
+msgid "Raw data"
+msgstr ""
+
+#: admin/views/settings.php:425
+msgid "Store the raw Zoho record with each job"
+msgstr ""
+
+#: admin/views/settings.php:426
+msgid "Useful for troubleshooting. Turn it off to save database space; it is never exposed publicly."
+msgstr ""
+
+#: admin/views/settings.php:432
+msgid "Failure notifications"
+msgstr ""
+
+#: admin/views/settings.php:438
+msgid "Email an administrator when a sync fails or the connection breaks"
+msgstr ""
+
+#: admin/views/settings.php:447
+msgid "Leave blank to use the site administration email address."
+msgstr ""
+
+#: admin/views/settings.php:455
+msgid "Status mapping"
+msgstr ""
+
+#: admin/views/settings.php:456
+msgid "Map each Zoho job opening status to how the job should behave on this site."
+msgstr ""
+
+#: admin/views/settings.php:462
+msgid "On this site"
+msgstr ""
+
+#: admin/views/settings.php:473
+msgid "Do not import"
+msgstr ""
+
+#: admin/views/settings.php:498
+msgid "Add another Zoho status"
+msgstr ""
+
+#: admin/views/settings.php:512
+msgid "Status for unmapped Zoho values"
+msgstr ""
+
+#: admin/views/settings.php:531
+#: includes/class-admin.php:345
+msgid "Public API"
+msgstr ""
+
+#: admin/views/settings.php:537
+msgid "Enable the public jobs REST API"
+msgstr ""
+
+#. translators: %s: REST endpoint URL.
+#: admin/views/settings.php:540
+#, php-format
+msgid "Endpoint: %s"
+msgstr ""
+
+#: admin/views/settings.php:548
+msgid "Default jobs per page"
+msgstr ""
+
+#: admin/views/settings.php:565
+msgid "Maximum jobs per page"
+msgstr ""
+
+#: admin/views/settings.php:572
+msgid "Requests above this limit are rejected."
+msgstr ""
+
+#: admin/views/settings.php:582
+msgid "Inactive jobs"
+msgstr ""
+
+#: admin/views/settings.php:588
+msgid "Allow inactive and expired jobs to be requested through the API"
+msgstr ""
+
+#: admin/views/settings.php:589
+msgid "Off by default so closed jobs cannot be enumerated."
+msgstr ""
+
+#: admin/views/settings.php:595
+msgid "Cache lifetime (seconds)"
+msgstr ""
+
+#: admin/views/settings.php:602
+msgid "Set to 0 to disable caching. Caches are cleared automatically when a sync completes."
+msgstr ""
+
+#: admin/views/settings.php:612
+#: admin/views/settings.php:615
+msgid "Fields exposed publicly"
+msgstr ""
+
+#: admin/views/settings.php:630
+msgid "This list also controls which job meta fields appear in the core wp/v2 REST endpoint."
+msgstr ""
+
+#: admin/views/settings.php:641
+msgid "Public job pages"
+msgstr ""
+
+#: admin/views/settings.php:647
+msgid "Give synchronized jobs their own public pages and archive"
+msgstr ""
+
+#: admin/views/settings.php:648
+msgid "Turn this off to keep jobs available only through the API, shortcode or block."
+msgstr ""
+
+#: admin/views/settings.php:654
+msgid "Job URL slug"
+msgstr ""
+
+#. translators: %s: example job URL.
+#: admin/views/settings.php:663
+#, php-format
+msgid "Example: %s"
+msgstr ""
+
+#: admin/views/settings.php:671
+msgid "Archive slug"
+msgstr ""
+
+#: admin/views/settings.php:675
+msgid "Default listing style"
+msgstr ""
+
+#: admin/views/settings.php:682
+#: blocks/jobs/build/index.js:1
+#: blocks/jobs/src/index.js:41
+msgid "List"
+msgstr ""
+
+#: admin/views/settings.php:683
+#: blocks/jobs/build/index.js:1
+#: blocks/jobs/src/index.js:42
+msgid "Grid"
+msgstr ""
+
+#: admin/views/settings.php:690
+msgid "Expired job pages"
+msgstr ""
+
+#: admin/views/settings.php:697
+msgid "Show a \"position closed\" notice and mark the page noindex"
+msgstr ""
+
+#: admin/views/settings.php:698
+msgid "Return HTTP 410 Gone"
+msgstr ""
+
+#: admin/views/settings.php:699
+msgid "Redirect to the jobs archive"
+msgstr ""
+
+#: admin/views/settings.php:706
+msgid "Apply button label"
+msgstr ""
+
+#: admin/views/settings.php:713
+msgid "Leave blank to use \"Apply Now\"."
+msgstr ""
+
+#: admin/views/settings.php:719
+msgid "Fallback application URL"
+msgstr ""
+
+#: admin/views/settings.php:726
+msgid "Used when a Zoho record has no application URL. Placeholders: {zoho_id}, {job_code}, {slug}, {id}."
+msgstr ""
+
+#: admin/views/settings.php:732
+msgid "Extra apply link parameters"
+msgstr ""
+
+#: admin/views/settings.php:739
+msgid "Appended to every apply link, for example: utm_source=website&utm_medium=careers"
+msgstr ""
+
+#: admin/views/settings.php:745
+msgid "Sitemap"
+msgstr ""
+
+#: admin/views/settings.php:751
+msgid "Include jobs in the WordPress sitemap"
+msgstr ""
+
+#: admin/views/settings.php:764
+msgid "JobPosting markup"
+msgstr ""
+
+#: admin/views/settings.php:770
+msgid "Output JobPosting structured data on single job pages"
+msgstr ""
+
+#: admin/views/settings.php:771
+msgid "Markup is only emitted for active jobs, and only when the required information is present."
+msgstr ""
+
+#: admin/views/settings.php:777
+msgid "SEO plugins"
+msgstr ""
+
+#: admin/views/settings.php:783
+msgid "Skip output when another plugin already emits JobPosting markup for the job"
+msgstr ""
+
+#: admin/views/settings.php:789
+msgid "Hiring organization name"
+msgstr ""
+
+#: admin/views/settings.php:796
+msgid "Leave blank to use the site title."
+msgstr ""
+
+#: admin/views/settings.php:802
+msgid "Organization URL"
+msgstr ""
+
+#: admin/views/settings.php:806
+msgid "Organization logo URL"
+msgstr ""
+
+#: admin/views/settings.php:817
+msgid "Debug logging"
+msgstr ""
+
+#: admin/views/settings.php:823
+msgid "Record detailed debug entries"
+msgstr ""
+
+#: admin/views/settings.php:824
+msgid "Tokens and secrets are always removed before anything is written to the log."
+msgstr ""
+
+#: admin/views/settings.php:830
+msgid "Keep logs for (days)"
+msgstr ""
+
+#: admin/views/settings.php:837
+msgid "0 keeps entries until the maximum count is reached."
+msgstr ""
+
+#: admin/views/settings.php:847
+msgid "Maximum log entries"
+msgstr ""
+
+#: admin/views/settings.php:864
+msgid "Webhook"
+msgstr ""
+
+#: admin/views/settings.php:870
+msgid "Accept webhook triggers from Zoho Recruit"
+msgstr ""
+
+#: admin/views/settings.php:871
+msgid "The payload is only used as a trigger; the record is always re-read from the Zoho API."
+msgstr ""
+
+#: admin/views/settings.php:875
+msgid "Webhook URL"
+msgstr ""
+
+#: admin/views/settings.php:882
+msgid "Uninstall"
+msgstr ""
+
+#: admin/views/settings.php:888
+msgid "Delete plugin settings, tokens and logs when the plugin is deleted"
+msgstr ""
+
+#: admin/views/settings.php:896
+msgid "Also delete synchronized job posts and their taxonomy terms"
+msgstr ""
+
+#: admin/views/settings.php:897
+msgid "Off by default. Jobs created by hand are never deleted."
+msgstr ""
+
+#: admin/views/settings.php:912
+msgid "Import and export"
+msgstr ""
+
+#: admin/views/settings.php:913
+msgid "Move configuration between staging and production. Credentials and tokens are never included."
+msgstr ""
+
+#: admin/views/settings.php:917
+msgid "Export settings"
+msgstr ""
+
+#: admin/views/settings.php:924
+msgid "Settings JSON file"
+msgstr ""
+
+#: admin/views/settings.php:926
+msgid "Import settings"
+msgstr ""
+
+#: admin/views/settings.php:930
+msgid "Webhook secret"
+msgstr ""
+
+#: admin/views/settings.php:934
+msgid "Generate a new webhook URL"
+msgstr ""
+
+#: includes/class-admin.php:168
+msgid "Zoho Recruit Dashboard"
+msgstr ""
+
+#: includes/class-admin.php:169
+msgid "Dashboard"
+msgstr ""
+
+#: includes/class-admin.php:177
+#: includes/class-admin.php:178
+#: includes/class-admin.php:280
+msgid "Settings"
+msgstr ""
+
+#: includes/class-admin.php:251
+msgid "Testing the connection..."
+msgstr ""
+
+#: includes/class-admin.php:252
+msgid "Connection successful."
+msgstr ""
+
+#: includes/class-admin.php:253
+msgid "Sync in progress..."
+msgstr ""
+
+#: includes/class-admin.php:254
+#: includes/class-cli.php:112
+msgid "Sync finished."
+msgstr ""
+
+#: includes/class-admin.php:255
+msgid "The sync failed. See the sync log for details."
+msgstr ""
+
+#: includes/class-admin.php:256
+msgid "Refreshing this job from Zoho..."
+msgstr ""
+
+#: includes/class-admin.php:257
+#: includes/class-admin.php:936
+msgid "Job refreshed from Zoho Recruit."
+msgstr ""
+
+#: includes/class-admin.php:258
+msgid "Something went wrong. Please try again."
+msgstr ""
+
+#: includes/class-admin.php:260
+msgid "Page"
+msgstr ""
+
+#: includes/class-admin.php:344
+msgid "Sync"
+msgstr ""
+
+#: includes/class-admin.php:346
+msgid "Frontend"
+msgstr ""
+
+#: includes/class-admin.php:347
+msgid "Structured Data"
+msgstr ""
+
+#: includes/class-admin.php:348
+msgid "Advanced"
+msgstr ""
+
+#: includes/class-admin.php:453
+msgid "You do not have permission to access this page."
+msgstr ""
+
+#: includes/class-admin.php:490
+msgid "Zoho Recruit syncing is paused after repeated authentication failures."
+msgstr ""
+
+#: includes/class-admin.php:492
+#: includes/class-admin.php:499
+msgid "Reconnect Zoho Recruit"
+msgstr ""
+
+#: includes/class-admin.php:497
+msgid "The stored Zoho Recruit credentials can no longer be decrypted because this site's security keys changed."
+msgstr ""
+
+#: includes/class-admin.php:504
+msgid "This site is not connected to Zoho Recruit yet, so no jobs can be synchronized."
+msgstr ""
+
+#: includes/class-admin.php:506
+msgid "Connect now"
+msgstr ""
+
+#: includes/class-admin.php:513
+msgid "WP-Cron is disabled on this site (DISABLE_WP_CRON). Scheduled syncing will only run if a system cron job calls wp-cron.php."
+msgstr ""
+
+#: includes/class-admin.php:577
+msgid "Dry run started. No changes will be written."
+msgstr ""
+
+#: includes/class-admin.php:578
+msgid "Sync started. Progress is shown below."
+msgstr ""
+
+#: includes/class-admin.php:598
+#: includes/class-cli.php:287
+msgid "The running sync was cancelled."
+msgstr ""
+
+#: includes/class-admin.php:599
+#: includes/class-cli.php:292
+msgid "No sync was running."
+msgstr ""
+
+#. translators: 1: Zoho module name, 2: number of job openings.
+#: includes/class-admin.php:622
+#, php-format
+msgid "Connection successful. Module \"%1$s\" reports %2$s job openings."
+msgstr ""
+
+#: includes/class-admin.php:654
+msgid "Zoho credentials saved."
+msgstr ""
+
+#: includes/class-admin.php:689
+msgid "Field mapping saved."
+msgstr ""
+
+#: includes/class-admin.php:703
+msgid "The default field mapping was restored."
+msgstr ""
+
+#: includes/class-admin.php:727
+msgid "Field mapping imported."
+msgstr ""
+
+#: includes/class-admin.php:796
+#: includes/class-field-mapper.php:871
+msgid "The uploaded file is not valid JSON."
+msgstr ""
+
+#: includes/class-admin.php:809
+msgid "Settings imported. Credentials and tokens were not changed."
+msgstr ""
+
+#: includes/class-admin.php:826
+msgid "Choose a JSON file to upload."
+msgstr ""
+
+#: includes/class-admin.php:833
+msgid "The upload could not be read."
+msgstr ""
+
+#: includes/class-admin.php:840
+msgid "The file is empty or larger than 1 MB."
+msgstr ""
+
+#: includes/class-admin.php:851
+msgid "The uploaded file could not be read."
+msgstr ""
+
+#: includes/class-admin.php:868
+msgid "Sync logs cleared."
+msgstr ""
+
+#. translators: %s: number of fields.
+#: includes/class-admin.php:889
+#, php-format
+msgid "Loaded %s fields from Zoho Recruit."
+msgstr ""
+
+#: includes/class-admin.php:908
+msgid "A new webhook URL was generated. Update it in Zoho Recruit."
+msgstr ""
+
+#: includes/class-admin.php:923
+msgid "You do not have permission to refresh this job."
+msgstr ""
+
+#: includes/class-admin.php:929
+#: includes/class-rest-api.php:623
+msgid "This job was not imported from Zoho Recruit."
+msgstr ""
+
+#: includes/class-admin.php:963
+msgid "Job Status"
+msgstr ""
+
+#: includes/class-admin.php:964
+msgid "Job Code"
+msgstr ""
+
+#: includes/class-admin.php:965
+msgid "Closing Date"
+msgstr ""
+
+#: includes/class-admin.php:966
+msgid "Last Sync"
+msgstr ""
+
+#: includes/class-admin.php:984
+msgid "Manual"
+msgstr ""
+
+#. translators: %s: human readable time difference.
+#: includes/class-admin.php:1028
+#, php-format
+msgid "%s ago"
+msgstr ""
+
+#: includes/class-admin.php:1084
+msgid "All job statuses"
+msgstr ""
+
+#: includes/class-admin.php:1092
+msgid "Filter by job status"
+msgstr ""
+
+#: includes/class-admin.php:1198
+#: includes/class-site-health.php:70
+msgid "Zoho Recruit"
+msgstr ""
+
+#. translators: 1: sync type, 2: yes/no.
+#: includes/class-cli.php:82
+#, php-format
+msgid "Starting %1$s sync (dry run: %2$s)..."
+msgstr ""
+
+#: includes/class-cli.php:103
+msgid "The sync failed."
+msgstr ""
+
+#: includes/class-cli.php:107
+msgid "The sync completed only partially."
+msgstr ""
+
+#. translators: %d: number of jobs.
+#: includes/class-cli.php:192
+#, php-format
+msgid "%d job expired."
+msgid_plural "%d jobs expired."
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/class-cli.php:230
+msgid "No errors logged."
+msgstr ""
+
+#: includes/class-cli.php:253
+msgid "No sync runs recorded yet."
+msgstr ""
+
+#: includes/class-cli.php:344
+msgid "Revoke the Zoho Recruit token and delete it from this site?"
+msgstr ""
+
+#: includes/class-cli.php:348
+#: includes/class-zoho-auth.php:645
+msgid "Disconnected from Zoho Recruit."
+msgstr ""
+
+#: includes/class-cron.php:62
+msgid "Every 6 hours (Zoho Recruit)"
+msgstr ""
+
+#: includes/class-cron.php:76
+msgid "Disabled (manual sync only)"
+msgstr ""
+
+#: includes/class-cron.php:77
+msgid "Hourly"
+msgstr ""
+
+#: includes/class-cron.php:78
+msgid "Every 6 hours"
+msgstr ""
+
+#: includes/class-cron.php:79
+msgid "Twice daily"
+msgstr ""
+
+#: includes/class-cron.php:80
+msgid "Daily"
+msgstr ""
+
+#: includes/class-field-mapper.php:40
+msgid "Plain text"
+msgstr ""
+
+#: includes/class-field-mapper.php:41
+msgid "HTML (sanitized)"
+msgstr ""
+
+#: includes/class-field-mapper.php:42
+msgid "Plain text with paragraphs"
+msgstr ""
+
+#: includes/class-field-mapper.php:43
+msgid "Date (Y-m-d)"
+msgstr ""
+
+#: includes/class-field-mapper.php:44
+msgid "Date and time"
+msgstr ""
+
+#: includes/class-field-mapper.php:45
+msgid "Number"
+msgstr ""
+
+#: includes/class-field-mapper.php:46
+msgid "Whole number"
+msgstr ""
+
+#: includes/class-field-mapper.php:47
+msgid "Yes / No"
+msgstr ""
+
+#: includes/class-field-mapper.php:48
+msgid "Join list with commas"
+msgstr ""
+
+#: includes/class-field-mapper.php:49
+msgid "Use lookup name"
+msgstr ""
+
+#: includes/class-field-mapper.php:50
+msgid "URL"
+msgstr ""
+
+#: includes/class-field-mapper.php:61
+msgid "Post: Title"
+msgstr ""
+
+#: includes/class-field-mapper.php:62
+msgid "Post: Description"
+msgstr ""
+
+#: includes/class-field-mapper.php:63
+msgid "Post: Excerpt"
+msgstr ""
+
+#. translators: %s: taxonomy label.
+#: includes/class-field-mapper.php:69
+#, php-format
+msgid "Taxonomy: %s"
+msgstr ""
+
+#: includes/class-field-mapper.php:75
+#: includes/class-settings.php:505
+#: templates/job-meta.php:24
+msgid "Job code"
+msgstr ""
+
+#: includes/class-field-mapper.php:77
+#: includes/class-settings.php:509
+msgid "City"
+msgstr ""
+
+#: includes/class-field-mapper.php:79
+#: includes/class-settings.php:511
+msgid "Country"
+msgstr ""
+
+#: includes/class-field-mapper.php:80
+#: includes/class-settings.php:512
+msgid "Remote / work mode"
+msgstr ""
+
+#: includes/class-field-mapper.php:81
+#: includes/class-settings.php:516
+#: templates/job-meta.php:26
+msgid "Industry"
+msgstr ""
+
+#: includes/class-field-mapper.php:82
+#: includes/class-settings.php:517
+#: templates/job-meta.php:27
+msgid "Client"
+msgstr ""
+
+#: includes/class-field-mapper.php:83
+#: includes/class-settings.php:518
+msgid "Number of positions"
+msgstr ""
+
+#: includes/class-field-mapper.php:84
+#: includes/class-settings.php:519
+#: templates/job-meta.php:25
+msgid "Salary"
+msgstr ""
+
+#: includes/class-field-mapper.php:85
+#: includes/class-settings.php:520
+#: blocks/jobs/build/index.js:1
+#: blocks/jobs/src/index.js:62
+msgid "Posted date"
+msgstr ""
+
+#: includes/class-field-mapper.php:86
+#: includes/class-settings.php:521
+#: blocks/jobs/build/index.js:1
+#: blocks/jobs/src/index.js:61
+msgid "Closing date"
+msgstr ""
+
+#: includes/class-field-mapper.php:87
+msgid "Created time"
+msgstr ""
+
+#: includes/class-field-mapper.php:88
+msgid "Modified time"
+msgstr ""
+
+#: includes/class-field-mapper.php:89
+#: includes/class-settings.php:523
+msgid "Application URL"
+msgstr ""
+
+#: includes/class-field-mapper.php:90
+msgid "Source URL"
+msgstr ""
+
+#. translators: %s: meta field label.
+#: includes/class-field-mapper.php:96
+#, php-format
+msgid "Meta: %s"
+msgstr ""
+
+#: includes/class-field-mapper.php:418
+msgid "Untitled job"
+msgstr ""
+
+#: includes/class-field-mapper.php:672
+#: includes/class-site-health.php:296
+msgid "Yes"
+msgstr ""
+
+#: includes/class-field-mapper.php:673
+#: includes/class-site-health.php:296
+msgid "No"
+msgstr ""
+
+#: includes/class-field-mapper.php:878
+msgid "The file did not contain any valid mapping rows."
+msgstr ""
+
+#: includes/class-field-metadata.php:123
+msgid "Zoho returned no field definitions for this module."
+msgstr ""
+
+#: includes/class-job.php:134
+msgid "The Zoho record has no usable ID."
+msgstr ""
+
+#: includes/class-job.php:160
+msgid "Another sync process is already importing this job."
+msgstr ""
+
+#. translators: %s: site name.
+#: includes/class-notifications.php:67
+#, php-format
+msgid "A Zoho Recruit job sync failed on %s."
+msgstr ""
+
+#. translators: 1: processed count, 2: created count, 3: updated count, 4: error count.
+#: includes/class-notifications.php:78
+#, php-format
+msgid "Processed: %1$d, created: %2$d, updated: %3$d, errors: %4$d"
+msgstr ""
+
+#: includes/class-notifications.php:87
+msgid "Sync logs:"
+msgstr ""
+
+#: includes/class-notifications.php:91
+msgid "Zoho Recruit job sync failed"
+msgstr ""
+
+#. translators: %d: number of consecutive failures.
+#: includes/class-notifications.php:113
+#, php-format
+msgid "The connection to Zoho Recruit has failed %d times in a row, so automatic syncing has been paused."
+msgstr ""
+
+#: includes/class-notifications.php:117
+msgid "Reconnect Zoho Recruit to resume syncing:"
+msgstr ""
+
+#: includes/class-notifications.php:123
+msgid "Zoho Recruit connection needs attention"
+msgstr ""
+
+#: includes/class-notifications.php:145
+msgid "No jobs were deactivated. Review the sync log before running another full sync:"
+msgstr ""
+
+#: includes/class-notifications.php:151
+msgid "Zoho Recruit sync stopped before deactivating jobs"
+msgstr ""
+
+#: includes/class-post-type.php:70
+msgctxt "post type general name"
+msgid "Jobs"
+msgstr ""
+
+#: includes/class-post-type.php:71
+msgctxt "post type singular name"
+msgid "Job"
+msgstr ""
+
+#: includes/class-post-type.php:72
+msgctxt "admin menu"
+msgid "Zoho Recruit Jobs"
+msgstr ""
+
+#: includes/class-post-type.php:73
+msgctxt "add new on admin bar"
+msgid "Job"
+msgstr ""
+
+#: includes/class-post-type.php:74
+msgid "Add New"
+msgstr ""
+
+#: includes/class-post-type.php:75
+msgid "Add New Job"
+msgstr ""
+
+#: includes/class-post-type.php:76
+msgid "New Job"
+msgstr ""
+
+#: includes/class-post-type.php:77
+msgid "Edit Job"
+msgstr ""
+
+#: includes/class-post-type.php:78
+#: templates/card.php:70
+msgid "View Job"
+msgstr ""
+
+#: includes/class-post-type.php:79
+msgid "View Jobs"
+msgstr ""
+
+#: includes/class-post-type.php:80
+msgid "All Jobs"
+msgstr ""
+
+#: includes/class-post-type.php:81
+msgid "Search Jobs"
+msgstr ""
+
+#: includes/class-post-type.php:82
+msgid "No jobs found."
+msgstr ""
+
+#: includes/class-post-type.php:83
+msgid "No jobs found in Trash."
+msgstr ""
+
+#: includes/class-post-type.php:84
+msgid "Job Archives"
+msgstr ""
+
+#: includes/class-post-type.php:85
+msgid "Job published."
+msgstr ""
+
+#: includes/class-post-type.php:86
+msgid "Job updated."
+msgstr ""
+
+#: includes/class-post-type.php:87
+msgid "Job image"
+msgstr ""
+
+#: includes/class-post-type.php:88
+msgid "Set job image"
+msgstr ""
+
+#: includes/class-post-type.php:89
+msgid "Remove job image"
+msgstr ""
+
+#: includes/class-post-type.php:94
+msgid "Job openings synchronized from Zoho Recruit."
+msgstr ""
+
+#: includes/class-post-type.php:172
+#: includes/class-post-type.php:174
+#: includes/class-settings.php:507
+#: templates/filters.php:19
+#: templates/job-meta.php:35
+#: blocks/jobs/build/index.js:1
+#: blocks/jobs/src/index.js:87
+msgid "Department"
+msgstr ""
+
+#: includes/class-post-type.php:175
+msgid "Departments"
+msgstr ""
+
+#: includes/class-post-type.php:181
+#: includes/class-post-type.php:183
+#: includes/class-settings.php:508
+#: templates/filters.php:20
+#: templates/job-meta.php:36
+#: blocks/jobs/build/index.js:1
+#: blocks/jobs/src/index.js:93
+msgid "Location"
+msgstr ""
+
+#: includes/class-post-type.php:184
+msgid "Locations"
+msgstr ""
+
+#: includes/class-post-type.php:190
+#: includes/class-post-type.php:192
+msgid "Employment Type"
+msgstr ""
+
+#: includes/class-post-type.php:193
+msgid "Employment Types"
+msgstr ""
+
+#: includes/class-post-type.php:199
+#: includes/class-settings.php:515
+#: templates/filters.php:22
+#: templates/job-meta.php:38
+#: blocks/jobs/build/index.js:1
+#: blocks/jobs/src/index.js:103
+msgid "Category"
+msgstr ""
+
+#: includes/class-post-type.php:201
+msgid "Job Category"
+msgstr ""
+
+#: includes/class-post-type.php:202
+msgid "Job Categories"
+msgstr ""
+
+#: includes/class-post-type.php:208
+#: includes/class-post-type.php:210
+#: includes/class-settings.php:514
+#: templates/filters.php:23
+#: templates/job-meta.php:39
+#: blocks/jobs/build/index.js:1
+#: blocks/jobs/src/index.js:108
+msgid "Experience"
+msgstr ""
+
+#: includes/class-post-type.php:211
+msgid "Experience Levels"
+msgstr ""
+
+#: includes/class-privacy.php:39
+msgid "Job listings from Zoho Recruit"
+msgstr ""
+
+#: includes/class-privacy.php:41
+msgid "This site publishes job openings that are copied from a Zoho Recruit account. The copying is one way: job opening records are read from Zoho Recruit and stored in this site's database. No information about visitors to this site is sent to Zoho Recruit by this plugin."
+msgstr ""
+
+#: includes/class-privacy.php:43
+msgid "The plugin reads job opening records only. It does not read, store or transmit candidate records, applications or any other personal data held in Zoho Recruit."
+msgstr ""
+
+#: includes/class-privacy.php:45
+msgid "Stored data consists of the job fields an administrator has chosen to map (such as title, description, location, employment type and closing date), together with the Zoho record identifier and, optionally, the raw record for troubleshooting. This data is retained until the job is deleted in this site or the plugin is uninstalled with the \"delete data\" option enabled."
+msgstr ""
+
+#: includes/class-privacy.php:47
+msgid "If an \"Apply\" link is shown, following it takes the visitor to an external application form. That destination is operated by the employer or by Zoho, and its own privacy policy applies from that point onwards."
+msgstr ""
+
+#: includes/class-privacy.php:49
+msgid "An administrator can end the connection at any time from the plugin settings screen, which revokes the stored access at Zoho and deletes the tokens from this site."
+msgstr ""
+
+#: includes/class-rest-api.php:114
+msgid "WordPress post ID of the job."
+msgstr ""
+
+#: includes/class-rest-api.php:258
+msgid "The jobs API is disabled on this site."
+msgstr ""
+
+#: includes/class-rest-api.php:275
+msgid "You do not have permission to manage Zoho Recruit synchronization."
+msgstr ""
+
+#. translators: %s: taxonomy name.
+#: includes/class-rest-api.php:338
+#, php-format
+msgid "Comma separated term slugs or names for %s."
+msgstr ""
+
+#: includes/class-rest-api.php:1006
+msgid "Job not found."
+msgstr ""
+
+#: includes/class-settings.php:40
+msgid "United States (zoho.com)"
+msgstr ""
+
+#: includes/class-settings.php:45
+msgid "Europe (zoho.eu)"
+msgstr ""
+
+#: includes/class-settings.php:50
+msgid "India (zoho.in)"
+msgstr ""
+
+#: includes/class-settings.php:55
+msgid "Australia (zoho.com.au)"
+msgstr ""
+
+#: includes/class-settings.php:60
+msgid "Japan (zoho.jp)"
+msgstr ""
+
+#: includes/class-settings.php:65
+msgid "Canada (zohocloud.ca)"
+msgstr ""
+
+#: includes/class-settings.php:70
+msgid "United Kingdom (zoho.uk)"
+msgstr ""
+
+#: includes/class-settings.php:75
+msgid "Saudi Arabia (zoho.sa)"
+msgstr ""
+
+#: includes/class-settings.php:499
+msgid "Job ID (WordPress)"
+msgstr ""
+
+#: includes/class-settings.php:500
+msgid "Job title"
+msgstr ""
+
+#: includes/class-settings.php:501
+msgid "Slug"
+msgstr ""
+
+#: includes/class-settings.php:502
+msgid "Permalink"
+msgstr ""
+
+#: includes/class-settings.php:503
+msgid "Excerpt"
+msgstr ""
+
+#: includes/class-settings.php:504
+msgid "Description"
+msgstr ""
+
+#: includes/class-settings.php:513
+#: templates/filters.php:21
+#: templates/job-meta.php:37
+#: blocks/jobs/build/index.js:1
+#: blocks/jobs/src/index.js:98
+msgid "Employment type"
+msgstr ""
+
+#: includes/class-settings.php:522
+msgid "Zoho modified time"
+msgstr ""
+
+#: includes/class-settings.php:524
+msgid "Zoho record ID"
+msgstr ""
+
+#: includes/class-shortcode.php:208
+#: templates/single.php:63
+msgid "Apply Now"
+msgstr ""
+
+#: includes/class-site-health.php:35
+msgid "Zoho Recruit connection"
+msgstr ""
+
+#: includes/class-site-health.php:40
+msgid "Zoho Recruit scheduled sync"
+msgstr ""
+
+#: includes/class-site-health.php:45
+msgid "Zoho Recruit last sync"
+msgstr ""
+
+#: includes/class-site-health.php:50
+msgid "Zoho Recruit environment"
+msgstr ""
+
+#: includes/class-site-health.php:77
+msgid "Open Zoho Recruit Jobs settings"
+msgstr ""
+
+#: includes/class-site-health.php:93
+msgid "Zoho Recruit credentials have not been entered"
+msgstr ""
+
+#: includes/class-site-health.php:95
+msgid "Add your Zoho Client ID and Client Secret, then connect the site, before jobs can be synchronized."
+msgstr ""
+
+#: includes/class-site-health.php:101
+msgid "This site is not connected to Zoho Recruit"
+msgstr ""
+
+#: includes/class-site-health.php:103
+msgid "Credentials are stored but the OAuth connection has not been completed."
+msgstr ""
+
+#: includes/class-site-health.php:109
+msgid "Stored Zoho credentials can no longer be decrypted"
+msgstr ""
+
+#: includes/class-site-health.php:111
+msgid "The site security keys in wp-config.php changed, so the stored tokens cannot be read. Reconnect Zoho Recruit."
+msgstr ""
+
+#: includes/class-site-health.php:117
+msgid "Zoho Recruit syncing is paused after repeated failures"
+msgstr ""
+
+#: includes/class-site-health.php:119
+msgid "Several authentication attempts failed in a row, so automatic syncing stopped. Reconnect Zoho Recruit to resume."
+msgstr ""
+
+#: includes/class-site-health.php:124
+msgid "Zoho Recruit is connected"
+msgstr ""
+
+#: includes/class-site-health.php:126
+msgid "The site holds a valid Zoho Recruit refresh token."
+msgstr ""
+
+#: includes/class-site-health.php:140
+msgid "Automatic Zoho Recruit syncing is disabled"
+msgstr ""
+
+#: includes/class-site-health.php:142
+msgid "Jobs will only change when you run a sync by hand."
+msgstr ""
+
+#: includes/class-site-health.php:150
+msgid "The Zoho Recruit sync is not scheduled"
+msgstr ""
+
+#: includes/class-site-health.php:152
+msgid "No scheduled event exists. Re-save the sync settings to reschedule it."
+msgstr ""
+
+#: includes/class-site-health.php:158
+msgid "WP-Cron is disabled on this site"
+msgstr ""
+
+#: includes/class-site-health.php:160
+msgid "DISABLE_WP_CRON is set, so scheduled syncing depends on a system cron job calling wp-cron.php. Confirm one is configured."
+msgstr ""
+
+#: includes/class-site-health.php:165
+msgid "The Zoho Recruit sync is scheduled"
+msgstr ""
+
+#. translators: %s: formatted date and time.
+#: includes/class-site-health.php:169
+#, php-format
+msgid "The next sync is due %s."
+msgstr ""
+
+#: includes/class-site-health.php:186
+msgid "No Zoho Recruit sync has completed yet"
+msgstr ""
+
+#: includes/class-site-health.php:188
+msgid "Run a full sync to import your job openings."
+msgstr ""
+
+#: includes/class-site-health.php:196
+msgid "The last successful Zoho Recruit sync is old"
+msgstr ""
+
+#. translators: %s: human readable time difference.
+#: includes/class-site-health.php:200
+#, php-format
+msgid "The last successful sync finished %s ago. Check the sync log for errors."
+msgstr ""
+
+#: includes/class-site-health.php:207
+msgid "Zoho Recruit jobs are up to date"
+msgstr ""
+
+#. translators: %s: human readable time difference.
+#: includes/class-site-health.php:211
+#, php-format
+msgid "The last successful sync finished %s ago."
+msgstr ""
+
+#: includes/class-site-health.php:226
+msgid "Secrets cannot be encrypted: this site has neither libsodium nor OpenSSL available, or its security salts are missing."
+msgstr ""
+
+#: includes/class-site-health.php:230
+msgid "The admin area is not served over HTTPS. Zoho requires an HTTPS redirect URI for production credentials."
+msgstr ""
+
+#. translators: 1: URL slug, 2: conflicting post type name.
+#: includes/class-site-health.php:245
+#, php-format
+msgid "The job URL slug \"%1$s\" is also used by the \"%2$s\" post type, which will break one of the two."
+msgstr ""
+
+#. translators: %s: URL slug.
+#: includes/class-site-health.php:257
+#, php-format
+msgid "A page already exists at \"/%s\", which conflicts with the job URL slug."
+msgstr ""
+
+#: includes/class-site-health.php:264
+msgid "The Zoho Recruit environment looks correct"
+msgstr ""
+
+#: includes/class-site-health.php:266
+msgid "Encryption is available, the admin is served over HTTPS, and the job URL slug is free."
+msgstr ""
+
+#: includes/class-site-health.php:271
+msgid "The Zoho Recruit environment needs attention"
+msgstr ""
+
+#: includes/class-site-health.php:291
+msgid "Plugin version"
+msgstr ""
+
+#: includes/class-site-health.php:303
+msgid "Zoho module"
+msgstr ""
+
+#: includes/class-site-health.php:307
+msgid "Secret encryption"
+msgstr ""
+
+#: includes/class-site-health.php:308
+msgid "Available"
+msgstr ""
+
+#: includes/class-site-health.php:308
+msgid "Unavailable"
+msgstr ""
+
+#: includes/class-site-health.php:317
+msgid "Job counts"
+msgstr ""
+
+#: includes/class-sync-queue.php:445
+msgid "Cancelled by an administrator."
+msgstr ""
+
+#: includes/class-sync.php:106
+msgid "Connect Zoho Recruit before running a sync."
+msgstr ""
+
+#: includes/class-sync.php:110
+msgid "Syncing is paused after repeated authentication failures. Reconnect Zoho Recruit to resume."
+msgstr ""
+
+#: includes/class-sync.php:118
+msgid "A sync is already running. Wait for it to finish or cancel it first."
+msgstr ""
+
+#: includes/class-sync.php:124
+#: includes/class-sync.php:149
+msgid "Another sync process holds the lock. Try again shortly."
+msgstr ""
+
+#: includes/class-sync.php:143
+msgid "The sync could not be started because its run record could not be stored."
+msgstr ""
+
+#: includes/class-sync.php:147
+msgid "Could not acquire the sync lock."
+msgstr ""
+
+#. translators: 1: percentage of jobs, 2: configured threshold percentage, 3: number of jobs.
+#: includes/class-sync.php:780
+#, php-format
+msgid "Deactivation was skipped: the sync would have deactivated %1$d%% of jobs (%3$d jobs), which is above the %2$d%% safety threshold. Check the Zoho connection and filters, then run a full sync again."
+msgstr ""
+
+#: includes/class-sync.php:1012
+#: includes/class-zoho-api.php:135
+msgid "Invalid Zoho record ID."
+msgstr ""
+
+#: includes/class-sync.php:1044
+msgid "That job no longer exists in Zoho Recruit."
+msgstr ""
+
+#: includes/class-templates.php:331
+msgid "Single Job"
+msgstr ""
+
+#: includes/class-templates.php:332
+msgid "Layout for a single job opening."
+msgstr ""
+
+#: includes/class-templates.php:336
+msgid "Jobs Archive"
+msgstr ""
+
+#: includes/class-templates.php:337
+msgid "Layout for the job listing archive."
+msgstr ""
+
+#: includes/class-webhook.php:101
+msgid "Webhooks are disabled on this site."
+msgstr ""
+
+#: includes/class-webhook.php:117
+msgid "Invalid webhook token."
+msgstr ""
+
+#: includes/class-webhook.php:125
+msgid "Too many webhook requests."
+msgstr ""
+
+#. translators: %s: transport error message.
+#: includes/class-zoho-api.php:322
+#, php-format
+msgid "Could not reach the Zoho Recruit API: %s"
+msgstr ""
+
+#: includes/class-zoho-api.php:442
+msgid "Zoho rejected the request as invalid."
+msgstr ""
+
+#: includes/class-zoho-api.php:443
+msgid "Zoho rejected the access token. Please reconnect Zoho Recruit."
+msgstr ""
+
+#: includes/class-zoho-api.php:444
+msgid "Access to this Zoho module was refused. Check the OAuth scopes and the user profile permissions."
+msgstr ""
+
+#: includes/class-zoho-api.php:445
+msgid "The Zoho endpoint or record was not found. Check the module API name."
+msgstr ""
+
+#: includes/class-zoho-api.php:446
+#: includes/class-zoho-api.php:506
+msgid "Zoho rate limit reached. The sync will resume automatically later."
+msgstr ""
+
+#: includes/class-zoho-api.php:447
+#: includes/class-zoho-api.php:507
+msgid "Zoho reported an internal error."
+msgstr ""
+
+#: includes/class-zoho-api.php:448
+msgid "The Zoho Recruit API is temporarily unavailable."
+msgstr ""
+
+#. translators: %d: HTTP status code.
+#: includes/class-zoho-api.php:455
+#, php-format
+msgid "Zoho returned HTTP %d."
+msgstr ""
+
+#: includes/class-zoho-api.php:499
+msgid "The Zoho access token is invalid. Please reconnect Zoho Recruit."
+msgstr ""
+
+#: includes/class-zoho-api.php:500
+msgid "Zoho could not authenticate this request. Please reconnect Zoho Recruit."
+msgstr ""
+
+#: includes/class-zoho-api.php:501
+msgid "The connection is missing a required scope. Disconnect and reconnect to grant the requested permissions."
+msgstr ""
+
+#: includes/class-zoho-api.php:502
+msgid "Zoho rejected one of the request parameters as invalid."
+msgstr ""
+
+#: includes/class-zoho-api.php:503
+msgid "The configured Zoho module does not exist in this account."
+msgstr ""
+
+#: includes/class-zoho-api.php:504
+msgid "The API endpoint is not valid for this Zoho account."
+msgstr ""
+
+#: includes/class-zoho-api.php:505
+msgid "The connected Zoho user does not have permission to read job openings."
+msgstr ""
+
+#. translators: %s: Zoho error code.
+#: includes/class-zoho-api.php:522
+#, php-format
+msgid "Zoho reported error code %s."
+msgstr ""
+
+#: includes/class-zoho-auth.php:142
+msgid "Credentials cannot be stored securely: this site has no usable encryption extension or security salts."
+msgstr ""
+
+#: includes/class-zoho-auth.php:265
+msgid "Enter your Zoho Client ID and Client Secret before connecting."
+msgstr ""
+
+#: includes/class-zoho-auth.php:300
+msgid "You do not have permission to connect Zoho Recruit."
+msgstr ""
+
+#: includes/class-zoho-auth.php:325
+msgid "You do not have permission to complete this connection."
+msgstr ""
+
+#: includes/class-zoho-auth.php:335
+#: includes/class-zoho-auth.php:342
+msgid "The connection request could not be verified. Please start the connection again."
+msgstr ""
+
+#. translators: %s: error code returned by Zoho.
+#: includes/class-zoho-auth.php:356
+#, php-format
+msgid "Zoho refused the connection: %s"
+msgstr ""
+
+#: includes/class-zoho-auth.php:366
+msgid "Zoho did not return an authorization code."
+msgstr ""
+
+#: includes/class-zoho-auth.php:377
+msgid "Connected to Zoho Recruit."
+msgstr ""
+
+#: includes/class-zoho-auth.php:404
+msgid "Zoho did not return a refresh token. Remove this site from your Zoho connected apps and try connecting again."
+msgstr ""
+
+#: includes/class-zoho-auth.php:478
+msgid "Automatic Zoho requests are paused after repeated authentication failures. Reconnect Zoho Recruit to resume."
+msgstr ""
+
+#: includes/class-zoho-auth.php:485
+#: includes/class-zoho-auth.php:536
+msgid "This site is not connected to Zoho Recruit."
+msgstr ""
+
+#: includes/class-zoho-auth.php:492
+msgid "Stored Zoho credentials can no longer be decrypted because the site security keys changed. Please reconnect Zoho Recruit."
+msgstr ""
+
+#: includes/class-zoho-auth.php:559
+msgid "Zoho did not return a new access token."
+msgstr ""
+
+#: includes/class-zoho-auth.php:638
+msgid "You do not have permission to disconnect Zoho Recruit."
+msgstr ""
+
+#. translators: %s: transport error message.
+#: includes/class-zoho-auth.php:772
+#, php-format
+msgid "Could not reach Zoho: %s"
+msgstr ""
+
+#: includes/class-zoho-auth.php:787
+msgid "Zoho returned an unreadable response to the token request."
+msgstr ""
+
+#. translators: %d: HTTP status code.
+#: includes/class-zoho-auth.php:804
+#, php-format
+msgid "Zoho returned HTTP %d for the token request."
+msgstr ""
+
+#: includes/class-zoho-auth.php:821
+msgid "The Client ID or Client Secret is incorrect for this data center."
+msgstr ""
+
+#: includes/class-zoho-auth.php:822
+msgid "The authorization code was already used or has expired. Please connect again."
+msgstr ""
+
+#: includes/class-zoho-auth.php:823
+msgid "Zoho rejected the grant. The refresh token may have been revoked; please reconnect."
+msgstr ""
+
+#: includes/class-zoho-auth.php:824
+msgid "The redirect URI does not match the one registered in the Zoho API console."
+msgstr ""
+
+#: includes/class-zoho-auth.php:825
+msgid "Access was denied in the Zoho consent screen."
+msgstr ""
+
+#: includes/class-zoho-auth.php:826
+msgid "One or more requested scopes are not available for this Zoho account."
+msgstr ""
+
+#: includes/class-zoho-auth.php:827
+msgid "The stored token is no longer valid. Please reconnect."
+msgstr ""
+
+#. translators: %s: raw error code from Zoho.
+#: includes/class-zoho-auth.php:838
+#, php-format
+msgid "Zoho reported \"%s\"."
+msgstr ""
+
+#: includes/functions.php:53
+msgid "You do not have permission to perform this action."
+msgstr ""
+
+#: templates/archive.php:117
+#: templates/pagination.php:30
+msgid "&laquo; Previous"
+msgstr ""
+
+#: templates/archive.php:118
+#: templates/pagination.php:31
+msgid "Next &raquo;"
+msgstr ""
+
+#. translators: %s: closing date.
+#: templates/card.php:80
+#, php-format
+msgid "Closes %s"
+msgstr ""
+
+#: templates/filters.php:56
+msgid "Search jobs"
+msgstr ""
+
+#: templates/filters.php:59
+msgid "Job title or code"
+msgstr ""
+
+#: templates/filters.php:82
+msgid "All"
+msgstr ""
+
+#: templates/filters.php:95
+msgid "Filter"
+msgstr ""
+
+#: templates/job-meta.php:28
+msgid "Work mode"
+msgstr ""
+
+#: templates/job-meta.php:29
+msgid "Openings"
+msgstr ""
+
+#: templates/job-meta.php:30
+msgid "Posted"
+msgstr ""
+
+#: templates/job-meta.php:31
+msgid "Closes"
+msgstr ""
+
+#: templates/listing.php:39
+msgid "Job results"
+msgstr ""
+
+#. translators: %s: number of jobs.
+#: templates/listing.php:46
+#, php-format
+msgid "%s job found"
+msgid_plural "%s jobs found"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %s: search term.
+#: templates/no-results.php:19
+#, php-format
+msgid "No open positions match “%s”."
+msgstr ""
+
+#: templates/no-results.php:24
+msgid "There are no open positions at the moment. Please check back soon."
+msgstr ""
+
+#: templates/pagination.php:39
+msgid "Job listing pages"
+msgstr ""
+
+#: templates/single.php:41
+msgid "This position is closed and is no longer accepting applications."
+msgstr ""
+
+#: templates/single.php:46
+msgid "See all open positions"
+msgstr ""
+
+#: blocks/jobs/build/index.js:1
+#: blocks/jobs/src/index.js:29
+msgid "Listing"
+msgstr ""
+
+#: blocks/jobs/build/index.js:1
+#: blocks/jobs/src/index.js:31
+msgid "Jobs to show"
+msgstr ""
+
+#: blocks/jobs/build/index.js:1
+#: blocks/jobs/src/index.js:38
+msgid "Listing style"
+msgstr ""
+
+#: blocks/jobs/build/index.js:1
+#: blocks/jobs/src/index.js:48
+msgid "Columns"
+msgstr ""
+
+#: blocks/jobs/build/index.js:1
+#: blocks/jobs/src/index.js:56
+msgid "Order by"
+msgstr ""
+
+#: blocks/jobs/build/index.js:1
+#: blocks/jobs/src/index.js:59
+msgid "Date published"
+msgstr ""
+
+#: blocks/jobs/build/index.js:1
+#: blocks/jobs/src/index.js:60
+msgid "Title"
+msgstr ""
+
+#: blocks/jobs/build/index.js:1
+#: blocks/jobs/src/index.js:67
+msgid "Order"
+msgstr ""
+
+#: blocks/jobs/build/index.js:1
+#: blocks/jobs/src/index.js:70
+msgid "Descending"
+msgstr ""
+
+#: blocks/jobs/build/index.js:1
+#: blocks/jobs/src/index.js:71
+msgid "Ascending"
+msgstr ""
+
+#: blocks/jobs/build/index.js:1
+#: blocks/jobs/src/index.js:78
+msgid "Filters"
+msgstr ""
+
+#: blocks/jobs/build/index.js:1
+#: blocks/jobs/src/index.js:82
+msgid "Keyword"
+msgstr ""
+
+#: blocks/jobs/build/index.js:1
+#: blocks/jobs/src/index.js:88
+msgid "Term slug or name. Separate several with commas."
+msgstr ""
+
+#: blocks/jobs/build/index.js:1
+#: blocks/jobs/src/index.js:115
+msgid "Visitor controls"
+msgstr ""
+
+#: blocks/jobs/build/index.js:1
+#: blocks/jobs/src/index.js:119
+msgid "Show filter dropdowns"
+msgstr ""
+
+#: blocks/jobs/build/index.js:1
+#: blocks/jobs/src/index.js:124
+msgid "Show search box"
+msgstr ""
+
+#: blocks/jobs/build/index.js:1
+#: blocks/jobs/src/index.js:129
+msgid "Show pagination"
+msgstr ""
+
+#: blocks/jobs/build/index.js:1
+#: blocks/jobs/src/index.js:134
+msgid "Show excerpts"
+msgstr ""
+
+#: blocks/jobs/block.json
+msgctxt "block title"
+msgid "Zoho Recruit Jobs"
+msgstr ""
+
+#: blocks/jobs/block.json
+msgctxt "block description"
+msgid "Show job openings synchronized from Zoho Recruit."
+msgstr ""
+
+#: blocks/jobs/block.json
+msgctxt "block keyword"
+msgid "jobs"
+msgstr ""
+
+#: blocks/jobs/block.json
+msgctxt "block keyword"
+msgid "careers"
+msgstr ""
+
+#: blocks/jobs/block.json
+msgctxt "block keyword"
+msgid "vacancies"
+msgstr ""
+
+#: blocks/jobs/block.json
+msgctxt "block keyword"
+msgid "recruit"
+msgstr ""
+
+#: blocks/jobs/block.json
+msgctxt "block keyword"
+msgid "hiring"
+msgstr ""
+
+#: blocks/jobs/block.json
+msgctxt "block style label"
+msgid "Default"
+msgstr ""
+
+#: blocks/jobs/block.json
+msgctxt "block style label"
+msgid "Bordered"
+msgstr ""

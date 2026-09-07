@@ -1,0 +1,8 @@
+# Keep line endings consistent across platforms. The plugin is deployed to Linux
+# servers, so everything text is stored and checked out with LF.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.gif binary
+*.zip binary
