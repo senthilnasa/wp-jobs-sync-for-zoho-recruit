@@ -53,8 +53,9 @@ class Plugin {
 	 * @return void
 	 */
 	private function boot() {
-		add_action( 'init', array( $this, 'load_textdomain' ), 0 );
-
+		// No load_plugin_textdomain() call: from WordPress 4.6 translations are
+		// loaded automatically, just in time, from the Domain Path in the plugin
+		// header and from the language packs WordPress.org builds.
 		$this->components['logger']   = new Logger();
 		$this->components['auth']     = new Zoho_Auth();
 		$this->components['api']      = new Zoho_API( $this->components['auth'] );
@@ -93,19 +94,6 @@ class Plugin {
 
 		add_action( 'plugins_loaded', array( $this, 'maybe_upgrade' ), 20 );
 		add_action( 'wp_initialize_site', array( __CLASS__, 'on_new_site' ), 100 );
-	}
-
-	/**
-	 * Load translations.
-	 *
-	 * @return void
-	 */
-	public function load_textdomain() {
-		load_plugin_textdomain(
-			'jobs-sync-for-zoho-recruit',
-			false,
-			dirname( PLUGIN_BASENAME ) . '/languages'
-		);
 	}
 
 	/**

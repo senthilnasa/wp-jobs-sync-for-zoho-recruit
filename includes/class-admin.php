@@ -557,8 +557,8 @@ class Admin {
 	public function handle_start_sync() {
 		jszr_verify_admin_request( 'jszr_start_sync' );
 
-		$type    = isset( $_POST['sync_type'] ) ? sanitize_key( wp_unslash( $_POST['sync_type'] ) ) : 'incremental';
-		$dry_run = ! empty( $_POST['dry_run'] );
+		$type    = isset( $_POST['sync_type'] ) ? sanitize_key( wp_unslash( $_POST['sync_type'] ) ) : 'incremental'; // phpcs:ignore WordPress.Security.NonceVerification -- Nonce and capability verified by jszr_verify_admin_request() at the top of the handler.
+		$dry_run = ! empty( $_POST['dry_run'] ); // phpcs:ignore WordPress.Security.NonceVerification -- Nonce and capability verified by jszr_verify_admin_request() at the top of the handler.
 
 		$result = $this->sync->start(
 			in_array( $type, array( 'full', 'incremental' ), true ) ? $type : 'incremental',
@@ -637,9 +637,9 @@ class Admin {
 	public function handle_save_credentials() {
 		jszr_verify_admin_request( 'jszr_save_credentials' );
 
-		$client_id     = isset( $_POST['jszr_client_id'] ) ? sanitize_text_field( wp_unslash( $_POST['jszr_client_id'] ) ) : '';
-		$client_secret = isset( $_POST['jszr_client_secret'] ) ? sanitize_text_field( wp_unslash( $_POST['jszr_client_secret'] ) ) : '';
-		$data_center   = isset( $_POST['jszr_data_center'] ) ? sanitize_key( wp_unslash( $_POST['jszr_data_center'] ) ) : '';
+		$client_id     = isset( $_POST['jszr_client_id'] ) ? sanitize_text_field( wp_unslash( $_POST['jszr_client_id'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- Nonce and capability verified by jszr_verify_admin_request() at the top of the handler.
+		$client_secret = isset( $_POST['jszr_client_secret'] ) ? sanitize_text_field( wp_unslash( $_POST['jszr_client_secret'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- Nonce and capability verified by jszr_verify_admin_request() at the top of the handler.
+		$data_center   = isset( $_POST['jszr_data_center'] ) ? sanitize_key( wp_unslash( $_POST['jszr_data_center'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- Nonce and capability verified by jszr_verify_admin_request() at the top of the handler.
 
 		if ( '' !== $data_center && ! Zoho_Auth::data_center_is_constant() ) {
 			Settings::update( Settings::sanitize( array( 'data_center' => $data_center ) ) );
@@ -667,7 +667,7 @@ class Admin {
 
 		$rows = array();
 
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Each value is sanitized in sanitize_mapping().
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification -- Each value is sanitized in sanitize_mapping(); the nonce is verified by jszr_verify_admin_request() above.
 		$raw = isset( $_POST['jszr_mapping'] ) ? wp_unslash( $_POST['jszr_mapping'] ) : array();
 
 		if ( is_array( $raw ) ) {
@@ -917,7 +917,7 @@ class Admin {
 	public function handle_resync_job() {
 		jszr_verify_admin_request( 'jszr_resync_job' );
 
-		$post_id = isset( $_REQUEST['post'] ) ? (int) $_REQUEST['post'] : 0;
+		$post_id = isset( $_REQUEST['post'] ) ? (int) $_REQUEST['post'] : 0; // phpcs:ignore WordPress.Security.NonceVerification -- Nonce and capability verified by jszr_verify_admin_request() at the top of the handler.
 
 		if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
 			wp_die( esc_html__( 'You do not have permission to refresh this job.', 'jobs-sync-for-zoho-recruit' ), 403 );

@@ -223,9 +223,8 @@ class Logger {
 			)
 		);
 
-		$table  = self::table();
 		$where  = array( '1=1' );
-		$params = array();
+		$params = array( self::table() );
 
 		if ( null !== $args['run_id'] ) {
 			$where[]  = 'run_id = %d';
@@ -240,7 +239,7 @@ class Logger {
 		$params[] = max( 1, min( 500, (int) $args['limit'] ) );
 		$params[] = max( 0, (int) $args['offset'] );
 
-		$sql = 'SELECT * FROM ' . $table . ' WHERE ' . implode( ' AND ', $where ) . ' ORDER BY id DESC LIMIT %d OFFSET %d';
+		$sql = 'SELECT * FROM %i WHERE ' . implode( ' AND ', $where ) . ' ORDER BY id DESC LIMIT %d OFFSET %d';
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Placeholders built above.
 		return (array) $wpdb->get_results( $wpdb->prepare( $sql, $params ) );
@@ -254,10 +253,8 @@ class Logger {
 	public static function clear() {
 		global $wpdb;
 
-		$table = self::table();
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is internal.
-		$wpdb->query( "TRUNCATE TABLE {$table}" );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table, nothing to cache.
+		$wpdb->query( $wpdb->prepare( 'TRUNCATE TABLE %i', self::table() ) );
 	}
 
 	/**
@@ -275,17 +272,17 @@ class Logger {
 		if ( $days > 0 ) {
 			$cutoff = gmdate( 'Y-m-d H:i:s', time() - ( $days * DAY_IN_SECONDS ) );
 
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is internal.
-			$wpdb->query( $wpdb->prepare( "DELETE FROM {$table} WHERE created_at < %s", $cutoff ) );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table, nothing to cache.
+			$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE created_at < %s', $table, $cutoff ) );
 		}
 
 		if ( $max > 0 ) {
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is internal.
-			$threshold = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table} ORDER BY id DESC LIMIT 1 OFFSET %d", $max ) );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table, nothing to cache.
+			$threshold = $wpdb->get_var( $wpdb->prepare( 'SELECT id FROM %i ORDER BY id DESC LIMIT 1 OFFSET %d', $table, $max ) );
 
 			if ( $threshold ) {
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is internal.
-				$wpdb->query( $wpdb->prepare( "DELETE FROM {$table} WHERE id <= %d", (int) $threshold ) );
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table, nothing to cache.
+				$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE id <= %d', $table, (int) $threshold ) );
 			}
 		}
 

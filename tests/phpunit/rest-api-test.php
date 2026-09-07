@@ -38,6 +38,10 @@ class JSZR_REST_API_Test extends WP_UnitTestCase {
 		Settings::flush_cache();
 		Settings::update( array( 'cache_ttl' => 0 ) );
 
+		// WP_UnitTestCase unregisters every meta key between tests and `init`
+		// does not fire again, so the registrations have to be replayed here.
+		Post_Type::register_meta();
+
 		do_action( 'rest_api_init' );
 	}
 

@@ -93,10 +93,8 @@ function jszr_uninstall_site() {
 	}
 
 	foreach ( array( 'jszr_sync_logs', 'jszr_sync_runs' ) as $table ) {
-		$full = $wpdb->prefix . $table;
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Removing the plugin's own tables.
-		$wpdb->query( "DROP TABLE IF EXISTS {$full}" );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Removing the plugin's own tables.
+		$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $wpdb->prefix . $table ) );
 	}
 
 	// Remove the custom capability from every role.

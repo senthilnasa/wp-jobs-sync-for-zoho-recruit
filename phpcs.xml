@@ -26,16 +26,6 @@
 		<exclude name="WordPress.WP.AlternativeFunctions.file_system_operations_fopen"/>
 	</rule>
 
-	<!-- Every admin_post handler starts with jszr_verify_admin_request(), which
-	     checks the plugin capability and then check_admin_referer(). -->
-	<rule ref="WordPress.Security.NonceVerification">
-		<properties>
-			<property name="customNonceVerificationFunctions" type="array">
-				<element value="jszr_verify_admin_request"/>
-			</property>
-		</properties>
-	</rule>
-
 	<rule ref="WordPress.WP.I18n">
 		<properties>
 			<property name="text_domain" type="array">

@@ -135,10 +135,8 @@ class Sync_Queue {
 	public static function get( $run_id ) {
 		global $wpdb;
 
-		$table = self::table();
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is internal.
-		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", (int) $run_id ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table, read fresh on purpose.
+		$row = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM %i WHERE id = %d', self::table(), (int) $run_id ) );
 
 		return $row ? $row : null;
 	}
@@ -151,10 +149,13 @@ class Sync_Queue {
 	public static function get_active() {
 		global $wpdb;
 
-		$table = self::table();
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is internal.
-		$row = $wpdb->get_row( "SELECT * FROM {$table} WHERE state IN ('pending','running') ORDER BY id DESC LIMIT 1" );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table, read fresh on purpose.
+		$row = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM %i WHERE state IN ('pending','running') ORDER BY id DESC LIMIT 1",
+				self::table()
+			)
+		);
 
 		return $row ? $row : null;
 	}
@@ -169,18 +170,15 @@ class Sync_Queue {
 	public static function get_recent( $limit = 20, $offset = 0 ) {
 		global $wpdb;
 
-		$table = self::table();
-
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name comes from $wpdb->prefix, never from a request.
-		$sql = $wpdb->prepare(
-			"SELECT * FROM {$table} ORDER BY id DESC LIMIT %d OFFSET %d",
-			max( 1, min( 200, (int) $limit ) ),
-			max( 0, (int) $offset )
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table, read fresh on purpose.
+		return (array) $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT * FROM %i ORDER BY id DESC LIMIT %d OFFSET %d',
+				self::table(),
+				max( 1, min( 200, (int) $limit ) ),
+				max( 0, (int) $offset )
+			)
 		);
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- $sql came from $wpdb->prepare() above; custom table, intentionally read fresh.
-		return (array) $wpdb->get_results( $sql );
 	}
 
 	/**
@@ -191,10 +189,8 @@ class Sync_Queue {
 	public static function count_runs() {
 		global $wpdb;
 
-		$table = self::table();
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is internal.
-		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table, read fresh on purpose.
+		return (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM %i', self::table() ) );
 	}
 
 	/**
@@ -209,11 +205,22 @@ class Sync_Queue {
 		$table = self::table();
 
 		if ( '' !== $type ) {
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is internal.
-			$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE state = 'completed' AND type = %s ORDER BY id DESC LIMIT 1", $type ) );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table, read fresh on purpose.
+			$row = $wpdb->get_row(
+				$wpdb->prepare(
+					"SELECT * FROM %i WHERE state = 'completed' AND type = %s ORDER BY id DESC LIMIT 1",
+					$table,
+					$type
+				)
+			);
 		} else {
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is internal.
-			$row = $wpdb->get_row( "SELECT * FROM {$table} WHERE state = 'completed' ORDER BY id DESC LIMIT 1" );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table, read fresh on purpose.
+			$row = $wpdb->get_row(
+				$wpdb->prepare(
+					"SELECT * FROM %i WHERE state = 'completed' ORDER BY id DESC LIMIT 1",
+					$table
+				)
+			);
 		}
 
 		return $row ? $row : null;
@@ -257,7 +264,7 @@ class Sync_Queue {
 		);
 
 		$sets   = array();
-		$params = array();
+		$params = array( self::table() );
 
 		foreach ( $deltas as $column => $delta ) {
 			if ( ! in_array( $column, $allowed, true ) || 0 === (int) $delta ) {
@@ -275,8 +282,7 @@ class Sync_Queue {
 		$params[] = current_time( 'mysql', true );
 		$params[] = (int) $run_id;
 
-		$table = self::table();
-		$sql   = "UPDATE {$table} SET " . implode( ', ', $sets ) . ', updated_at = %s WHERE id = %d';
+		$sql = 'UPDATE %i SET ' . implode( ', ', $sets ) . ', updated_at = %s WHERE id = %d';
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Column names come from the allow-list above.
 		$wpdb->query( $wpdb->prepare( $sql, $params ) );
@@ -542,17 +548,29 @@ class Sync_Queue {
 		if ( $days > 0 ) {
 			$cutoff = gmdate( 'Y-m-d H:i:s', time() - ( $days * DAY_IN_SECONDS ) );
 
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is internal.
-			$wpdb->query( $wpdb->prepare( "DELETE FROM {$table} WHERE state NOT IN ('pending','running') AND started_at < %s", $cutoff ) );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table, read fresh on purpose.
+			$wpdb->query(
+				$wpdb->prepare(
+					"DELETE FROM %i WHERE state NOT IN ('pending','running') AND started_at < %s",
+					$table,
+					$cutoff
+				)
+			);
 		}
 
 		if ( $max > 0 ) {
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is internal.
-			$threshold = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table} ORDER BY id DESC LIMIT 1 OFFSET %d", $max ) );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table, read fresh on purpose.
+			$threshold = $wpdb->get_var( $wpdb->prepare( 'SELECT id FROM %i ORDER BY id DESC LIMIT 1 OFFSET %d', $table, $max ) );
 
 			if ( $threshold ) {
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is internal.
-				$wpdb->query( $wpdb->prepare( "DELETE FROM {$table} WHERE id <= %d AND state NOT IN ('pending','running')", (int) $threshold ) );
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table, read fresh on purpose.
+				$wpdb->query(
+					$wpdb->prepare(
+						"DELETE FROM %i WHERE id <= %d AND state NOT IN ('pending','running')",
+						$table,
+						(int) $threshold
+					)
+				);
 			}
 		}
 	}
@@ -567,7 +585,7 @@ class Sync_Queue {
 
 		$table = self::table();
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is internal.
-		$wpdb->query( "TRUNCATE TABLE {$table}" );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table, read fresh on purpose.
+		$wpdb->query( $wpdb->prepare( 'TRUNCATE TABLE %i', $table ) );
 	}
 }

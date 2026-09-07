@@ -69,12 +69,15 @@ npm run build           # build blocks/jobs/build from blocks/jobs/src
 composer run lint       # PHPCS against the WordPress standard
 npm run env:start       # a local WordPress via wp-env
 npm run test:php        # PHPUnit inside wp-env
-npm run plugin-zip      # dist/jobs-sync-for-zoho-recruit-<version>.zip
+npm run plugin-zip      # jobs-sync-for-zoho-recruit.zip
 ```
 
 The built block asset is committed so the plugin runs from a plain checkout with
-no build step. It is shipped unminified: the code that runs is the code you can
-read, and its JSX source sits beside it in `blocks/jobs/src/`.
+no build step, and its JSX source ships beside it in `blocks/jobs/src/` so the
+code that runs can always be traced back to source.
+
+What goes into the ZIP is the `files` list in `package.json` — an allow-list, so
+a new development file never reaches a release by accident.
 
 ## Disclaimer
 
