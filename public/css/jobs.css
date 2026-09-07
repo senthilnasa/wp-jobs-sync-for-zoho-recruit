@@ -1,0 +1,234 @@
+/**
+ * Frontend styles for Jobs Sync for Zoho Recruit.
+ *
+ * Deliberately minimal: colours and fonts are inherited from the theme so the
+ * listing looks native wherever it is used. Every selector is prefixed.
+ */
+
+.jszr-jobs {
+	--jszr-gap: 1.25rem;
+	--jszr-radius: 6px;
+	--jszr-border: 1px solid rgba(0, 0, 0, 0.12);
+	--jszr-muted: rgba(0, 0, 0, 0.62);
+	--jszr-columns: 3;
+}
+
+@media (prefers-color-scheme: dark) {
+	.jszr-jobs {
+		--jszr-border: 1px solid rgba(255, 255, 255, 0.18);
+		--jszr-muted: rgba(255, 255, 255, 0.7);
+	}
+}
+
+.jszr-jobs__list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	gap: var(--jszr-gap);
+}
+
+.jszr-jobs--grid .jszr-jobs__list {
+	grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+.jszr-jobs__item {
+	margin: 0;
+}
+
+.jszr-jobs__count {
+	margin: 0 0 var(--jszr-gap);
+	color: var(--jszr-muted);
+	font-size: 0.9em;
+}
+
+.jszr-job-card {
+	border: var(--jszr-border);
+	border-radius: var(--jszr-radius);
+	padding: 1.25rem;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.jszr-job-card__title {
+	margin: 0;
+	font-size: 1.15em;
+	line-height: 1.3;
+}
+
+.jszr-job-card__title a {
+	text-decoration: none;
+}
+
+.jszr-job-card__title a:hover,
+.jszr-job-card__title a:focus {
+	text-decoration: underline;
+}
+
+.jszr-job-card__meta,
+.jszr-job-card__remote,
+.jszr-job-card__closing {
+	margin: 0;
+	color: var(--jszr-muted);
+	font-size: 0.9em;
+}
+
+.jszr-job-card__excerpt {
+	margin: 0;
+}
+
+.jszr-job-card__footer {
+	margin: auto 0 0;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.5rem;
+	padding-top: 0.5rem;
+}
+
+.jszr-job-card__link {
+	font-weight: 600;
+}
+
+/* Filters ---------------------------------------------------------------- */
+
+.jszr-filters {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: 0.75rem;
+	margin-bottom: var(--jszr-gap, 1.25rem);
+}
+
+.jszr-filters__field {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	margin: 0;
+	min-width: 12rem;
+	flex: 1 1 12rem;
+}
+
+.jszr-filters__field label {
+	font-size: 0.85em;
+	font-weight: 600;
+}
+
+.jszr-filters__field select,
+.jszr-filters__field input {
+	width: 100%;
+}
+
+.jszr-filters__actions {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	margin: 0;
+}
+
+/* Pagination ------------------------------------------------------------- */
+
+.jszr-pagination {
+	margin-top: 1.5rem;
+}
+
+.jszr-pagination__list {
+	list-style: none;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+	margin: 0;
+	padding: 0;
+}
+
+.jszr-pagination__item .page-numbers {
+	display: inline-block;
+	padding: 0.35rem 0.7rem;
+	border: 1px solid rgba(0, 0, 0, 0.15);
+	border-radius: 4px;
+	text-decoration: none;
+}
+
+.jszr-pagination__item .page-numbers.current {
+	font-weight: 700;
+}
+
+/* Single job ------------------------------------------------------------- */
+
+.jszr-job-meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1rem 2rem;
+	margin: 1rem 0 1.5rem;
+}
+
+.jszr-job-meta__item {
+	margin: 0;
+}
+
+.jszr-job-meta__label {
+	margin: 0;
+	font-size: 0.8em;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+	opacity: 0.7;
+}
+
+.jszr-job-meta__value {
+	margin: 0;
+	font-weight: 600;
+}
+
+.jszr-job__closed {
+	border-inline-start: 4px solid #b32d2e;
+	background: rgba(179, 45, 46, 0.06);
+	padding: 0.85rem 1rem;
+	margin: 0 0 1.5rem;
+}
+
+.jszr-job__closed p {
+	margin: 0 0 0.5rem;
+}
+
+.jszr-job__closed p:last-child {
+	margin-bottom: 0;
+}
+
+.jszr-apply-button {
+	display: inline-block;
+	padding: 0.7rem 1.4rem;
+	border: 2px solid currentColor;
+	border-radius: var(--jszr-radius, 6px);
+	background: transparent;
+	color: inherit;
+	text-decoration: none;
+	font-weight: 600;
+}
+
+.jszr-apply-button:focus-visible,
+.jszr-filters__submit:focus-visible,
+.jszr-job-card__title a:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 2px;
+}
+
+.jszr-no-results {
+	color: var(--jszr-muted, inherit);
+}
+
+/* Block style variation --------------------------------------------------- */
+
+.is-style-bordered.wp-block-jobs-sync-for-zoho-recruit-jobs {
+	border: 1px solid rgba(0, 0, 0, 0.12);
+	border-radius: 8px;
+	padding: 1.25rem;
+}
+
+@media (prefers-color-scheme: dark) {
+	.is-style-bordered.wp-block-jobs-sync-for-zoho-recruit-jobs {
+		border-color: rgba(255, 255, 255, 0.18);
+	}
+}

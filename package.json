@@ -1,0 +1,28 @@
+{
+	"name": "jobs-sync-for-zoho-recruit",
+	"version": "1.0.0",
+	"description": "Build tooling for the Jobs Sync for Zoho Recruit block editor assets.",
+	"license": "GPL-2.0-or-later",
+	"private": true,
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/senthilnasa/wp-jobs-sync-for-zoho-recruit.git"
+	},
+	"scripts": {
+		"build": "wp-scripts build blocks/jobs/src/index.js --output-path=blocks/jobs/build",
+		"start": "wp-scripts start blocks/jobs/src/index.js --output-path=blocks/jobs/build",
+		"lint:js": "wp-scripts lint-js blocks/jobs/src admin/assets/js public/js",
+		"lint:css": "wp-scripts lint-style \"**/*.css\"",
+		"format": "wp-scripts format blocks/jobs/src",
+		"makepot": "wp i18n make-pot . languages/jobs-sync-for-zoho-recruit.pot --exclude=node_modules,vendor,tests,.wordpress-org",
+		"makejson": "wp i18n make-json languages --no-purge",
+		"plugin-zip": "bash bin/build-zip.sh",
+		"env:start": "wp-env start",
+		"env:stop": "wp-env stop",
+		"test:php": "wp-env run tests-cli --env-cwd=wp-content/plugins/jobs-sync-for-zoho-recruit vendor/bin/phpunit"
+	},
+	"devDependencies": {
+		"@wordpress/env": "^10.0.0",
+		"@wordpress/scripts": "^30.0.0"
+	}
+}

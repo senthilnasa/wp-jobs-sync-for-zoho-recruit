@@ -1,0 +1,22 @@
+# Files and directories excluded from the distributable ZIP.
+# Source that WordPress.org expects to review (blocks/jobs/src) and the
+# end-user documentation stay in the package on purpose.
+.git
+.github
+.gitignore
+.distignore
+.editorconfig
+.wp-env.json
+.wp-env.override.json
+.wordpress-org
+node_modules
+vendor
+tests
+bin
+dist
+composer.json
+composer.lock
+package.json
+package-lock.json
+phpcs.xml
+phpunit.xml.dist

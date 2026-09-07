@@ -1,0 +1,100 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "jobs-sync-for-zoho-recruit/jobs",
+	"version": "1.0.0",
+	"title": "Zoho Recruit Jobs",
+	"category": "widgets",
+	"icon": "businessperson",
+	"description": "Show job openings synchronized from Zoho Recruit.",
+	"keywords": [ "jobs", "careers", "vacancies", "recruit", "hiring" ],
+	"textdomain": "jobs-sync-for-zoho-recruit",
+	"supports": {
+		"align": [ "wide", "full" ],
+		"html": false,
+		"anchor": true,
+		"spacing": {
+			"margin": true,
+			"padding": true
+		},
+		"typography": {
+			"fontSize": true
+		}
+	},
+	"styles": [
+		{
+			"name": "default",
+			"label": "Default",
+			"isDefault": true
+		},
+		{
+			"name": "bordered",
+			"label": "Bordered"
+		}
+	],
+	"attributes": {
+		"perPage": {
+			"type": "number",
+			"default": 10
+		},
+		"search": {
+			"type": "string",
+			"default": ""
+		},
+		"department": {
+			"type": "string",
+			"default": ""
+		},
+		"location": {
+			"type": "string",
+			"default": ""
+		},
+		"employmentType": {
+			"type": "string",
+			"default": ""
+		},
+		"category": {
+			"type": "string",
+			"default": ""
+		},
+		"experience": {
+			"type": "string",
+			"default": ""
+		},
+		"orderby": {
+			"type": "string",
+			"default": "date"
+		},
+		"order": {
+			"type": "string",
+			"default": "desc"
+		},
+		"listingStyle": {
+			"type": "string",
+			"default": "list"
+		},
+		"columns": {
+			"type": "number",
+			"default": 3
+		},
+		"showFilters": {
+			"type": "boolean",
+			"default": false
+		},
+		"showSearch": {
+			"type": "boolean",
+			"default": false
+		},
+		"showPagination": {
+			"type": "boolean",
+			"default": true
+		},
+		"showExcerpt": {
+			"type": "boolean",
+			"default": true
+		}
+	},
+	"editorScript": "file:./build/index.js",
+	"editorStyle": "file:./build/editor.css",
+	"style": "jszr-jobs"
+}
