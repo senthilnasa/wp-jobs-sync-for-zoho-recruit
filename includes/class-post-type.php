@@ -90,31 +90,31 @@ class Post_Type {
 		);
 
 		$args = array(
-			'labels'             => $labels,
-			'description'        => __( 'Job openings synchronized from Zoho Recruit.', 'jobs-sync-for-zoho-recruit' ),
-			'public'             => $public,
-			'publicly_queryable' => $public,
+			'labels'              => $labels,
+			'description'         => __( 'Job openings synchronized from Zoho Recruit.', 'jobs-sync-for-zoho-recruit' ),
+			'public'              => $public,
+			'publicly_queryable'  => $public,
 			'exclude_from_search' => ! $public,
-			'show_ui'            => true,
-			'show_in_menu'       => true,
-			'show_in_nav_menus'  => $public,
-			'show_in_admin_bar'  => true,
-			'show_in_rest'       => true,
-			'rest_base'          => 'zoho_job',
-			'menu_position'      => 26,
-			'menu_icon'          => 'dashicons-businessperson',
-			'capability_type'    => 'post',
-			'map_meta_cap'       => true,
-			'hierarchical'       => false,
-			'has_archive'        => $public ? (string) Settings::get( 'archive_slug', 'jobs' ) : false,
-			'rewrite'            => $public ? array(
+			'show_ui'             => true,
+			'show_in_menu'        => true,
+			'show_in_nav_menus'   => $public,
+			'show_in_admin_bar'   => true,
+			'show_in_rest'        => true,
+			'rest_base'           => 'zoho_job',
+			'menu_position'       => 26,
+			'menu_icon'           => 'dashicons-businessperson',
+			'capability_type'     => 'post',
+			'map_meta_cap'        => true,
+			'hierarchical'        => false,
+			'has_archive'         => $public ? (string) Settings::get( 'archive_slug', 'jobs' ) : false,
+			'rewrite'             => $public ? array(
 				'slug'       => $slug,
 				'with_front' => false,
 				'feeds'      => true,
 				'pages'      => true,
 			) : false,
-			'supports'           => array( 'title', 'editor', 'excerpt', 'custom-fields', 'thumbnail', 'revisions' ),
-			'delete_with_user'   => false,
+			'supports'            => array( 'title', 'editor', 'excerpt', 'custom-fields', 'thumbnail', 'revisions' ),
+			'delete_with_user'    => false,
 		);
 
 		/**
@@ -141,7 +141,7 @@ class Post_Type {
 
 		$build = static function ( $singular, $plural, $slug, $hierarchical ) use ( $public ) {
 			return array(
-				'labels'            => array(
+				'labels'             => array(
 					'name'          => $plural,
 					'singular_name' => $singular,
 					'search_items'  => $plural,
@@ -152,15 +152,15 @@ class Post_Type {
 					'new_item_name' => $singular,
 					'menu_name'     => $plural,
 				),
-				'hierarchical'      => $hierarchical,
-				'public'            => $public,
+				'hierarchical'       => $hierarchical,
+				'public'             => $public,
 				'publicly_queryable' => $public,
-				'show_ui'           => true,
-				'show_admin_column' => true,
-				'show_in_rest'      => true,
-				'show_in_nav_menus' => $public,
-				'query_var'         => true,
-				'rewrite'           => $public ? array(
+				'show_ui'            => true,
+				'show_admin_column'  => true,
+				'show_in_rest'       => true,
+				'show_in_nav_menus'  => $public,
+				'query_var'          => true,
+				'rewrite'            => $public ? array(
 					'slug'       => $slug,
 					'with_front' => false,
 				) : false,
@@ -233,29 +233,29 @@ class Post_Type {
 	 */
 	public static function meta_keys() {
 		return array(
-			'_zoho_recruit_id'            => 'string',
-			'_jszr_job_code'              => 'string',
-			'_jszr_status'                => 'string',
-			'_zoho_recruit_status'        => 'string',
-			'_zoho_recruit_created_time'  => 'string',
-			'_zoho_recruit_modified_time' => 'string',
-			'_zoho_recruit_posted_date'   => 'string',
-			'_zoho_recruit_closing_date'  => 'string',
-			'_zoho_recruit_city'          => 'string',
-			'_zoho_recruit_state'         => 'string',
-			'_zoho_recruit_country'       => 'string',
-			'_zoho_recruit_remote'        => 'string',
-			'_zoho_recruit_industry'      => 'string',
-			'_zoho_recruit_client'        => 'string',
-			'_zoho_recruit_positions'     => 'integer',
-			'_zoho_recruit_salary'        => 'string',
-			'_zoho_recruit_salary_min'    => 'number',
-			'_zoho_recruit_salary_max'    => 'number',
+			'_zoho_recruit_id'              => 'string',
+			'_jszr_job_code'                => 'string',
+			'_jszr_status'                  => 'string',
+			'_zoho_recruit_status'          => 'string',
+			'_zoho_recruit_created_time'    => 'string',
+			'_zoho_recruit_modified_time'   => 'string',
+			'_zoho_recruit_posted_date'     => 'string',
+			'_zoho_recruit_closing_date'    => 'string',
+			'_zoho_recruit_city'            => 'string',
+			'_zoho_recruit_state'           => 'string',
+			'_zoho_recruit_country'         => 'string',
+			'_zoho_recruit_remote'          => 'string',
+			'_zoho_recruit_industry'        => 'string',
+			'_zoho_recruit_client'          => 'string',
+			'_zoho_recruit_positions'       => 'integer',
+			'_zoho_recruit_salary'          => 'string',
+			'_zoho_recruit_salary_min'      => 'number',
+			'_zoho_recruit_salary_max'      => 'number',
 			'_zoho_recruit_salary_currency' => 'string',
-			'_zoho_recruit_salary_unit'   => 'string',
+			'_zoho_recruit_salary_unit'     => 'string',
 			'_zoho_recruit_application_url' => 'string',
-			'_zoho_recruit_source_url'    => 'string',
-			'_zoho_recruit_last_synced'   => 'string',
+			'_zoho_recruit_source_url'      => 'string',
+			'_zoho_recruit_last_synced'     => 'string',
 		);
 	}
 
@@ -266,20 +266,20 @@ class Post_Type {
 	 */
 	public static function rest_field_meta_map() {
 		return array(
-			'job_code'     => '_jszr_job_code',
-			'status'       => '_jszr_status',
-			'city'         => '_zoho_recruit_city',
-			'state'        => '_zoho_recruit_state',
-			'country'      => '_zoho_recruit_country',
-			'remote'       => '_zoho_recruit_remote',
-			'industry'     => '_zoho_recruit_industry',
-			'client'       => '_zoho_recruit_client',
-			'positions'    => '_zoho_recruit_positions',
-			'salary'       => '_zoho_recruit_salary',
-			'posted_date'  => '_zoho_recruit_posted_date',
-			'closing_date' => '_zoho_recruit_closing_date',
+			'job_code'      => '_jszr_job_code',
+			'status'        => '_jszr_status',
+			'city'          => '_zoho_recruit_city',
+			'state'         => '_zoho_recruit_state',
+			'country'       => '_zoho_recruit_country',
+			'remote'        => '_zoho_recruit_remote',
+			'industry'      => '_zoho_recruit_industry',
+			'client'        => '_zoho_recruit_client',
+			'positions'     => '_zoho_recruit_positions',
+			'salary'        => '_zoho_recruit_salary',
+			'posted_date'   => '_zoho_recruit_posted_date',
+			'closing_date'  => '_zoho_recruit_closing_date',
 			'modified_time' => '_zoho_recruit_modified_time',
-			'zoho_id'      => '_zoho_recruit_id',
+			'zoho_id'       => '_zoho_recruit_id',
 		);
 	}
 
@@ -385,7 +385,7 @@ class Post_Type {
 	 * @param string $original_slug Requested slug.
 	 * @return string
 	 */
-	public static function preserve_slug( $slug, $post_id, $post_status, $post_type, $post_parent, $original_slug ) {
+	public static function preserve_slug( $slug, $post_id, $post_status, $post_type, $post_parent, $original_slug ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter -- Signature is fixed by the wp_unique_post_slug filter.
 		if ( self::POST_TYPE !== $post_type ) {
 			return $slug;
 		}

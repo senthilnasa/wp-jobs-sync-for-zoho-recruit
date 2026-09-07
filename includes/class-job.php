@@ -118,17 +118,14 @@ class Job {
 	/**
 	 * Create or update the job for a Zoho record.
 	 *
+	 * The `$context` array carries `record` (the raw Zoho record), `status` (the
+	 * normalised job status) and `dry_run` (when true nothing is written).
+	 *
 	 * @param string $zoho_id Zoho record ID.
 	 * @param array  $payload Mapped payload from Field_Mapper::map().
-	 * @param array  $context {
-	 *     @type array  $record   Raw Zoho record.
-	 *     @type string $status   Normalised job status.
-	 *     @type bool   $dry_run  When true nothing is written.
-	 * }
-	 * @return array|\WP_Error {
-	 *     @type int    $post_id Resulting post ID.
-	 *     @type string $action  created|updated|unchanged.
-	 * }
+	 * @param array  $context Sync context, described above.
+	 * @return array|\WP_Error Array with `post_id` and `action`
+	 *                         (created|updated|unchanged), or an error.
 	 */
 	public static function upsert( $zoho_id, array $payload, array $context = array() ) {
 		$zoho_id = self::sanitize_zoho_id( $zoho_id );
@@ -246,11 +243,11 @@ class Job {
 	/**
 	 * Write mapped meta values.
 	 *
-	 * @param int   $post_id   Post ID.
-	 * @param array $payload   Mapped payload.
+	 * @param int    $post_id   Post ID.
+	 * @param array  $payload   Mapped payload.
 	 * @param string $mode     Conflict mode.
-	 * @param array $hashes    Stored hashes.
-	 * @param bool  $is_create Whether the post was just created.
+	 * @param array  $hashes    Stored hashes.
+	 * @param bool   $is_create Whether the post was just created.
 	 * @return void
 	 */
 	private static function write_meta( $post_id, array $payload, $mode, array $hashes, $is_create ) {
@@ -331,13 +328,14 @@ class Job {
 	/**
 	 * Find or create a single term.
 	 *
-	 * @param string $name     Term name.
-	 * @param string $taxonomy Taxonomy.
-	 * @param int    $parent   Parent term ID.
+	 * @param string $name      Term name.
+	 * @param string $taxonomy  Taxonomy.
+	 * @param int    $parent_id Parent term ID.
 	 * @return int Term ID, or 0 on failure.
 	 */
-	public static function ensure_term( $name, $taxonomy, $parent = 0 ) {
-		$name = trim( wp_strip_all_tags( (string) $name ) );
+	public static function ensure_term( $name, $taxonomy, $parent_id = 0 ) {
+		$name      = trim( wp_strip_all_tags( (string) $name ) );
+		$parent_id = (int) $parent_id;
 
 		if ( '' === $name || ! taxonomy_exists( $taxonomy ) ) {
 			return 0;
@@ -346,15 +344,15 @@ class Job {
 		$existing = get_term_by( 'name', $name, $taxonomy );
 
 		if ( $existing instanceof \WP_Term ) {
-			if ( 0 === (int) $parent || (int) $existing->parent === (int) $parent ) {
+			if ( 0 === $parent_id || (int) $existing->parent === $parent_id ) {
 				return (int) $existing->term_id;
 			}
 		}
 
 		$args = array();
 
-		if ( $parent > 0 && is_taxonomy_hierarchical( $taxonomy ) ) {
-			$args['parent'] = (int) $parent;
+		if ( $parent_id > 0 && is_taxonomy_hierarchical( $taxonomy ) ) {
+			$args['parent'] = $parent_id;
 		}
 
 		$result = wp_insert_term( $name, $taxonomy, $args );
@@ -558,9 +556,9 @@ class Job {
 		return ! empty( $admins ) ? (int) $admins[0] : 0;
 	}
 
-	/* ---------------------------------------------------------------------
-	 * Status transitions
-	 * ------------------------------------------------------------------ */
+	// ----------------------------------------------------------------------
+	// Status transitions
+	// ----------------------------------------------------------------------
 
 	/**
 	 * Mark a job inactive.
@@ -718,9 +716,9 @@ class Job {
 		);
 	}
 
-	/* ---------------------------------------------------------------------
-	 * Readers
-	 * ------------------------------------------------------------------ */
+	// ----------------------------------------------------------------------
+	// Readers
+	// ----------------------------------------------------------------------
 
 	/**
 	 * Whether a job was created by hand rather than imported.
@@ -947,9 +945,9 @@ class Job {
 		return $counts;
 	}
 
-	/* ---------------------------------------------------------------------
-	 * Locking
-	 * ------------------------------------------------------------------ */
+	// ----------------------------------------------------------------------
+	// Locking
+	// ----------------------------------------------------------------------
 
 	/**
 	 * Acquire a short-lived named lock.

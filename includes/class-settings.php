@@ -106,17 +106,17 @@ class Settings {
 			'only_published'          => true,
 			'published_field'         => 'Publish_in_Career_Website',
 			'status_map'              => array(
-				'In-progress'    => 'active',
-				'Active'         => 'active',
-				'Submitted'      => 'active',
-				'Approved'       => 'active',
-				'On-Hold'        => 'inactive',
-				'Inactive'       => 'inactive',
+				'In-progress'          => 'active',
+				'Active'               => 'active',
+				'Submitted'            => 'active',
+				'Approved'             => 'active',
+				'On-Hold'              => 'inactive',
+				'Inactive'             => 'inactive',
 				'Waiting for approval' => 'draft',
-				'Cancelled'      => 'closed',
-				'Closed'         => 'closed',
-				'Filled'         => 'closed',
-				'Closed-Won'     => 'closed',
+				'Cancelled'            => 'closed',
+				'Closed'               => 'closed',
+				'Filled'               => 'closed',
+				'Closed-Won'           => 'closed',
 			),
 			'default_status'          => 'active',
 			'expire_action'           => 'inactive',
@@ -217,18 +217,18 @@ class Settings {
 	/**
 	 * Get a single setting.
 	 *
-	 * @param string $key     Setting key.
-	 * @param mixed  $default Fallback when the key is unknown.
+	 * @param string $key      Setting key.
+	 * @param mixed  $fallback Value returned when the key is unknown.
 	 * @return mixed
 	 */
-	public static function get( $key, $default = null ) {
+	public static function get( $key, $fallback = null ) {
 		$all = self::all();
 
 		if ( array_key_exists( $key, $all ) ) {
 			return $all[ $key ];
 		}
 
-		return $default;
+		return $fallback;
 	}
 
 	/**
@@ -402,7 +402,7 @@ class Settings {
 		}
 
 		if ( isset( $input['notify_email'] ) ) {
-			$email                = sanitize_email( (string) $input['notify_email'] );
+			$email               = sanitize_email( (string) $input['notify_email'] );
 			$out['notify_email'] = is_email( $email ) ? $email : '';
 		}
 

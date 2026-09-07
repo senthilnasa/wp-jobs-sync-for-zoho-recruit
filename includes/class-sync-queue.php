@@ -171,14 +171,16 @@ class Sync_Queue {
 
 		$table = self::table();
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is internal.
-		return (array) $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT * FROM {$table} ORDER BY id DESC LIMIT %d OFFSET %d",
-				max( 1, min( 200, (int) $limit ) ),
-				max( 0, (int) $offset )
-			)
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name comes from $wpdb->prefix, never from a request.
+		$sql = $wpdb->prepare(
+			"SELECT * FROM {$table} ORDER BY id DESC LIMIT %d OFFSET %d",
+			max( 1, min( 200, (int) $limit ) ),
+			max( 0, (int) $offset )
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- $sql came from $wpdb->prepare() above; custom table, intentionally read fresh.
+		return (array) $wpdb->get_results( $sql );
 	}
 
 	/**
@@ -381,9 +383,9 @@ class Sync_Queue {
 		);
 	}
 
-	/* ---------------------------------------------------------------------
-	 * Batch scheduling
-	 * ------------------------------------------------------------------ */
+	// ----------------------------------------------------------------------
+	// Batch scheduling
+	// ----------------------------------------------------------------------
 
 	/**
 	 * Schedule the next batch for a run.
@@ -441,9 +443,9 @@ class Sync_Queue {
 		return true;
 	}
 
-	/* ---------------------------------------------------------------------
-	 * Locking
-	 * ------------------------------------------------------------------ */
+	// ----------------------------------------------------------------------
+	// Locking
+	// ----------------------------------------------------------------------
 
 	/**
 	 * Try to take the global sync lock.

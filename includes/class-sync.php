@@ -328,7 +328,7 @@ class Sync {
 				break;
 			}
 
-			$record = is_array( $records[ $index ] ) ? $records[ $index ] : array();
+			$record  = is_array( $records[ $index ] ) ? $records[ $index ] : array();
 			$zoho_id = Job::sanitize_zoho_id( $record['id'] ?? '' );
 
 			if ( '' !== $zoho_id ) {
@@ -644,9 +644,9 @@ class Sync {
 		return $date->getTimestamp() < time();
 	}
 
-	/* ---------------------------------------------------------------------
-	 * Finalization
-	 * ------------------------------------------------------------------ */
+	// ----------------------------------------------------------------------
+	// Finalization
+	// ----------------------------------------------------------------------
 
 	/**
 	 * Run the closing stage of a sync.
@@ -724,7 +724,7 @@ class Sync {
 	 * @return int|\WP_Error Number deactivated, or WP_Error when blocked.
 	 */
 	private function deactivate_missing( $run, $dry_run ) {
-		$seen    = Sync_Queue::get_seen( (int) $run->id );
+		$seen     = Sync_Queue::get_seen( (int) $run->id );
 		$existing = $this->get_synced_job_map();
 
 		if ( empty( $existing ) ) {
@@ -895,9 +895,9 @@ class Sync {
 		return $map;
 	}
 
-	/* ---------------------------------------------------------------------
-	 * Expiry
-	 * ------------------------------------------------------------------ */
+	// ----------------------------------------------------------------------
+	// Expiry
+	// ----------------------------------------------------------------------
 
 	/**
 	 * Mark active jobs whose closing date has passed as expired.
@@ -912,9 +912,13 @@ class Sync {
 			array(
 				'post_type'      => Post_Type::POST_TYPE,
 				'post_status'    => array( 'publish', 'private', 'draft' ),
+				// This runs on cron over an ID-only, unpaginated query; a smaller
+				// page would just mean more round trips for the same work.
+				// phpcs:ignore WordPress.WP.PostsPerPage.posts_per_page_posts_per_page -- Bounded batch for a cron task.
 				'posts_per_page' => 200,
 				'fields'         => 'ids',
 				'no_found_rows'  => true,
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Closing dates only exist in meta.
 				'meta_query'     => array(
 					'relation' => 'AND',
 					array(
@@ -962,9 +966,9 @@ class Sync {
 		return $count;
 	}
 
-	/* ---------------------------------------------------------------------
-	 * Single record refresh
-	 * ------------------------------------------------------------------ */
+	// ----------------------------------------------------------------------
+	// Single record refresh
+	// ----------------------------------------------------------------------
 
 	/**
 	 * Re-fetch and rewrite a single job from Zoho.
@@ -1030,9 +1034,9 @@ class Sync {
 		);
 	}
 
-	/* ---------------------------------------------------------------------
-	 * State helpers
-	 * ------------------------------------------------------------------ */
+	// ----------------------------------------------------------------------
+	// State helpers
+	// ----------------------------------------------------------------------
 
 	/**
 	 * Mark a run as failed and notify.
@@ -1107,11 +1111,11 @@ class Sync {
 		$last_success = Sync_Queue::get_last_successful();
 
 		return array(
-			'last_run'      => ! empty( $last_run ) ? Sync_Queue::stats( $last_run[0] ) : null,
-			'last_success'  => $last_success ? Sync_Queue::stats( $last_success ) : null,
+			'last_run'          => ! empty( $last_run ) ? Sync_Queue::stats( $last_run[0] ) : null,
+			'last_success'      => $last_success ? Sync_Queue::stats( $last_success ) : null,
 			'last_success_time' => isset( $state['last_success'] ) ? (int) $state['last_success'] : 0,
-			'active'        => Sync_Queue::get_active() ? Sync_Queue::stats( Sync_Queue::get_active() ) : null,
-			'next_scheduled' => (int) wp_next_scheduled( Cron::SYNC_HOOK ),
+			'active'            => Sync_Queue::get_active() ? Sync_Queue::stats( Sync_Queue::get_active() ) : null,
+			'next_scheduled'    => (int) wp_next_scheduled( Cron::SYNC_HOOK ),
 		);
 	}
 

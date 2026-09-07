@@ -162,36 +162,126 @@ class Field_Metadata {
 	 */
 	public static function default_fields() {
 		$fields = array(
-			'Posting_Title'      => array( 'label' => 'Posting Title', 'type' => 'text' ),
-			'Job_Opening_ID'     => array( 'label' => 'Job Opening ID', 'type' => 'text' ),
-			'Job_Description'    => array( 'label' => 'Job Description', 'type' => 'textarea' ),
-			'Job_Summary'        => array( 'label' => 'Job Summary', 'type' => 'textarea' ),
-			'Requirements'       => array( 'label' => 'Requirements', 'type' => 'textarea' ),
-			'Job_Opening_Status' => array( 'label' => 'Job Opening Status', 'type' => 'picklist' ),
-			'Department_Name'    => array( 'label' => 'Department', 'type' => 'lookup' ),
-			'Industry'           => array( 'label' => 'Industry', 'type' => 'picklist' ),
-			'Job_Type'           => array( 'label' => 'Job Type', 'type' => 'picklist' ),
-			'Work_Experience'    => array( 'label' => 'Work Experience', 'type' => 'picklist' ),
-			'Salary'             => array( 'label' => 'Salary', 'type' => 'currency' ),
-			'City'               => array( 'label' => 'City', 'type' => 'text' ),
-			'State'              => array( 'label' => 'State', 'type' => 'text' ),
-			'Country'            => array( 'label' => 'Country', 'type' => 'text' ),
-			'Zip_Code'           => array( 'label' => 'Zip Code', 'type' => 'text' ),
-			'Remote_Job'         => array( 'label' => 'Remote Job', 'type' => 'boolean' ),
-			'Work_Mode'          => array( 'label' => 'Work Mode', 'type' => 'picklist' ),
-			'Number_of_Positions' => array( 'label' => 'Number of Positions', 'type' => 'integer' ),
-			'Date_Opened'        => array( 'label' => 'Date Opened', 'type' => 'date' ),
-			'Target_Date'        => array( 'label' => 'Target Date', 'type' => 'date' ),
-			'Expected_Closing_Date' => array( 'label' => 'Expected Closing Date', 'type' => 'date' ),
-			'Created_Time'       => array( 'label' => 'Created Time', 'type' => 'datetime' ),
-			'Modified_Time'      => array( 'label' => 'Modified Time', 'type' => 'datetime' ),
-			'Client_Name'        => array( 'label' => 'Client Name', 'type' => 'lookup' ),
-			'Account_Manager'    => array( 'label' => 'Account Manager', 'type' => 'ownerlookup' ),
-			'Assigned_Recruiter' => array( 'label' => 'Assigned Recruiter', 'type' => 'multiselectlookup' ),
-			'Publish_in_Career_Website' => array( 'label' => 'Publish in Career Website', 'type' => 'boolean' ),
-			'Job_Opening_Name'   => array( 'label' => 'Job Opening Name', 'type' => 'text' ),
-			'Skill_Set'          => array( 'label' => 'Skill Set', 'type' => 'textarea' ),
-			'Website'            => array( 'label' => 'Website', 'type' => 'website' ),
+			'Posting_Title'             => array(
+				'label' => 'Posting Title',
+				'type'  => 'text',
+			),
+			'Job_Opening_ID'            => array(
+				'label' => 'Job Opening ID',
+				'type'  => 'text',
+			),
+			'Job_Description'           => array(
+				'label' => 'Job Description',
+				'type'  => 'textarea',
+			),
+			'Job_Summary'               => array(
+				'label' => 'Job Summary',
+				'type'  => 'textarea',
+			),
+			'Requirements'              => array(
+				'label' => 'Requirements',
+				'type'  => 'textarea',
+			),
+			'Job_Opening_Status'        => array(
+				'label' => 'Job Opening Status',
+				'type'  => 'picklist',
+			),
+			'Department_Name'           => array(
+				'label' => 'Department',
+				'type'  => 'lookup',
+			),
+			'Industry'                  => array(
+				'label' => 'Industry',
+				'type'  => 'picklist',
+			),
+			'Job_Type'                  => array(
+				'label' => 'Job Type',
+				'type'  => 'picklist',
+			),
+			'Work_Experience'           => array(
+				'label' => 'Work Experience',
+				'type'  => 'picklist',
+			),
+			'Salary'                    => array(
+				'label' => 'Salary',
+				'type'  => 'currency',
+			),
+			'City'                      => array(
+				'label' => 'City',
+				'type'  => 'text',
+			),
+			'State'                     => array(
+				'label' => 'State',
+				'type'  => 'text',
+			),
+			'Country'                   => array(
+				'label' => 'Country',
+				'type'  => 'text',
+			),
+			'Zip_Code'                  => array(
+				'label' => 'Zip Code',
+				'type'  => 'text',
+			),
+			'Remote_Job'                => array(
+				'label' => 'Remote Job',
+				'type'  => 'boolean',
+			),
+			'Work_Mode'                 => array(
+				'label' => 'Work Mode',
+				'type'  => 'picklist',
+			),
+			'Number_of_Positions'       => array(
+				'label' => 'Number of Positions',
+				'type'  => 'integer',
+			),
+			'Date_Opened'               => array(
+				'label' => 'Date Opened',
+				'type'  => 'date',
+			),
+			'Target_Date'               => array(
+				'label' => 'Target Date',
+				'type'  => 'date',
+			),
+			'Expected_Closing_Date'     => array(
+				'label' => 'Expected Closing Date',
+				'type'  => 'date',
+			),
+			'Created_Time'              => array(
+				'label' => 'Created Time',
+				'type'  => 'datetime',
+			),
+			'Modified_Time'             => array(
+				'label' => 'Modified Time',
+				'type'  => 'datetime',
+			),
+			'Client_Name'               => array(
+				'label' => 'Client Name',
+				'type'  => 'lookup',
+			),
+			'Account_Manager'           => array(
+				'label' => 'Account Manager',
+				'type'  => 'ownerlookup',
+			),
+			'Assigned_Recruiter'        => array(
+				'label' => 'Assigned Recruiter',
+				'type'  => 'multiselectlookup',
+			),
+			'Publish_in_Career_Website' => array(
+				'label' => 'Publish in Career Website',
+				'type'  => 'boolean',
+			),
+			'Job_Opening_Name'          => array(
+				'label' => 'Job Opening Name',
+				'type'  => 'text',
+			),
+			'Skill_Set'                 => array(
+				'label' => 'Skill Set',
+				'type'  => 'textarea',
+			),
+			'Website'                   => array(
+				'label' => 'Website',
+				'type'  => 'website',
+			),
 		);
 
 		$normalised = array();

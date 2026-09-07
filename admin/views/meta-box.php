@@ -70,7 +70,22 @@ $jszr_format = get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
 		<?php if ( current_user_can( Plugin::capability() ) ) : ?>
 			<p>
 				<a class="button button-secondary"
-					href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'action' => 'jszr_resync_job', 'post' => (int) $post->ID ), admin_url( 'admin-post.php' ) ), 'jszr_resync_job' ) ); ?>">
+					href="
+					<?php
+					echo esc_url(
+						wp_nonce_url(
+							add_query_arg(
+								array(
+									'action' => 'jszr_resync_job',
+									'post'   => (int) $post->ID,
+								),
+								admin_url( 'admin-post.php' )
+							),
+							'jszr_resync_job'
+						)
+					);
+					?>
+							">
 					<?php esc_html_e( 'Resync from Zoho', 'jobs-sync-for-zoho-recruit' ); ?>
 				</a>
 			</p>

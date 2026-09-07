@@ -55,6 +55,7 @@ class Encryption {
 				$nonce  = random_bytes( SODIUM_CRYPTO_SECRETBOX_NONCEBYTES );
 				$cipher = sodium_crypto_secretbox( $plaintext, $nonce, $key );
 
+				// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- Encoding binary ciphertext for storage in a text option, not obfuscating code.
 				return self::PREFIX_SODIUM . base64_encode( $nonce . $cipher );
 			} catch ( \Exception $e ) {
 				// Fall through to OpenSSL.
@@ -79,6 +80,7 @@ class Encryption {
 
 			$mac = hash_hmac( 'sha256', $iv . $cipher, $key, true );
 
+			// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- Encoding binary ciphertext for storage in a text option, not obfuscating code.
 			return self::PREFIX_OPENSSL . base64_encode( $iv . $mac . $cipher );
 		}
 
@@ -109,6 +111,7 @@ class Encryption {
 				return '';
 			}
 
+			// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- Encoding binary ciphertext for storage in a text option, not obfuscating code.
 			$raw = base64_decode( substr( $ciphertext, strlen( self::PREFIX_SODIUM ) ), true );
 
 			if ( false === $raw || strlen( $raw ) <= SODIUM_CRYPTO_SECRETBOX_NONCEBYTES ) {
@@ -132,6 +135,7 @@ class Encryption {
 				return '';
 			}
 
+			// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode -- Encoding binary ciphertext for storage in a text option, not obfuscating code.
 			$raw = base64_decode( substr( $ciphertext, strlen( self::PREFIX_OPENSSL ) ), true );
 
 			if ( false === $raw ) {

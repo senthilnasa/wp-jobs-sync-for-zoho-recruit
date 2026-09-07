@@ -84,7 +84,7 @@ class JSZR_REST_API_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * per_page above the configured maximum is rejected.
+	 * A per_page above the configured maximum is rejected.
 	 */
 	public function test_per_page_is_capped() {
 		Settings::update( array( 'rest_max_per_page' => 50 ) );

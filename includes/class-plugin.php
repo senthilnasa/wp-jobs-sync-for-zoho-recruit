@@ -55,13 +55,13 @@ class Plugin {
 	private function boot() {
 		add_action( 'init', array( $this, 'load_textdomain' ), 0 );
 
-		$this->components['logger']    = new Logger();
-		$this->components['auth']      = new Zoho_Auth();
-		$this->components['api']       = new Zoho_API( $this->components['auth'] );
-		$this->components['metadata']  = new Field_Metadata( $this->components['api'] );
-		$this->components['mapper']    = new Field_Mapper();
-		$this->components['queue']     = new Sync_Queue();
-		$this->components['sync']      = new Sync( $this->components['api'], $this->components['mapper'], $this->components['queue'], $this->components['logger'] );
+		$this->components['logger']   = new Logger();
+		$this->components['auth']     = new Zoho_Auth();
+		$this->components['api']      = new Zoho_API( $this->components['auth'] );
+		$this->components['metadata'] = new Field_Metadata( $this->components['api'] );
+		$this->components['mapper']   = new Field_Mapper();
+		$this->components['queue']    = new Sync_Queue();
+		$this->components['sync']     = new Sync( $this->components['api'], $this->components['mapper'], $this->components['queue'], $this->components['logger'] );
 
 		Post_Type::init();
 		Templates::init();
@@ -202,7 +202,7 @@ class Plugin {
 	public function maybe_upgrade() {
 		$stored = (string) get_option( 'jszr_db_version', '' );
 
-		if ( $stored === DB_VERSION ) {
+		if ( DB_VERSION === $stored ) {
 			return;
 		}
 

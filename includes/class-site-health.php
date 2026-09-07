@@ -287,33 +287,33 @@ class Site_Health {
 		$info['jszr'] = array(
 			'label'  => __( 'Jobs Sync for Zoho Recruit', 'jobs-sync-for-zoho-recruit' ),
 			'fields' => array(
-				'version'        => array(
+				'version'     => array(
 					'label' => __( 'Plugin version', 'jobs-sync-for-zoho-recruit' ),
 					'value' => VERSION,
 				),
-				'connected'      => array(
+				'connected'   => array(
 					'label' => __( 'Connected', 'jobs-sync-for-zoho-recruit' ),
 					'value' => $auth->is_connected() ? __( 'Yes', 'jobs-sync-for-zoho-recruit' ) : __( 'No', 'jobs-sync-for-zoho-recruit' ),
 				),
-				'data_center'    => array(
+				'data_center' => array(
 					'label' => __( 'Data center', 'jobs-sync-for-zoho-recruit' ),
 					'value' => Settings::data_center(),
 				),
-				'module'         => array(
+				'module'      => array(
 					'label' => __( 'Zoho module', 'jobs-sync-for-zoho-recruit' ),
 					'value' => plugin()->api()->module(),
 				),
-				'encryption'     => array(
+				'encryption'  => array(
 					'label' => __( 'Secret encryption', 'jobs-sync-for-zoho-recruit' ),
 					'value' => Encryption::is_available() ? __( 'Available', 'jobs-sync-for-zoho-recruit' ) : __( 'Unavailable', 'jobs-sync-for-zoho-recruit' ),
 				),
-				'last_sync'      => array(
+				'last_sync'   => array(
 					'label' => __( 'Last successful sync', 'jobs-sync-for-zoho-recruit' ),
 					'value' => $state['last_success_time']
 						? wp_date( 'c', $state['last_success_time'] )
 						: __( 'Never', 'jobs-sync-for-zoho-recruit' ),
 				),
-				'job_counts'     => array(
+				'job_counts'  => array(
 					'label' => __( 'Job counts', 'jobs-sync-for-zoho-recruit' ),
 					'value' => wp_json_encode( Job::counts() ),
 				),

@@ -146,9 +146,9 @@ class Admin {
 		add_action( 'add_meta_boxes', array( $this, 'register_meta_box' ) );
 	}
 
-	/* ---------------------------------------------------------------------
-	 * Menu and assets
-	 * ------------------------------------------------------------------ */
+	// ----------------------------------------------------------------------
+	// Menu and assets
+	// ----------------------------------------------------------------------
 
 	/**
 	 * Register admin menu pages.
@@ -285,9 +285,9 @@ class Admin {
 		return $links;
 	}
 
-	/* ---------------------------------------------------------------------
-	 * Settings registration
-	 * ------------------------------------------------------------------ */
+	// ----------------------------------------------------------------------
+	// Settings registration
+	// ----------------------------------------------------------------------
 
 	/**
 	 * Register the settings option.
@@ -307,9 +307,9 @@ class Admin {
 		);
 	}
 
-	/* ---------------------------------------------------------------------
-	 * Screens
-	 * ------------------------------------------------------------------ */
+	// ----------------------------------------------------------------------
+	// Screens
+	// ----------------------------------------------------------------------
 
 	/**
 	 * Render the dashboard screen.
@@ -406,12 +406,12 @@ class Admin {
 		$this->view(
 			'logs.php',
 			array(
-				'runs'      => Sync_Queue::get_recent( $per_page, ( $paged - 1 ) * $per_page ),
-				'total'     => Sync_Queue::count_runs(),
-				'paged'     => $paged,
-				'per_page'  => $per_page,
-				'run_id'    => $run_id,
-				'entries'   => $run_id > 0
+				'runs'     => Sync_Queue::get_recent( $per_page, ( $paged - 1 ) * $per_page ),
+				'total'    => Sync_Queue::count_runs(),
+				'paged'    => $paged,
+				'per_page' => $per_page,
+				'run_id'   => $run_id,
+				'entries'  => $run_id > 0
 					? Logger::get_entries(
 						array(
 							'run_id' => $run_id,
@@ -454,9 +454,9 @@ class Admin {
 		}
 	}
 
-	/* ---------------------------------------------------------------------
-	 * Notices
-	 * ------------------------------------------------------------------ */
+	// ----------------------------------------------------------------------
+	// Notices
+	// ----------------------------------------------------------------------
 
 	/**
 	 * Render one-off and persistent notices.
@@ -481,7 +481,7 @@ class Admin {
 			);
 		}
 
-		$screen = get_current_screen();
+		$screen           = get_current_screen();
 		$on_plugin_screen = $screen && false !== strpos( (string) $screen->id, 'jszr-' );
 
 		if ( $this->auth->is_circuit_open() ) {
@@ -534,20 +534,6 @@ class Admin {
 	}
 
 	/**
-	 * Verify capability and nonce for an admin-post handler.
-	 *
-	 * @param string $action Nonce action.
-	 * @return void
-	 */
-	private function verify( $action ) {
-		if ( ! current_user_can( Plugin::capability() ) ) {
-			wp_die( esc_html__( 'You do not have permission to perform this action.', 'jobs-sync-for-zoho-recruit' ), 403 );
-		}
-
-		check_admin_referer( $action );
-	}
-
-	/**
 	 * Redirect back to a plugin screen.
 	 *
 	 * @param string $page Page slug.
@@ -559,9 +545,9 @@ class Admin {
 		exit;
 	}
 
-	/* ---------------------------------------------------------------------
-	 * Actions
-	 * ------------------------------------------------------------------ */
+	// ----------------------------------------------------------------------
+	// Actions
+	// ----------------------------------------------------------------------
 
 	/**
 	 * Start a sync from the dashboard.
@@ -569,7 +555,7 @@ class Admin {
 	 * @return void
 	 */
 	public function handle_start_sync() {
-		$this->verify( 'jszr_start_sync' );
+		jszr_verify_admin_request( 'jszr_start_sync' );
 
 		$type    = isset( $_POST['sync_type'] ) ? sanitize_key( wp_unslash( $_POST['sync_type'] ) ) : 'incremental';
 		$dry_run = ! empty( $_POST['dry_run'] );
@@ -602,7 +588,7 @@ class Admin {
 	 * @return void
 	 */
 	public function handle_cancel_sync() {
-		$this->verify( 'jszr_cancel_sync' );
+		jszr_verify_admin_request( 'jszr_cancel_sync' );
 
 		$cancelled = Sync_Queue::cancel_active();
 
@@ -622,7 +608,7 @@ class Admin {
 	 * @return void
 	 */
 	public function handle_test_connection() {
-		$this->verify( 'jszr_test_connection' );
+		jszr_verify_admin_request( 'jszr_test_connection' );
 
 		$result = $this->api->test_connection();
 
@@ -649,7 +635,7 @@ class Admin {
 	 * @return void
 	 */
 	public function handle_save_credentials() {
-		$this->verify( 'jszr_save_credentials' );
+		jszr_verify_admin_request( 'jszr_save_credentials' );
 
 		$client_id     = isset( $_POST['jszr_client_id'] ) ? sanitize_text_field( wp_unslash( $_POST['jszr_client_id'] ) ) : '';
 		$client_secret = isset( $_POST['jszr_client_secret'] ) ? sanitize_text_field( wp_unslash( $_POST['jszr_client_secret'] ) ) : '';
@@ -677,7 +663,7 @@ class Admin {
 	 * @return void
 	 */
 	public function handle_save_mapping() {
-		$this->verify( 'jszr_save_mapping' );
+		jszr_verify_admin_request( 'jszr_save_mapping' );
 
 		$rows = array();
 
@@ -710,7 +696,7 @@ class Admin {
 	 * @return void
 	 */
 	public function handle_reset_mapping() {
-		$this->verify( 'jszr_reset_mapping' );
+		jszr_verify_admin_request( 'jszr_reset_mapping' );
 
 		Field_Mapper::reset_mapping();
 
@@ -724,7 +710,7 @@ class Admin {
 	 * @return void
 	 */
 	public function handle_import_mapping() {
-		$this->verify( 'jszr_import_mapping' );
+		jszr_verify_admin_request( 'jszr_import_mapping' );
 
 		$json = $this->read_uploaded_json( 'jszr_mapping_file' );
 
@@ -750,7 +736,7 @@ class Admin {
 	 * @return void
 	 */
 	public function handle_export_mapping() {
-		$this->verify( 'jszr_export_mapping' );
+		jszr_verify_admin_request( 'jszr_export_mapping' );
 
 		nocache_headers();
 		header( 'Content-Type: application/json; charset=utf-8' );
@@ -766,7 +752,7 @@ class Admin {
 	 * @return void
 	 */
 	public function handle_export_settings() {
-		$this->verify( 'jszr_export_settings' );
+		jszr_verify_admin_request( 'jszr_export_settings' );
 
 		$settings = Settings::all();
 
@@ -795,7 +781,7 @@ class Admin {
 	 * @return void
 	 */
 	public function handle_import_settings() {
-		$this->verify( 'jszr_import_settings' );
+		jszr_verify_admin_request( 'jszr_import_settings' );
 
 		$json = $this->read_uploaded_json( 'jszr_settings_file' );
 
@@ -827,21 +813,27 @@ class Admin {
 	/**
 	 * Read an uploaded JSON file safely.
 	 *
+	 * Only ever called from an admin-post handler that has already run
+	 * jszr_verify_admin_request(), so the nonce and capability are settled by the
+	 * time execution reaches here.
+	 *
 	 * @param string $field File input name.
 	 * @return string|\WP_Error
 	 */
 	private function read_uploaded_json( $field ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Verified by the calling handler.
 		if ( empty( $_FILES[ $field ]['tmp_name'] ) ) {
 			return new \WP_Error( 'jszr_no_file', __( 'Choose a JSON file to upload.', 'jobs-sync-for-zoho-recruit' ) );
 		}
 
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Path is validated below.
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification.Missing -- Path is validated below; nonce verified by the calling handler.
 		$tmp = isset( $_FILES[ $field ]['tmp_name'] ) ? sanitize_text_field( wp_unslash( $_FILES[ $field ]['tmp_name'] ) ) : '';
 
 		if ( '' === $tmp || ! is_uploaded_file( $tmp ) ) {
 			return new \WP_Error( 'jszr_bad_upload', __( 'The upload could not be read.', 'jobs-sync-for-zoho-recruit' ) );
 		}
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Verified by the calling handler.
 		$size = isset( $_FILES[ $field ]['size'] ) ? (int) $_FILES[ $field ]['size'] : 0;
 
 		if ( $size <= 0 || $size > MB_IN_BYTES ) {
@@ -868,7 +860,7 @@ class Admin {
 	 * @return void
 	 */
 	public function handle_clear_logs() {
-		$this->verify( 'jszr_clear_logs' );
+		jszr_verify_admin_request( 'jszr_clear_logs' );
 
 		Logger::clear();
 		Sync_Queue::clear();
@@ -883,7 +875,7 @@ class Admin {
 	 * @return void
 	 */
 	public function handle_refresh_fields() {
-		$this->verify( 'jszr_refresh_fields' );
+		jszr_verify_admin_request( 'jszr_refresh_fields' );
 
 		$result = $this->metadata->refresh();
 
@@ -909,7 +901,7 @@ class Admin {
 	 * @return void
 	 */
 	public function handle_regenerate_webhook() {
-		$this->verify( 'jszr_regenerate_webhook' );
+		jszr_verify_admin_request( 'jszr_regenerate_webhook' );
 
 		Webhook::regenerate_secret();
 
@@ -923,7 +915,7 @@ class Admin {
 	 * @return void
 	 */
 	public function handle_resync_job() {
-		$this->verify( 'jszr_resync_job' );
+		jszr_verify_admin_request( 'jszr_resync_job' );
 
 		$post_id = isset( $_REQUEST['post'] ) ? (int) $_REQUEST['post'] : 0;
 
@@ -951,9 +943,9 @@ class Admin {
 		exit;
 	}
 
-	/* ---------------------------------------------------------------------
-	 * Job list table
-	 * ------------------------------------------------------------------ */
+	// ----------------------------------------------------------------------
+	// Job list table
+	// ----------------------------------------------------------------------
 
 	/**
 	 * Add plugin columns.
@@ -1191,9 +1183,9 @@ class Admin {
 		return $actions;
 	}
 
-	/* ---------------------------------------------------------------------
-	 * Job edit screen
-	 * ------------------------------------------------------------------ */
+	// ----------------------------------------------------------------------
+	// Job edit screen
+	// ----------------------------------------------------------------------
 
 	/**
 	 * Register the Zoho details metabox.

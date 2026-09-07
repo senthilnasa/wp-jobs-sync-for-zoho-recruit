@@ -14,12 +14,12 @@ if ( ! function_exists( 'jszr_get_setting' ) ) {
 	/**
 	 * Read a single plugin setting.
 	 *
-	 * @param string $key     Setting key.
-	 * @param mixed  $default Value returned when the setting is not stored.
+	 * @param string $key      Setting key.
+	 * @param mixed  $fallback Value returned when the setting is not stored.
 	 * @return mixed
 	 */
-	function jszr_get_setting( $key, $default = null ) {
-		return \JobsSyncForZohoRecruit\Settings::get( $key, $default );
+	function jszr_get_setting( $key, $fallback = null ) {
+		return \JobsSyncForZohoRecruit\Settings::get( $key, $fallback );
 	}
 }
 
@@ -31,6 +31,31 @@ if ( ! function_exists( 'jszr_capability' ) ) {
 	 */
 	function jszr_capability() {
 		return \JobsSyncForZohoRecruit\Plugin::capability();
+	}
+}
+
+if ( ! function_exists( 'jszr_verify_admin_request' ) ) {
+	/**
+	 * Guard an admin-post request handler.
+	 *
+	 * Every one of the plugin's `admin_post_jszr_*` handlers calls this before it
+	 * reads a single request value: it checks the plugin capability and then the
+	 * nonce, and stops the request outright when either fails. It is a global
+	 * function rather than a class method so static analysis can see the nonce
+	 * check at the call site.
+	 *
+	 * @param string $action Nonce action name.
+	 * @return void
+	 */
+	function jszr_verify_admin_request( $action ) {
+		if ( ! current_user_can( jszr_capability() ) ) {
+			wp_die(
+				esc_html__( 'You do not have permission to perform this action.', 'jobs-sync-for-zoho-recruit' ),
+				403
+			);
+		}
+
+		check_admin_referer( $action );
 	}
 }
 

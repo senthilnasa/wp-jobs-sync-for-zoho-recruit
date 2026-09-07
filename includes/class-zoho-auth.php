@@ -56,9 +56,9 @@ class Zoho_Auth {
 		add_action( 'admin_post_jszr_oauth_disconnect', array( $this, 'handle_disconnect' ) );
 	}
 
-	/* ---------------------------------------------------------------------
-	 * Credentials
-	 * ------------------------------------------------------------------ */
+	// ----------------------------------------------------------------------
+	// Credentials
+	// ----------------------------------------------------------------------
 
 	/**
 	 * Whether the client ID comes from wp-config.php.
@@ -211,9 +211,9 @@ class Zoho_Auth {
 		return substr( $value, 0, 4 ) . str_repeat( '*', 12 ) . substr( $value, -4 );
 	}
 
-	/* ---------------------------------------------------------------------
-	 * Authorization flow
-	 * ------------------------------------------------------------------ */
+	// ----------------------------------------------------------------------
+	// Authorization flow
+	// ----------------------------------------------------------------------
 
 	/**
 	 * The exact redirect URI that must be registered in the Zoho console.
@@ -308,6 +308,9 @@ class Zoho_Auth {
 			$this->redirect_with_notice( 'error', $url->get_error_message() );
 		}
 
+		// The destination is the Zoho accounts domain for the configured data
+		// center, so wp_safe_redirect() would refuse it.
+		// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Deliberate off-site redirect to Zoho.
 		wp_redirect( $url );
 		exit;
 	}
@@ -334,7 +337,7 @@ class Zoho_Auth {
 
 		delete_transient( $key );
 
-		if ( (int) $stored['user_id'] !== get_current_user_id() ) {
+		if ( get_current_user_id() !== (int) $stored['user_id'] ) {
 			Logger::warning( 'oauth_state_user_mismatch', 'OAuth callback rejected: state belongs to a different user.' );
 			$this->redirect_with_notice( 'error', __( 'The connection request could not be verified. Please start the connection again.', 'jobs-sync-for-zoho-recruit' ) );
 		}
@@ -419,9 +422,9 @@ class Zoho_Auth {
 		return true;
 	}
 
-	/* ---------------------------------------------------------------------
-	 * Token access
-	 * ------------------------------------------------------------------ */
+	// ----------------------------------------------------------------------
+	// Token access
+	// ----------------------------------------------------------------------
 
 	/**
 	 * Whether a refresh token is stored.
@@ -459,7 +462,7 @@ class Zoho_Auth {
 			return false;
 		}
 
-		return (string) $tokens['fingerprint'] !== Encryption::key_fingerprint();
+		return Encryption::key_fingerprint() !== (string) $tokens['fingerprint'];
 	}
 
 	/**
@@ -608,22 +611,22 @@ class Zoho_Auth {
 		$dc      = Settings::data_center();
 
 		return array(
-			'connected'     => $this->is_connected(),
-			'data_center'   => $dc,
+			'connected'         => $this->is_connected(),
+			'data_center'       => $dc,
 			'data_center_label' => isset( $centers[ $dc ]['label'] ) ? $centers[ $dc ]['label'] : $dc,
-			'api_base'      => $this->api_base(),
-			'scope'         => isset( $tokens['scope'] ) ? (string) $tokens['scope'] : '',
-			'connected_at'  => isset( $tokens['connected_at'] ) ? (int) $tokens['connected_at'] : 0,
-			'expires_at'    => isset( $tokens['expires_at'] ) ? (int) $tokens['expires_at'] : 0,
-			'keys_changed'  => $this->keys_changed(),
-			'failures'      => (int) get_option( self::OPTION_FAILURES, 0 ),
-			'state'         => (string) get_option( self::OPTION_STATE, 'ok' ),
+			'api_base'          => $this->api_base(),
+			'scope'             => isset( $tokens['scope'] ) ? (string) $tokens['scope'] : '',
+			'connected_at'      => isset( $tokens['connected_at'] ) ? (int) $tokens['connected_at'] : 0,
+			'expires_at'        => isset( $tokens['expires_at'] ) ? (int) $tokens['expires_at'] : 0,
+			'keys_changed'      => $this->keys_changed(),
+			'failures'          => (int) get_option( self::OPTION_FAILURES, 0 ),
+			'state'             => (string) get_option( self::OPTION_STATE, 'ok' ),
 		);
 	}
 
-	/* ---------------------------------------------------------------------
-	 * Disconnect
-	 * ------------------------------------------------------------------ */
+	// ----------------------------------------------------------------------
+	// Disconnect
+	// ----------------------------------------------------------------------
 
 	/**
 	 * Handle the disconnect admin action.
@@ -668,9 +671,9 @@ class Zoho_Auth {
 		Logger::info( 'oauth_disconnected', 'Disconnected from Zoho Recruit.' );
 	}
 
-	/* ---------------------------------------------------------------------
-	 * Circuit breaker
-	 * ------------------------------------------------------------------ */
+	// ----------------------------------------------------------------------
+	// Circuit breaker
+	// ----------------------------------------------------------------------
 
 	/**
 	 * Record an authentication failure.
@@ -734,9 +737,9 @@ class Zoho_Auth {
 		$this->reset_failures();
 	}
 
-	/* ---------------------------------------------------------------------
-	 * Internals
-	 * ------------------------------------------------------------------ */
+	// ----------------------------------------------------------------------
+	// Internals
+	// ----------------------------------------------------------------------
 
 	/**
 	 * Perform a token endpoint request.
@@ -815,13 +818,13 @@ class Zoho_Auth {
 	 */
 	public static function describe_oauth_error( $error ) {
 		$map = array(
-			'invalid_client'     => __( 'The Client ID or Client Secret is incorrect for this data center.', 'jobs-sync-for-zoho-recruit' ),
-			'invalid_code'       => __( 'The authorization code was already used or has expired. Please connect again.', 'jobs-sync-for-zoho-recruit' ),
-			'invalid_grant'      => __( 'Zoho rejected the grant. The refresh token may have been revoked; please reconnect.', 'jobs-sync-for-zoho-recruit' ),
+			'invalid_client'       => __( 'The Client ID or Client Secret is incorrect for this data center.', 'jobs-sync-for-zoho-recruit' ),
+			'invalid_code'         => __( 'The authorization code was already used or has expired. Please connect again.', 'jobs-sync-for-zoho-recruit' ),
+			'invalid_grant'        => __( 'Zoho rejected the grant. The refresh token may have been revoked; please reconnect.', 'jobs-sync-for-zoho-recruit' ),
 			'invalid_redirect_uri' => __( 'The redirect URI does not match the one registered in the Zoho API console.', 'jobs-sync-for-zoho-recruit' ),
-			'access_denied'      => __( 'Access was denied in the Zoho consent screen.', 'jobs-sync-for-zoho-recruit' ),
-			'invalid_scope'      => __( 'One or more requested scopes are not available for this Zoho account.', 'jobs-sync-for-zoho-recruit' ),
-			'invalid_token'      => __( 'The stored token is no longer valid. Please reconnect.', 'jobs-sync-for-zoho-recruit' ),
+			'access_denied'        => __( 'Access was denied in the Zoho consent screen.', 'jobs-sync-for-zoho-recruit' ),
+			'invalid_scope'        => __( 'One or more requested scopes are not available for this Zoho account.', 'jobs-sync-for-zoho-recruit' ),
+			'invalid_token'        => __( 'The stored token is no longer valid. Please reconnect.', 'jobs-sync-for-zoho-recruit' ),
 		);
 
 		$key = strtolower( (string) $error );

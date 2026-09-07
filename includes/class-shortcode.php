@@ -82,12 +82,12 @@ class Shortcode {
 		$request = self::request_values( $show_filters, $show_search );
 
 		$params = array(
-			'page'            => $request['page'],
-			'per_page'        => max( 1, (int) $atts['per_page'] ),
-			'search'          => '' !== $request['search'] ? $request['search'] : (string) $atts['search'],
-			'orderby'         => (string) $atts['orderby'],
-			'order'           => (string) $atts['order'],
-			'status'          => (string) $atts['status'],
+			'page'     => $request['page'],
+			'per_page' => max( 1, (int) $atts['per_page'] ),
+			'search'   => '' !== $request['search'] ? $request['search'] : (string) $atts['search'],
+			'orderby'  => (string) $atts['orderby'],
+			'order'    => (string) $atts['order'],
+			'status'   => (string) $atts['status'],
 		);
 
 		foreach ( array_keys( REST_API::filter_map() ) as $key ) {

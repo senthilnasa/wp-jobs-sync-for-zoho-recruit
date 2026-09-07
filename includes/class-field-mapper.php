@@ -113,27 +113,111 @@ class Field_Mapper {
 	 */
 	public static function default_mapping() {
 		$mapping = array(
-			array( 'zoho_field' => 'Posting_Title', 'target' => 'post_title', 'transform' => 'text' ),
-			array( 'zoho_field' => 'Job_Description', 'target' => 'post_content', 'transform' => 'html' ),
-			array( 'zoho_field' => 'Job_Summary', 'target' => 'post_excerpt', 'transform' => 'text' ),
-			array( 'zoho_field' => 'Job_Opening_ID', 'target' => 'meta:_jszr_job_code', 'transform' => 'text' ),
-			array( 'zoho_field' => 'Job_Opening_Status', 'target' => 'meta:_zoho_recruit_status', 'transform' => 'text' ),
-			array( 'zoho_field' => 'Department_Name', 'target' => 'tax:' . Post_Type::TAX_DEPARTMENT, 'transform' => 'lookup_name' ),
-			array( 'zoho_field' => 'Job_Type', 'target' => 'tax:' . Post_Type::TAX_EMPLOYMENT_TYPE, 'transform' => 'text' ),
-			array( 'zoho_field' => 'Work_Experience', 'target' => 'tax:' . Post_Type::TAX_EXPERIENCE, 'transform' => 'text' ),
-			array( 'zoho_field' => 'Industry', 'target' => 'meta:_zoho_recruit_industry', 'transform' => 'text' ),
-			array( 'zoho_field' => 'City', 'target' => 'meta:_zoho_recruit_city', 'transform' => 'text' ),
-			array( 'zoho_field' => 'State', 'target' => 'meta:_zoho_recruit_state', 'transform' => 'text' ),
-			array( 'zoho_field' => 'Country', 'target' => 'meta:_zoho_recruit_country', 'transform' => 'text' ),
-			array( 'zoho_field' => 'Remote_Job', 'target' => 'meta:_zoho_recruit_remote', 'transform' => 'boolean' ),
-			array( 'zoho_field' => 'Salary', 'target' => 'meta:_zoho_recruit_salary', 'transform' => 'text' ),
-			array( 'zoho_field' => 'Number_of_Positions', 'target' => 'meta:_zoho_recruit_positions', 'transform' => 'integer' ),
-			array( 'zoho_field' => 'Date_Opened', 'target' => 'meta:_zoho_recruit_posted_date', 'transform' => 'date' ),
-			array( 'zoho_field' => 'Expected_Closing_Date', 'target' => 'meta:_zoho_recruit_closing_date', 'transform' => 'date' ),
-			array( 'zoho_field' => 'Created_Time', 'target' => 'meta:_zoho_recruit_created_time', 'transform' => 'datetime' ),
-			array( 'zoho_field' => 'Modified_Time', 'target' => 'meta:_zoho_recruit_modified_time', 'transform' => 'datetime' ),
-			array( 'zoho_field' => 'Client_Name', 'target' => 'meta:_zoho_recruit_client', 'transform' => 'lookup_name' ),
-			array( 'zoho_field' => 'Website', 'target' => 'meta:_zoho_recruit_application_url', 'transform' => 'url' ),
+			array(
+				'zoho_field' => 'Posting_Title',
+				'target'     => 'post_title',
+				'transform'  => 'text',
+			),
+			array(
+				'zoho_field' => 'Job_Description',
+				'target'     => 'post_content',
+				'transform'  => 'html',
+			),
+			array(
+				'zoho_field' => 'Job_Summary',
+				'target'     => 'post_excerpt',
+				'transform'  => 'text',
+			),
+			array(
+				'zoho_field' => 'Job_Opening_ID',
+				'target'     => 'meta:_jszr_job_code',
+				'transform'  => 'text',
+			),
+			array(
+				'zoho_field' => 'Job_Opening_Status',
+				'target'     => 'meta:_zoho_recruit_status',
+				'transform'  => 'text',
+			),
+			array(
+				'zoho_field' => 'Department_Name',
+				'target'     => 'tax:' . Post_Type::TAX_DEPARTMENT,
+				'transform'  => 'lookup_name',
+			),
+			array(
+				'zoho_field' => 'Job_Type',
+				'target'     => 'tax:' . Post_Type::TAX_EMPLOYMENT_TYPE,
+				'transform'  => 'text',
+			),
+			array(
+				'zoho_field' => 'Work_Experience',
+				'target'     => 'tax:' . Post_Type::TAX_EXPERIENCE,
+				'transform'  => 'text',
+			),
+			array(
+				'zoho_field' => 'Industry',
+				'target'     => 'meta:_zoho_recruit_industry',
+				'transform'  => 'text',
+			),
+			array(
+				'zoho_field' => 'City',
+				'target'     => 'meta:_zoho_recruit_city',
+				'transform'  => 'text',
+			),
+			array(
+				'zoho_field' => 'State',
+				'target'     => 'meta:_zoho_recruit_state',
+				'transform'  => 'text',
+			),
+			array(
+				'zoho_field' => 'Country',
+				'target'     => 'meta:_zoho_recruit_country',
+				'transform'  => 'text',
+			),
+			array(
+				'zoho_field' => 'Remote_Job',
+				'target'     => 'meta:_zoho_recruit_remote',
+				'transform'  => 'boolean',
+			),
+			array(
+				'zoho_field' => 'Salary',
+				'target'     => 'meta:_zoho_recruit_salary',
+				'transform'  => 'text',
+			),
+			array(
+				'zoho_field' => 'Number_of_Positions',
+				'target'     => 'meta:_zoho_recruit_positions',
+				'transform'  => 'integer',
+			),
+			array(
+				'zoho_field' => 'Date_Opened',
+				'target'     => 'meta:_zoho_recruit_posted_date',
+				'transform'  => 'date',
+			),
+			array(
+				'zoho_field' => 'Expected_Closing_Date',
+				'target'     => 'meta:_zoho_recruit_closing_date',
+				'transform'  => 'date',
+			),
+			array(
+				'zoho_field' => 'Created_Time',
+				'target'     => 'meta:_zoho_recruit_created_time',
+				'transform'  => 'datetime',
+			),
+			array(
+				'zoho_field' => 'Modified_Time',
+				'target'     => 'meta:_zoho_recruit_modified_time',
+				'transform'  => 'datetime',
+			),
+			array(
+				'zoho_field' => 'Client_Name',
+				'target'     => 'meta:_zoho_recruit_client',
+				'transform'  => 'lookup_name',
+			),
+			array(
+				'zoho_field' => 'Website',
+				'target'     => 'meta:_zoho_recruit_application_url',
+				'transform'  => 'url',
+			),
 		);
 
 		/**
@@ -216,7 +300,7 @@ class Field_Mapper {
 				continue;
 			}
 
-			$field = Settings::sanitize_api_name( $row['zoho_field'] ?? '' );
+			$field  = Settings::sanitize_api_name( $row['zoho_field'] ?? '' );
 			$target = isset( $row['target'] ) ? (string) $row['target'] : '';
 			$target = preg_replace( '/[^a-z0-9_:]/i', '', $target );
 
@@ -291,7 +375,7 @@ class Field_Mapper {
 				$terms    = array_values( array_filter( array_map( 'trim', array_map( 'strval', $terms ) ), 'strlen' ) );
 
 				if ( ! empty( $terms ) ) {
-					$existing                 = isset( $data['terms'][ $taxonomy ] ) ? $data['terms'][ $taxonomy ] : array();
+					$existing                   = isset( $data['terms'][ $taxonomy ] ) ? $data['terms'][ $taxonomy ] : array();
 					$data['terms'][ $taxonomy ] = array_merge( $existing, $terms );
 				}
 			} elseif ( in_array( $target, array( 'post_title', 'post_content', 'post_excerpt' ), true ) ) {
@@ -713,9 +797,14 @@ class Field_Mapper {
 				$numbers[] = (float) str_replace( ',', '', $match ) * $multiplier;
 			}
 
-			$numbers = array_values( array_filter( $numbers, static function ( $number ) {
-				return $number > 0;
-			} ) );
+			$numbers = array_values(
+				array_filter(
+					$numbers,
+					static function ( $number ) {
+						return $number > 0;
+					}
+				)
+			);
 
 			if ( 1 === count( $numbers ) ) {
 				$result['min'] = (string) $numbers[0];

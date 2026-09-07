@@ -12,6 +12,7 @@ if ( ! $jszr_tests_dir ) {
 }
 
 if ( ! file_exists( $jszr_tests_dir . '/includes/functions.php' ) ) {
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI bootstrap, no HTML context.
 	echo "Could not find the WordPress test suite in {$jszr_tests_dir}." . PHP_EOL;
 	echo 'Run: bash bin/install-wp-tests.sh wordpress_test root root localhost latest' . PHP_EOL;
 	exit( 1 );

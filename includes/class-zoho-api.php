@@ -233,10 +233,10 @@ class Zoho_API {
 		$info = isset( $result['info'] ) ? $result['info'] : array();
 
 		return array(
-			'module'  => $this->module(),
+			'module'   => $this->module(),
 			'api_base' => $this->auth->api_base(),
-			'count'   => isset( $info['count'] ) ? (int) $info['count'] : count( $result['records'] ),
-			'sample'  => ! empty( $result['records'] ),
+			'count'    => isset( $info['count'] ) ? (int) $info['count'] : count( $result['records'] ),
+			'sample'   => ! empty( $result['records'] ),
 		);
 	}
 

@@ -23,9 +23,17 @@ $jszr_labels = array(
 	'experience'      => __( 'Experience', 'jobs-sync-for-zoho-recruit' ),
 );
 
-$jszr_action = remove_query_arg( array_merge( array( 'jszr_page', 'jszr_search' ), array_map( static function ( $key ) {
-	return 'jszr_' . $key;
-}, array_keys( $jszr_labels ) ) ) );
+$jszr_action = remove_query_arg(
+	array_merge(
+		array( 'jszr_page', 'jszr_search' ),
+		array_map(
+			static function ( $key ) {
+				return 'jszr_' . $key;
+			},
+			array_keys( $jszr_labels )
+		)
+	)
+);
 ?>
 <form class="jszr-filters" method="get" action="<?php echo esc_url( $jszr_action ); ?>" role="search">
 	<?php
