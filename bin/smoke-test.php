@@ -425,6 +425,90 @@ function jszr_run_smoke_test( array $cli_args ) {
 
 	\JobsSyncForZohoRecruit\Settings::update( array( 'conflict_mode' => $jszr_conflict_before ) );
 
+	// Layouts: every preset, the custom template, and the filter bar options.
+	$jszr_layout_before = jszr_get_setting( 'listing_layout' );
+
+	foreach ( array( 'default', 'card', 'compact', 'table' ) as $jszr_layout ) {
+		\JobsSyncForZohoRecruit\Settings::update( array( 'listing_layout' => $jszr_layout ) );
+
+		$jszr_markup = \JobsSyncForZohoRecruit\Shortcode::render(
+			array(
+				'per_page'     => 5,
+				'show_filters' => 'false',
+				'show_search'  => 'false',
+			)
+		);
+
+		$checks[] = jszr_smoke_check(
+			false !== strpos( $jszr_markup, 'jszr-jobs--layout-' . $jszr_layout )
+				&& false !== strpos( $jszr_markup, 'Senior PHP Developer' ),
+			sprintf( 'listing layout "%s" renders', $jszr_layout )
+		);
+	}
+
+	\JobsSyncForZohoRecruit\Settings::update(
+		array(
+			'listing_layout' => 'custom',
+			'card_template'  => '<article class="jszr-job-card jszr-smoke"><h3>{title}</h3>{if:salary}<p class="pay">{salary}</p>{/if:salary}{ifnot:client}<p class="direct">Direct</p>{/ifnot:client}</article>',
+		)
+	);
+
+	$jszr_custom = \JobsSyncForZohoRecruit\Shortcode::render( array( 'per_page' => 5 ) );
+
+	$checks[] = jszr_smoke_check( false !== strpos( $jszr_custom, 'jszr-smoke' ), 'custom layout renders' );
+	$checks[] = jszr_smoke_check( false !== strpos( $jszr_custom, 'class="pay"' ), '{if:} keeps a block when the value is set' );
+	$checks[] = jszr_smoke_check( false !== strpos( $jszr_custom, 'Direct' ), '{ifnot:} keeps a block when the value is empty' );
+
+	\JobsSyncForZohoRecruit\Settings::update(
+		array(
+			'listing_layout'       => 'compact',
+			'filter_fields'        => array( 'department' ),
+			'search_placeholder'   => 'Try engineer',
+			'filters_button_label' => 'Show jobs',
+			'filters_layout'       => 'stacked',
+		)
+	);
+
+	$jszr_bar = \JobsSyncForZohoRecruit\Shortcode::render(
+		array(
+			'per_page'     => 5,
+			'show_filters' => 'true',
+			'show_search'  => 'true',
+			'show_sort'    => 'true',
+		)
+	);
+
+	$checks[] = jszr_smoke_check( false !== strpos( $jszr_bar, 'name="jszr_search"' ), 'filter bar renders a search box' );
+	$checks[] = jszr_smoke_check( false !== strpos( $jszr_bar, 'name="jszr_sort"' ), 'filter bar renders a sort control' );
+	$checks[] = jszr_smoke_check( false !== strpos( $jszr_bar, 'name="jszr_department"' ), 'a chosen filter is offered' );
+	$checks[] = jszr_smoke_check( false === strpos( $jszr_bar, 'name="jszr_experience"' ), 'an unchosen filter is left out' );
+	$checks[] = jszr_smoke_check( false !== strpos( $jszr_bar, 'Show jobs' ), 'the filter button label is applied' );
+	$checks[] = jszr_smoke_check( false !== strpos( $jszr_bar, 'jszr-filters--stacked' ), 'the stacked filter layout is applied' );
+
+	\JobsSyncForZohoRecruit\Settings::update( array( 'job_info_layout' => 'inline' ) );
+
+	$checks[] = jszr_smoke_check(
+		false !== strpos( \JobsSyncForZohoRecruit\Shortcode::render_meta( array( 'id' => $first ) ), 'jszr-job-meta--inline' ),
+		'the inline job details layout renders'
+	);
+
+	// Written past the settings sanitizer, the way an import would.
+	\JobsSyncForZohoRecruit\Settings::update( array( 'custom_css' => '.jszr-job-card{border-color:#0b5cff}</style><script>x()</script>' ) );
+
+	$jszr_css = \JobsSyncForZohoRecruit\Layouts::custom_css();
+
+	$checks[] = jszr_smoke_check( false !== strpos( $jszr_css, '#0b5cff' ), 'custom CSS is kept' );
+	$checks[] = jszr_smoke_check( false === strpos( $jszr_css, '<' ), 'custom CSS cannot break out of the style element' );
+
+	\JobsSyncForZohoRecruit\Settings::update(
+		array(
+			'listing_layout'  => $jszr_layout_before,
+			'card_template'   => '',
+			'job_info_layout' => 'default',
+			'custom_css'      => '',
+		)
+	);
+
 	// Page cache purging is best effort and must never throw.
 	$jszr_purge_ran = false;
 

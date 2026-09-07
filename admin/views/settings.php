@@ -756,6 +756,251 @@ $jszr_input = static function ( $key, $values, $type = 'text', $help = '', $attr
 					</tbody>
 				</table>
 
+			<?php elseif ( 'display' === $active ) : ?>
+
+				<h2><?php esc_html_e( 'Job listing', 'jobs-sync-for-zoho-recruit' ); ?></h2>
+
+				<table class="form-table" role="presentation">
+					<tbody>
+						<tr>
+							<th scope="row"><label for="jszr-listing_layout"><?php esc_html_e( 'Listing layout', 'jobs-sync-for-zoho-recruit' ); ?></label></th>
+							<td>
+								<?php
+								$jszr_select(
+									'listing_layout',
+									$settings,
+									Layouts::listing_layouts(),
+									__( 'Applies to the shortcode, the block and the job archive. A copy of card.php in your theme still wins over all of these.', 'jobs-sync-for-zoho-recruit' )
+								);
+								?>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><label for="jszr-card_template"><?php esc_html_e( 'Card HTML', 'jobs-sync-for-zoho-recruit' ); ?></label></th>
+							<td>
+								<textarea id="jszr-card_template" class="large-text code" rows="14"
+									name="<?php echo esc_attr( $jszr_option ); ?>[card_template]"
+									spellcheck="false"><?php echo esc_textarea( (string) $settings['card_template'] ); ?></textarea>
+								<p class="description">
+									<?php esc_html_e( 'Used when the layout is set to Custom. Leave it empty to fall back to the default card.', 'jobs-sync-for-zoho-recruit' ); ?>
+								</p>
+								<p>
+									<button type="button" class="button jszr-copy-preset"
+										data-jszr-target="jszr-card_template"
+										data-jszr-preset="<?php echo esc_attr( Layouts::listing_preset( 'card' ) ); ?>">
+										<?php esc_html_e( 'Start from the Card layout', 'jobs-sync-for-zoho-recruit' ); ?>
+									</button>
+									<button type="button" class="button jszr-copy-preset"
+										data-jszr-target="jszr-card_template"
+										data-jszr-preset="<?php echo esc_attr( Layouts::listing_preset( 'compact' ) ); ?>">
+										<?php esc_html_e( 'Start from the Compact layout', 'jobs-sync-for-zoho-recruit' ); ?>
+									</button>
+								</p>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+
+				<h2><?php esc_html_e( 'Preview', 'jobs-sync-for-zoho-recruit' ); ?></h2>
+
+				<?php
+				$jszr_preview_template = Layouts::listing_template();
+				$jszr_preview_info     = Layouts::job_info_template();
+				?>
+
+				<p class="description">
+					<?php esc_html_e( 'The saved layout, drawn with a real job where one exists. Save the page to refresh it.', 'jobs-sync-for-zoho-recruit' ); ?>
+				</p>
+
+				<div class="jszr-preview jszr-jobs">
+					<?php if ( '' !== $jszr_preview_template ) : ?>
+						<?php
+						echo wp_kses(
+							Layouts::render_preview( $jszr_preview_template ),
+							Layouts::allowed_html()
+						);
+						?>
+					<?php else : ?>
+						<p class="description"><?php esc_html_e( 'The default card is rendered by a PHP template, so there is nothing to preview here. Choose another layout to see it.', 'jobs-sync-for-zoho-recruit' ); ?></p>
+					<?php endif; ?>
+
+					<?php if ( '' !== $jszr_preview_info ) : ?>
+						<?php
+						echo wp_kses(
+							Layouts::render_preview( $jszr_preview_info ),
+							Layouts::allowed_html()
+						);
+						?>
+					<?php endif; ?>
+				</div>
+
+				<h2><?php esc_html_e( 'Job details', 'jobs-sync-for-zoho-recruit' ); ?></h2>
+
+				<table class="form-table" role="presentation">
+					<tbody>
+						<tr>
+							<th scope="row"><label for="jszr-job_info_layout"><?php esc_html_e( 'Job details layout', 'jobs-sync-for-zoho-recruit' ); ?></label></th>
+							<td>
+								<?php
+								$jszr_select(
+									'job_info_layout',
+									$settings,
+									Layouts::job_info_layouts(),
+									__( 'The facts shown on a single job page, by the Job Details block and by the [zoho_job_meta] shortcode.', 'jobs-sync-for-zoho-recruit' )
+								);
+								?>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><?php esc_html_e( 'Fields to show', 'jobs-sync-for-zoho-recruit' ); ?></th>
+							<td>
+								<fieldset>
+									<legend class="screen-reader-text"><?php esc_html_e( 'Fields to show', 'jobs-sync-for-zoho-recruit' ); ?></legend>
+									<?php foreach ( Settings::available_job_info_fields() as $jszr_field => $jszr_label ) : ?>
+										<label class="jszr-checkbox-row">
+											<input type="checkbox"
+												name="<?php echo esc_attr( $jszr_option ); ?>[job_info_fields][]"
+												value="<?php echo esc_attr( $jszr_field ); ?>"
+												<?php checked( in_array( $jszr_field, (array) $settings['job_info_fields'], true ) ); ?> />
+											<?php echo esc_html( $jszr_label ); ?>
+										</label>
+									<?php endforeach; ?>
+								</fieldset>
+								<p class="description"><?php esc_html_e( 'A field with no value on a job is skipped rather than shown empty. The Custom layout ignores this list and decides for itself.', 'jobs-sync-for-zoho-recruit' ); ?></p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><label for="jszr-job_info_template"><?php esc_html_e( 'Job details HTML', 'jobs-sync-for-zoho-recruit' ); ?></label></th>
+							<td>
+								<textarea id="jszr-job_info_template" class="large-text code" rows="10"
+									name="<?php echo esc_attr( $jszr_option ); ?>[job_info_template]"
+									spellcheck="false"><?php echo esc_textarea( (string) $settings['job_info_template'] ); ?></textarea>
+								<p>
+									<button type="button" class="button jszr-copy-preset"
+										data-jszr-target="jszr-job_info_template"
+										data-jszr-preset="<?php echo esc_attr( Layouts::job_info_preset( 'inline' ) ); ?>">
+										<?php esc_html_e( 'Start from the Inline layout', 'jobs-sync-for-zoho-recruit' ); ?>
+									</button>
+								</p>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+
+				<h2><?php esc_html_e( 'Available tags', 'jobs-sync-for-zoho-recruit' ); ?></h2>
+
+				<p>
+					<?php esc_html_e( 'Use these in either HTML box. A tag with no value on a job becomes nothing at all.', 'jobs-sync-for-zoho-recruit' ); ?>
+					<?php
+					printf(
+						/* translators: 1: an example conditional opening tag, 2: the matching closing tag. */
+						esc_html__( 'Wrap a part in %1$s and %2$s to drop it entirely when that value is missing.', 'jobs-sync-for-zoho-recruit' ),
+						'<code>{if:salary}</code>',
+						'<code>{/if:salary}</code>'
+					);
+					?>
+				</p>
+
+				<table class="widefat striped jszr-tag-reference">
+					<thead>
+						<tr>
+							<th scope="col"><?php esc_html_e( 'Tag', 'jobs-sync-for-zoho-recruit' ); ?></th>
+							<th scope="col"><?php esc_html_e( 'Value', 'jobs-sync-for-zoho-recruit' ); ?></th>
+						</tr>
+					</thead>
+					<tbody>
+						<?php foreach ( Template_Tags::documented_tags() as $jszr_tag => $jszr_description ) : ?>
+							<tr>
+								<td><code>{<?php echo esc_html( $jszr_tag ); ?>}</code></td>
+								<td><?php echo esc_html( $jszr_description ); ?></td>
+							</tr>
+						<?php endforeach; ?>
+					</tbody>
+				</table>
+
+				<h2><?php esc_html_e( 'Search and filters', 'jobs-sync-for-zoho-recruit' ); ?></h2>
+
+				<table class="form-table" role="presentation">
+					<tbody>
+						<tr>
+							<th scope="row"><?php esc_html_e( 'Show by default', 'jobs-sync-for-zoho-recruit' ); ?></th>
+							<td>
+								<?php
+								$jszr_checkbox( 'show_search_default', $settings, __( 'Search box', 'jobs-sync-for-zoho-recruit' ) );
+								echo '<br />';
+								$jszr_checkbox( 'show_filters_default', $settings, __( 'Filter dropdowns', 'jobs-sync-for-zoho-recruit' ) );
+								echo '<br />';
+								$jszr_checkbox( 'show_sort', $settings, __( 'Sort control', 'jobs-sync-for-zoho-recruit' ) );
+								?>
+								<p class="description"><?php esc_html_e( 'An individual shortcode or block can still switch each one on or off.', 'jobs-sync-for-zoho-recruit' ); ?></p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><?php esc_html_e( 'Filters to offer', 'jobs-sync-for-zoho-recruit' ); ?></th>
+							<td>
+								<fieldset>
+									<legend class="screen-reader-text"><?php esc_html_e( 'Filters to offer', 'jobs-sync-for-zoho-recruit' ); ?></legend>
+									<?php foreach ( REST_API::filter_map() as $jszr_param => $jszr_taxonomy ) : ?>
+										<?php $jszr_tax_object = get_taxonomy( $jszr_taxonomy ); ?>
+										<label class="jszr-checkbox-row">
+											<input type="checkbox"
+												name="<?php echo esc_attr( $jszr_option ); ?>[filter_fields][]"
+												value="<?php echo esc_attr( $jszr_param ); ?>"
+												<?php checked( in_array( $jszr_param, (array) $settings['filter_fields'], true ) ); ?> />
+											<?php echo esc_html( $jszr_tax_object ? $jszr_tax_object->labels->singular_name : $jszr_param ); ?>
+										</label>
+									<?php endforeach; ?>
+								</fieldset>
+								<p class="description"><?php esc_html_e( 'A filter with no terms yet is left out automatically.', 'jobs-sync-for-zoho-recruit' ); ?></p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><label for="jszr-filters_layout"><?php esc_html_e( 'Filter bar layout', 'jobs-sync-for-zoho-recruit' ); ?></label></th>
+							<td>
+								<?php
+								$jszr_select(
+									'filters_layout',
+									$settings,
+									array(
+										'inline'  => __( 'Inline — side by side', 'jobs-sync-for-zoho-recruit' ),
+										'stacked' => __( 'Stacked — one per line, for narrow columns', 'jobs-sync-for-zoho-recruit' ),
+									)
+								);
+								?>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><label for="jszr-search_placeholder"><?php esc_html_e( 'Search placeholder', 'jobs-sync-for-zoho-recruit' ); ?></label></th>
+							<td><?php $jszr_input( 'search_placeholder', $settings, 'text', __( 'Leave blank to use "Job title or code".', 'jobs-sync-for-zoho-recruit' ) ); ?></td>
+						</tr>
+						<tr>
+							<th scope="row"><label for="jszr-filters_button_label"><?php esc_html_e( 'Filter button label', 'jobs-sync-for-zoho-recruit' ); ?></label></th>
+							<td><?php $jszr_input( 'filters_button_label', $settings, 'text', __( 'Leave blank to use "Filter".', 'jobs-sync-for-zoho-recruit' ) ); ?></td>
+						</tr>
+					</tbody>
+				</table>
+
+				<h2><?php esc_html_e( 'Custom CSS', 'jobs-sync-for-zoho-recruit' ); ?></h2>
+
+				<table class="form-table" role="presentation">
+					<tbody>
+						<tr>
+							<th scope="row"><label for="jszr-custom_css"><?php esc_html_e( 'CSS', 'jobs-sync-for-zoho-recruit' ); ?></label></th>
+							<td>
+								<textarea id="jszr-custom_css" class="large-text code" rows="12"
+									name="<?php echo esc_attr( $jszr_option ); ?>[custom_css]"
+									spellcheck="false"><?php echo esc_textarea( (string) $settings['custom_css'] ); ?></textarea>
+								<p class="description">
+									<?php esc_html_e( 'Loaded only on pages that show jobs, and after the plugin stylesheet so it wins. Every class the plugin prints starts with jszr-.', 'jobs-sync-for-zoho-recruit' ); ?>
+								</p>
+								<p class="description">
+									<code>.jszr-job-card { border-color: #0b5cff; }</code>
+								</p>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+
 			<?php elseif ( 'schema' === $active ) : ?>
 
 				<table class="form-table" role="presentation">

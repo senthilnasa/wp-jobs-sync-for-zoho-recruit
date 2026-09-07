@@ -46,11 +46,13 @@ class Shortcode {
 				'order'           => 'desc',
 				'status'          => 'active',
 				'style'           => (string) Settings::get( 'default_style', 'list' ),
+				'layout'          => (string) Settings::get( 'listing_layout', 'default' ),
 				'columns'         => 3,
-				'show_filters'    => 'false',
-				'show_search'     => 'false',
+				'show_filters'    => Settings::get( 'show_filters_default', true ) ? 'true' : 'false',
+				'show_search'     => Settings::get( 'show_search_default', true ) ? 'true' : 'false',
 				'show_pagination' => 'true',
 				'show_excerpt'    => 'true',
+				'show_sort'       => Settings::get( 'show_sort', false ) ? 'true' : 'false',
 			)
 		);
 	}
@@ -88,8 +90,8 @@ class Shortcode {
 			'page'     => $request['page'],
 			'per_page' => max( 1, (int) $atts['per_page'] ),
 			'search'   => '' !== $request['search'] ? $request['search'] : (string) $atts['search'],
-			'orderby'  => (string) $atts['orderby'],
-			'order'    => (string) $atts['order'],
+			'orderby'  => '' !== $request['orderby'] ? $request['orderby'] : (string) $atts['orderby'],
+			'order'    => '' !== $request['order'] ? $request['order'] : (string) $atts['order'],
 			'status'   => (string) $atts['status'],
 		);
 
@@ -112,6 +114,11 @@ class Shortcode {
 		$style   = 'grid' === $atts['style'] ? 'grid' : 'list';
 		$columns = max( 1, min( 4, (int) $atts['columns'] ) );
 
+		$layouts = array_keys( Layouts::listing_layouts() );
+		$layout  = in_array( (string) $atts['layout'], $layouts, true )
+			? (string) $atts['layout']
+			: (string) Settings::get( 'listing_layout', 'default' );
+
 		return Templates::get(
 			'listing.php',
 			array(
@@ -119,11 +126,13 @@ class Shortcode {
 				'atts'            => $atts,
 				'params'          => $params,
 				'style'           => $style,
+				'layout'          => $layout,
 				'columns'         => $columns,
 				'show_filters'    => $show_filters,
 				'show_search'     => $show_search,
 				'show_pagination' => self::truthy( $atts['show_pagination'] ),
 				'show_excerpt'    => self::truthy( $atts['show_excerpt'] ),
+				'show_sort'       => self::truthy( $atts['show_sort'] ),
 			)
 		);
 	}
@@ -139,8 +148,10 @@ class Shortcode {
 	 */
 	private static function request_values( $allow_filters, $allow_search ) {
 		$values = array(
-			'page'   => 1,
-			'search' => '',
+			'page'    => 1,
+			'search'  => '',
+			'orderby' => '',
+			'order'   => '',
 		);
 
 		foreach ( array_keys( REST_API::filter_map() ) as $key ) {
@@ -156,6 +167,25 @@ class Shortcode {
 
 		if ( $allow_search && isset( $_GET['jszr_search'] ) ) {
 			$values['search'] = sanitize_text_field( wp_unslash( $_GET['jszr_search'] ) );
+		}
+
+		// The sort control posts one value, "orderby:order", so the visitor gets
+		// a single dropdown rather than two. Both halves are validated against
+		// the same allow-lists the REST endpoint uses.
+		if ( isset( $_GET['jszr_sort'] ) ) {
+			$sort  = sanitize_text_field( wp_unslash( $_GET['jszr_sort'] ) );
+			$parts = array_pad( explode( ':', $sort, 2 ), 2, '' );
+
+			$orderby = sanitize_key( $parts[0] );
+			$order   = strtolower( sanitize_key( $parts[1] ) );
+
+			if ( in_array( $orderby, array( 'date', 'title', 'closing_date', 'posted_date' ), true ) ) {
+				$values['orderby'] = $orderby;
+			}
+
+			if ( in_array( $order, array( 'asc', 'desc' ), true ) ) {
+				$values['order'] = $order;
+			}
 		}
 
 		if ( $allow_filters ) {
@@ -231,7 +261,7 @@ class Shortcode {
 		$atts = shortcode_atts(
 			array(
 				'id'     => 0,
-				'fields' => 'department,location,employment_type,experience,closing_date',
+				'fields' => implode( ',', (array) Settings::get( 'job_info_fields', array() ) ),
 			),
 			(array) $atts,
 			'zoho_job_meta'

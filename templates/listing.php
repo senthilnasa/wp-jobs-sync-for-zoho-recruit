@@ -10,19 +10,21 @@
  * @var array     $atts            Listing attributes.
  * @var array     $params          Normalised listing parameters.
  * @var string    $style           list|grid.
+ * @var string    $layout          Card layout key.
  * @var int       $columns         Grid column count.
  * @var bool      $show_filters    Whether to render taxonomy filters.
  * @var bool      $show_search     Whether to render the search box.
  * @var bool      $show_pagination Whether to render pagination.
  * @var bool      $show_excerpt    Whether cards show an excerpt.
+ * @var bool      $show_sort       Whether to offer a sort control.
  */
 
 defined( 'ABSPATH' ) || exit;
 ?>
-<div class="jszr-jobs jszr-jobs--<?php echo esc_attr( $style ); ?>"
+<div class="jszr-jobs jszr-jobs--<?php echo esc_attr( $style ); ?> jszr-jobs--layout-<?php echo esc_attr( isset( $layout ) ? $layout : 'default' ); ?>"
 	<?php echo 'grid' === $style ? 'style="--jszr-columns:' . esc_attr( (string) $columns ) . '"' : ''; ?>>
 
-	<?php if ( $show_filters || $show_search ) : ?>
+	<?php if ( $show_filters || $show_search || ! empty( $show_sort ) ) : ?>
 		<?php
 		jszr_get_template(
 			'filters.php',
@@ -30,6 +32,7 @@ defined( 'ABSPATH' ) || exit;
 				'params'       => $params,
 				'show_filters' => $show_filters,
 				'show_search'  => $show_search,
+				'show_sort'    => ! empty( $show_sort ),
 			)
 		);
 		?>
@@ -63,6 +66,7 @@ defined( 'ABSPATH' ) || exit;
 							array(
 								'post_id'      => get_the_ID(),
 								'show_excerpt' => $show_excerpt,
+								'layout'       => isset( $layout ) ? $layout : '',
 							)
 						);
 						?>

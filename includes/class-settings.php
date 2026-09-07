@@ -166,6 +166,21 @@ class Settings {
 			'apply_url_template'      => '',
 			'apply_utm'               => '',
 
+			// Display: layouts, filters and custom CSS.
+			'listing_layout'          => 'default',
+			'card_template'           => '',
+			'job_info_layout'         => 'default',
+			'job_info_template'       => '',
+			'job_info_fields'         => array( 'department', 'location', 'employment_type', 'experience', 'salary', 'posted_date', 'closing_date' ),
+			'custom_css'              => '',
+			'show_filters_default'    => true,
+			'show_search_default'     => true,
+			'filters_layout'          => 'inline',
+			'filter_fields'           => array( 'department', 'location', 'employment_type', 'experience' ),
+			'show_sort'               => false,
+			'search_placeholder'      => '',
+			'filters_button_label'    => '',
+
 			// Structured data.
 			'schema_enabled'          => true,
 			'schema_skip_if_seo'      => true,
@@ -336,6 +351,9 @@ class Settings {
 			'debug_logging',
 			'uninstall_delete_jobs',
 			'uninstall_delete_data',
+			'show_filters_default',
+			'show_search_default',
+			'show_sort',
 		);
 
 		foreach ( $booleans as $key ) {
@@ -379,6 +397,9 @@ class Settings {
 			'default_style'    => array( 'list', 'grid' ),
 			'expired_behavior' => array( 'notice', 'gone', 'redirect' ),
 			'default_status'   => array( 'active', 'inactive', 'draft', 'closed', 'expired' ),
+			'listing_layout'   => array( 'default', 'card', 'compact', 'table', 'custom' ),
+			'job_info_layout'  => array( 'default', 'inline', 'custom' ),
+			'filters_layout'   => array( 'inline', 'stacked' ),
 		);
 
 		foreach ( $enums as $key => $allowed ) {
@@ -406,7 +427,7 @@ class Settings {
 			$out['notify_email'] = is_email( $email ) ? $email : '';
 		}
 
-		$texts = array( 'apply_label', 'apply_url_template', 'apply_utm', 'org_name' );
+		$texts = array( 'apply_label', 'apply_url_template', 'apply_utm', 'org_name', 'search_placeholder', 'filters_button_label' );
 
 		foreach ( $texts as $key ) {
 			if ( isset( $input[ $key ] ) ) {
@@ -418,6 +439,36 @@ class Settings {
 			if ( isset( $input[ $key ] ) ) {
 				$out[ $key ] = esc_url_raw( (string) $input[ $key ] );
 			}
+		}
+
+		// Layout templates keep their markup, filtered through an allow-list, and
+		// their {tokens}, which are not HTML and must survive the filtering.
+		foreach ( array( 'card_template', 'job_info_template' ) as $key ) {
+			if ( isset( $input[ $key ] ) ) {
+				$out[ $key ] = Layouts::sanitize_template( (string) $input[ $key ] );
+			}
+		}
+
+		if ( isset( $input['custom_css'] ) ) {
+			$out['custom_css'] = Layouts::sanitize_css( (string) $input['custom_css'] );
+		}
+
+		if ( isset( $input['filter_fields'] ) ) {
+			$available = array_keys( REST_API::filter_map() );
+			$fields    = is_array( $input['filter_fields'] ) ? $input['filter_fields'] : array();
+			$fields    = array_map( 'sanitize_key', $fields );
+
+			// Keep the map's order rather than the order the form posted, so the
+			// filter bar always reads the same way round.
+			$out['filter_fields'] = array_values( array_intersect( $available, $fields ) );
+		}
+
+		if ( isset( $input['job_info_fields'] ) ) {
+			$available = array_keys( self::available_job_info_fields() );
+			$fields    = is_array( $input['job_info_fields'] ) ? $input['job_info_fields'] : array();
+			$fields    = array_map( 'sanitize_key', $fields );
+
+			$out['job_info_fields'] = array_values( array_intersect( $available, $fields ) );
 		}
 
 		$allowed_statuses = array( 'active', 'inactive', 'draft', 'closed', 'expired', 'skip' );
@@ -487,6 +538,43 @@ class Settings {
 		$name = preg_replace( '/[^A-Za-z0-9_]/', '', $name );
 
 		return is_string( $name ) ? substr( $name, 0, 100 ) : '';
+	}
+
+	/**
+	 * Fields the job info block can display, in the order it displays them.
+	 *
+	 * @return array<string,string> Key => human label.
+	 */
+	public static function available_job_info_fields() {
+		$fields = array();
+
+		// Registered taxonomies first, so a custom one is offered too.
+		foreach ( REST_API::filter_map() as $param => $taxonomy ) {
+			$object = get_taxonomy( $taxonomy );
+
+			$fields[ $param ] = $object ? $object->labels->singular_name : $param;
+		}
+
+		$fields = array_merge(
+			$fields,
+			array(
+				'job_code'     => __( 'Job code', 'jobs-sync-for-zoho-recruit' ),
+				'salary'       => __( 'Salary', 'jobs-sync-for-zoho-recruit' ),
+				'industry'     => __( 'Industry', 'jobs-sync-for-zoho-recruit' ),
+				'client'       => __( 'Client', 'jobs-sync-for-zoho-recruit' ),
+				'remote'       => __( 'Work mode', 'jobs-sync-for-zoho-recruit' ),
+				'positions'    => __( 'Openings', 'jobs-sync-for-zoho-recruit' ),
+				'posted_date'  => __( 'Posted date', 'jobs-sync-for-zoho-recruit' ),
+				'closing_date' => __( 'Closing date', 'jobs-sync-for-zoho-recruit' ),
+			)
+		);
+
+		/**
+		 * Filter the fields the job info block can display.
+		 *
+		 * @param array $fields Key => label.
+		 */
+		return (array) apply_filters( 'jszr_available_job_info_fields', $fields );
 	}
 
 	/**

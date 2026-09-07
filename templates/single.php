@@ -30,7 +30,7 @@ while ( have_posts() ) :
 					'job-meta.php',
 					array(
 						'post_id' => $jszr_post_id,
-						'fields'  => array( 'department', 'location', 'employment_type', 'experience', 'salary', 'posted_date', 'closing_date' ),
+						'fields'  => (array) jszr_get_setting( 'job_info_fields', array() ),
 					)
 				);
 				?>

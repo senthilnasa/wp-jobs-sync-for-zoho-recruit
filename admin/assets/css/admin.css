@@ -191,3 +191,29 @@
 .jszr-notice-inline {
 	margin: 10px 0;
 }
+
+/* Layout preview ---------------------------------------------------------- */
+
+.jszr-preview {
+	max-inline-size: 42rem;
+	padding: 16px;
+	margin-block-end: 20px;
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+}
+
+.jszr-tag-reference {
+	max-inline-size: 42rem;
+	margin-block-end: 20px;
+}
+
+.jszr-tag-reference td:first-child {
+	inline-size: 12rem;
+}
+
+textarea.code {
+	font-family: Consolas, Monaco, monospace;
+	font-size: 13px;
+	line-height: 1.5;
+}

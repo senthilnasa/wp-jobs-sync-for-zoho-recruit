@@ -309,6 +309,14 @@ class Templates {
 
 		wp_enqueue_style( 'jszr-jobs' );
 		wp_enqueue_script( 'jszr-jobs' );
+
+		// Administrator CSS rides along with the plugin stylesheet, so it loads
+		// only on pages that actually show jobs and always after the defaults.
+		$custom_css = Layouts::custom_css();
+
+		if ( '' !== $custom_css ) {
+			wp_add_inline_style( 'jszr-jobs', $custom_css );
+		}
 	}
 
 	// ----------------------------------------------------------------------

@@ -34,11 +34,16 @@ editor is what visitors get, and a template override applies to both.
 | `order` | `desc` | `asc`, `desc` |
 | `status` | `active` | Rarely worth changing |
 | `style` | Setting (`list`) | `list` or `grid` |
+| `layout` | Setting (`default`) | `default`, `card`, `compact`, `table`, `custom` |
 | `columns` | `3` | Grid only, 1–4 |
-| `show_filters` | `false` | Taxonomy dropdowns |
-| `show_search` | `false` | Keyword box |
+| `show_filters` | Setting (on) | Taxonomy dropdowns |
+| `show_search` | Setting (on) | Keyword box |
+| `show_sort` | Setting (off) | Sort dropdown |
 | `show_pagination` | `true` | |
 | `show_excerpt` | `true` | |
+
+Attributes named "Setting" above default to whatever **Settings → Display** says,
+so a site can change every listing at once and still override one of them here.
 
 ```
 [zoho_jobs per_page="12" style="grid" columns="3" show_filters="true" show_search="true"]
@@ -55,6 +60,87 @@ Two more, for use on a single job page (or inside a loop):
 
 Frontend CSS and JS are enqueued only when one of these actually renders. A page
 without jobs on it loads nothing.
+
+## Changing the markup without touching a file
+
+**Settings → Display** covers the cases that used to need a child theme.
+
+### Listing layout
+
+Five choices: **Default** (the standard card), **Card** (image, badges and a
+summary), **Compact** (one line per job), **Columns** (aligned columns on wide
+screens, stacked on narrow ones), and **Custom**.
+
+Custom means you write the HTML. It is a *token template*, not PHP — the plugin
+never evaluates what you type, because an option that holds executable code is a
+remote code execution hole waiting for one weak administrator password. Tokens
+give the same layout freedom safely.
+
+```html
+<article class="jszr-job-card my-card">
+	<h3><a href="{permalink}">{title}</a></h3>
+	{if:location}<p class="my-card__where">{location}</p>{/if:location}
+	{if:salary}<p class="my-card__pay">{salary}</p>{/if:salary}
+	{ifnot:salary}<p class="my-card__pay">Salary on application</p>{/ifnot:salary}
+	{view_link}
+</article>
+```
+
+- `{token}` is replaced with that value, escaped for output. A token with no
+  value on a job becomes nothing at all, and a token the plugin does not
+  recognise is removed rather than printed back at a visitor.
+- `{if:token}…{/if:token}` keeps its contents only when the value is present, so
+  a missing salary does not leave a stray label or separator behind.
+- `{ifnot:token}…{/ifnot:token}` is the opposite, for "not stated" fallbacks.
+
+The **Available tags** table on that screen lists every token for your site,
+including any taxonomy you registered through `jszr_taxonomies`. `{view_link}`,
+`{apply_button}` and `{thumbnail}` produce ready-made markup; the rest are plain
+values.
+
+The HTML is filtered through an allow-list when you save: structural tags, links
+and images are kept, and `script`, `style`, `iframe`, `form` and event handler
+attributes are removed. Starting from a preset with the **Start from…** buttons
+gives you working markup to edit rather than an empty box.
+
+### Job details layout
+
+The same three-way choice for the facts block on a single job: **Default** (a
+labelled list), **Inline** (pills in a row), or **Custom** with your own token
+template. The **Fields to show** checkboxes control which facts appear in the
+two built-in layouts; a custom template decides for itself.
+
+### Search, filters and sorting
+
+Choose which taxonomy filters appear and in what order, whether the search box
+and sort dropdown are on by default, whether the bar is laid out inline or
+stacked (for a sidebar), and the placeholder and button text. A filter whose
+taxonomy has no terms yet is left out automatically.
+
+Everything still works with JavaScript off: the bar is a plain GET form.
+
+### Custom CSS
+
+A CSS box that loads only on pages showing jobs, and after the plugin
+stylesheet so it wins. Every class the plugin prints starts with `jszr-`.
+
+```css
+.jszr-job-card { border-color: #0b5cff; }
+.jszr-job-card__title { font-size: 1.3rem; }
+```
+
+Markup, `@import`, `expression()` and script URLs are stripped — on save and
+again on output, because the settings form is not the only thing that can write
+that option.
+
+### Precedence
+
+1. A template file in your theme (`yourtheme/jobs-sync-for-zoho-recruit/card.php`)
+2. A shortcode or block `layout` attribute
+3. **Settings → Display**
+4. The plugin's default card
+
+A theme override wins outright: the layout settings never run when one exists.
 
 ## Blocks
 

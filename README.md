@@ -20,7 +20,8 @@ visitor.
 | Mapping | Field mapping driven by the live field list from your Zoho account, including custom fields |
 | Syncing | Full and incremental syncs, batched over WP-Cron, resumable from a checkpoint |
 | Safety | Missing-job deactivation only after a fully successful full sync, behind a configurable percentage threshold |
-| Publishing | Shortcode, server-rendered block, classic and block theme templates, REST API, JobPosting structured data |
+| Publishing | Shortcode, three server-rendered blocks, classic and block theme templates, REST API, JobPosting structured data |
+| Appearance | Listing and job-detail layouts, custom HTML via safe tokens, custom CSS, and a configurable search / filter / sort bar — all without touching a theme file |
 
 ## Documentation
 

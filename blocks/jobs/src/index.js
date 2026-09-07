@@ -87,6 +87,65 @@ function Edit( { attributes, setAttributes } ) {
 						/>
 					) }
 					<SelectControl
+						label={ __(
+							'Card layout',
+							'jobs-sync-for-zoho-recruit'
+						) }
+						help={ __(
+							'Leave as Site default to follow Settings → Display.',
+							'jobs-sync-for-zoho-recruit'
+						) }
+						value={ attributes.listingLayout }
+						options={ [
+							{
+								label: __(
+									'Site default',
+									'jobs-sync-for-zoho-recruit'
+								),
+								value: '',
+							},
+							{
+								label: __(
+									'Default',
+									'jobs-sync-for-zoho-recruit'
+								),
+								value: 'default',
+							},
+							{
+								label: __(
+									'Card',
+									'jobs-sync-for-zoho-recruit'
+								),
+								value: 'card',
+							},
+							{
+								label: __(
+									'Compact',
+									'jobs-sync-for-zoho-recruit'
+								),
+								value: 'compact',
+							},
+							{
+								label: __(
+									'Columns',
+									'jobs-sync-for-zoho-recruit'
+								),
+								value: 'table',
+							},
+							{
+								label: __(
+									'Custom',
+									'jobs-sync-for-zoho-recruit'
+								),
+								value: 'custom',
+							},
+						] }
+						onChange={ ( listingLayout ) =>
+							setAttributes( { listingLayout } )
+						}
+						__nextHasNoMarginBottom
+					/>
+					<SelectControl
 						label={ __( 'Order by', 'jobs-sync-for-zoho-recruit' ) }
 						value={ attributes.orderby }
 						options={ [
@@ -229,6 +288,17 @@ function Edit( { attributes, setAttributes } ) {
 						onChange={ ( showSearch ) =>
 							setAttributes( { showSearch } )
 						}
+					/>
+					<ToggleControl
+						label={ __(
+							'Show sort control',
+							'jobs-sync-for-zoho-recruit'
+						) }
+						checked={ attributes.showSort }
+						onChange={ ( showSort ) =>
+							setAttributes( { showSort } )
+						}
+						__nextHasNoMarginBottom
 					/>
 					<ToggleControl
 						label={ __(

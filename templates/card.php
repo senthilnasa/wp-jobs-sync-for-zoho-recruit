@@ -12,6 +12,23 @@
 
 defined( 'ABSPATH' ) || exit;
 
+/*
+ * An administrator can choose a different layout, or write their own, on
+ * Settings → Display. Those are token templates rather than PHP, so they are
+ * rendered here and this file's markup is used only for the default layout.
+ * A theme override of this file still wins over both.
+ */
+$jszr_layout_template = \JobsSyncForZohoRecruit\Layouts::listing_template( isset( $layout ) ? (string) $layout : '' );
+
+if ( '' !== $jszr_layout_template ) {
+	echo wp_kses(
+		\JobsSyncForZohoRecruit\Template_Tags::render( $jszr_layout_template, $post_id ),
+		\JobsSyncForZohoRecruit\Layouts::allowed_html()
+	);
+
+	return;
+}
+
 $jszr_department = get_the_terms( $post_id, 'zoho_job_department' );
 $jszr_location   = get_the_terms( $post_id, 'zoho_job_location' );
 $jszr_type       = get_the_terms( $post_id, 'zoho_job_employment_type' );

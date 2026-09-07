@@ -69,6 +69,22 @@ version onwards.
   Autoptimize, extensible through `jszr_page_cache_purgers`. Every call is
   guarded, nothing is a dependency, and a purger that throws is logged and
   skipped rather than allowed to fail the sync.
+- A Display settings tab that covers the customization that previously needed a
+  child theme: listing layouts (Default, Card, Compact, Columns, Custom), job
+  detail layouts (Default, Inline, Custom), a custom CSS box, and control over
+  which search, filter and sort controls visitors get, how the filter bar is laid
+  out, and what its labels say.
+- Custom layouts are token templates — `{title}`, `{salary}`, `{apply_button}`,
+  with `{if:token}` and `{ifnot:token}` conditionals — never PHP. The plugin does
+  not evaluate what an administrator types, because an option holding executable
+  code is a remote code execution hole waiting for one weak password. Template
+  HTML is filtered through an allow-list on save, token values are escaped as
+  they are substituted, and unrecognised tokens are dropped rather than printed.
+  Custom CSS is stripped of markup, `@import`, `expression()` and script URLs on
+  save and again on output.
+- A sort control for visitors (newest, oldest, title, closing soonest), off by
+  default, sharing the same GET form and the same validation as the REST
+  endpoint so it keeps working with JavaScript disabled.
 - Taxonomies registered through `jszr_taxonomies` now become REST parameters,
   shortcode attributes, `/jobs/filters` entries and labelled filter dropdowns
   automatically, with no second registration through `jszr_filter_map`.

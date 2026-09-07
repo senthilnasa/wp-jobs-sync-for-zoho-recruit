@@ -7,10 +7,19 @@
 	"category": "widgets",
 	"icon": "businessperson",
 	"description": "Show job openings synchronized from Zoho Recruit.",
-	"keywords": [ "jobs", "careers", "vacancies", "recruit", "hiring" ],
+	"keywords": [
+		"jobs",
+		"careers",
+		"vacancies",
+		"recruit",
+		"hiring"
+	],
 	"textdomain": "jobs-sync-for-zoho-recruit",
 	"supports": {
-		"align": [ "wide", "full" ],
+		"align": [
+			"wide",
+			"full"
+		],
 		"html": false,
 		"anchor": true,
 		"spacing": {
@@ -92,6 +101,14 @@
 		"showExcerpt": {
 			"type": "boolean",
 			"default": true
+		},
+		"listingLayout": {
+			"type": "string",
+			"default": ""
+		},
+		"showSort": {
+			"type": "boolean",
+			"default": false
 		}
 	},
 	"editorScript": "file:./build/index.js",

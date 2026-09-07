@@ -220,10 +220,14 @@ class Blocks {
 			'orderby'         => isset( $attributes['orderby'] ) ? sanitize_key( (string) $attributes['orderby'] ) : 'date',
 			'order'           => isset( $attributes['order'] ) ? sanitize_key( (string) $attributes['order'] ) : 'desc',
 			'style'           => isset( $attributes['listingStyle'] ) ? sanitize_key( (string) $attributes['listingStyle'] ) : (string) Settings::get( 'default_style', 'list' ),
+			// An empty layout means "whatever Settings → Display says", so a site
+			// can restyle every listing at once without editing each block.
+			'layout'          => ! empty( $attributes['listingLayout'] ) ? sanitize_key( (string) $attributes['listingLayout'] ) : (string) Settings::get( 'listing_layout', 'default' ),
 			'columns'         => isset( $attributes['columns'] ) ? (int) $attributes['columns'] : 3,
 			'show_filters'    => ! empty( $attributes['showFilters'] ) ? 'true' : 'false',
 			'show_search'     => ! empty( $attributes['showSearch'] ) ? 'true' : 'false',
 			'show_pagination' => ! empty( $attributes['showPagination'] ) ? 'true' : 'false',
+			'show_sort'       => ! empty( $attributes['showSort'] ) ? 'true' : 'false',
 			'show_excerpt'    => ! empty( $attributes['showExcerpt'] ) ? 'true' : 'false',
 			'status'          => 'active',
 		);

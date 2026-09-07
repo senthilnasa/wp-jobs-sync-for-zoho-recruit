@@ -24,7 +24,8 @@ The sync runs in one direction only: Zoho Recruit is the source of truth, WordPr
 * Runs full and incremental syncs in the background, in batches, so a large account never times out a web request.
 * Resumes an interrupted sync from its last checkpoint, and never deactivates jobs because a sync failed halfway.
 * Handles closed, expired and deleted jobs according to rules you choose.
-* Publishes jobs through a shortcode, a block, theme templates, the WordPress REST API and JobPosting structured data.
+* Publishes jobs through a shortcode, three blocks, theme templates, the WordPress REST API and JobPosting structured data.
+* Lets you restyle the listing and the job details from the admin: pick a layout, write your own HTML with simple tags, add custom CSS, and choose which search, filter and sort controls visitors get - all without editing a theme file.
 
 **Safety first**
 
@@ -127,6 +128,12 @@ Only for scheduled syncing. If `DISABLE_WP_CRON` is set, point a system cron job
 = Can I change the job URLs? =
 
 Yes, on the Frontend settings tab. Rewrite rules are flushed automatically when the slug changes. Existing job slugs stay stable even when the job title changes in Zoho, so published links keep working.
+
+= Can I change how the jobs look without editing theme files? =
+
+Yes. **Settings -> Display** has layouts for the listing (Default, Card, Compact, Columns) and for the job details block (Default, Inline), a custom HTML option for both, a custom CSS box, and controls for which search, filter and sort options visitors see.
+
+Custom HTML uses simple tags rather than PHP: `{title}`, `{location}`, `{salary}`, `{apply_button}` and so on, with `{if:salary}...{/if:salary}` to drop a section when a job has no value for it. The screen lists every tag available on your site. The plugin never runs what you type - storing executable code in a setting would be a security hole - and the HTML is filtered through an allow-list when you save.
 
 = How do I customize the markup? =
 

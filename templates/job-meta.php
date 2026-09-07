@@ -12,13 +12,20 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$jszr_taxonomies = array(
-	'department'      => 'zoho_job_department',
-	'location'        => 'zoho_job_location',
-	'employment_type' => 'zoho_job_employment_type',
-	'category'        => 'zoho_job_category',
-	'experience'      => 'zoho_job_experience',
-);
+// As with the card, a chosen or custom layout is a token template.
+$jszr_info_template = \JobsSyncForZohoRecruit\Layouts::job_info_template();
+
+if ( '' !== $jszr_info_template ) {
+	echo wp_kses(
+		\JobsSyncForZohoRecruit\Template_Tags::render( $jszr_info_template, $post_id ),
+		\JobsSyncForZohoRecruit\Layouts::allowed_html()
+	);
+
+	return;
+}
+
+// Derived, so a taxonomy registered through jszr_taxonomies is displayable too.
+$jszr_taxonomies = \JobsSyncForZohoRecruit\REST_API::filter_map();
 
 $jszr_meta_fields = array(
 	'job_code'     => array( '_jszr_job_code', __( 'Job code', 'jobs-sync-for-zoho-recruit' ), 'text' ),
@@ -31,13 +38,7 @@ $jszr_meta_fields = array(
 	'closing_date' => array( '_zoho_recruit_closing_date', __( 'Closes', 'jobs-sync-for-zoho-recruit' ), 'date' ),
 );
 
-$jszr_labels = array(
-	'department'      => __( 'Department', 'jobs-sync-for-zoho-recruit' ),
-	'location'        => __( 'Location', 'jobs-sync-for-zoho-recruit' ),
-	'employment_type' => __( 'Employment type', 'jobs-sync-for-zoho-recruit' ),
-	'category'        => __( 'Category', 'jobs-sync-for-zoho-recruit' ),
-	'experience'      => __( 'Experience', 'jobs-sync-for-zoho-recruit' ),
-);
+$jszr_labels = \JobsSyncForZohoRecruit\Settings::available_job_info_fields();
 
 $jszr_rows = array();
 
@@ -49,7 +50,7 @@ foreach ( (array) $fields as $jszr_field ) {
 
 		if ( is_array( $jszr_terms ) && ! empty( $jszr_terms ) ) {
 			$jszr_rows[] = array(
-				'label' => $jszr_labels[ $jszr_field ],
+				'label' => isset( $jszr_labels[ $jszr_field ] ) ? $jszr_labels[ $jszr_field ] : $jszr_field,
 				'value' => implode( ', ', wp_list_pluck( $jszr_terms, 'name' ) ),
 			);
 		}

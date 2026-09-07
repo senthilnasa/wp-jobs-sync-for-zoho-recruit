@@ -210,9 +210,47 @@
 		} );
 	}
 
+	/**
+	 * Load a built-in layout into a template box, so an administrator editing
+	 * their own HTML starts from working markup rather than an empty field.
+	 */
+	function initPresets() {
+		document.addEventListener( 'click', function ( event ) {
+			const button = event.target.closest( '.jszr-copy-preset' );
+
+			if ( ! button ) {
+				return;
+			}
+
+			event.preventDefault();
+
+			const target = document.getElementById(
+				button.getAttribute( 'data-jszr-target' )
+			);
+
+			if ( ! target ) {
+				return;
+			}
+
+			// Only ask when there is something to lose.
+			if ( target.value.trim() !== '' ) {
+				// eslint-disable-next-line no-alert
+				const confirmed = window.confirm( i18n.replaceTemplate || '' );
+
+				if ( ! confirmed ) {
+					return;
+				}
+			}
+
+			target.value = button.getAttribute( 'data-jszr-preset' ) || '';
+			target.focus();
+		} );
+	}
+
 	document.addEventListener( 'DOMContentLoaded', function () {
 		initMapping();
 		initProgress();
 		initConfirm();
+		initPresets();
 	} );
 } )( window.wp, window.jszrAdmin );

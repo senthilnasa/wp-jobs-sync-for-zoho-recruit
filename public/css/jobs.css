@@ -231,6 +231,104 @@
 	outline-offset: 2px;
 }
 
+/* Layout presets ---------------------------------------------------------- */
+
+.jszr-tag {
+	display: inline-block;
+	padding: 0.15em 0.6em;
+	margin-inline-end: 0.35em;
+	border: 1px solid currentcolor;
+	border-radius: 999px;
+	font-size: 0.8em;
+	line-height: 1.6;
+	opacity: 0.85;
+}
+
+.jszr-job-card__badges {
+	margin: 0;
+}
+
+.jszr-job-card__media img {
+	display: block;
+	inline-size: 100%;
+	block-size: auto;
+	border-radius: calc(var(--jszr-radius) - 2px);
+}
+
+/* Compact: one line per job, with the facts subdued. */
+.jszr-job-card--compact {
+	gap: 0.25rem;
+	padding: 0.9rem 1rem;
+}
+
+.jszr-job-card--compact .jszr-job-card__title {
+	font-size: 1.05em;
+}
+
+.jszr-job-card--compact .jszr-job-card__footer {
+	padding-block-start: 0;
+}
+
+/*
+ * Columns: aligned columns on wide screens, stacked on narrow ones. This is a
+ * grid over list markup rather than a real table, because a job listing is a
+ * list of things and screen readers should hear it that way.
+ */
+.jszr-jobs--layout-table .jszr-jobs__list {
+	gap: 0;
+}
+
+.jszr-job-card--table {
+	display: grid;
+	gap: 0.25rem 1rem;
+	padding: 0.85rem 1rem;
+	border-radius: 0;
+	border-block-end: none;
+}
+
+.jszr-jobs--layout-table .jszr-jobs__item:last-child .jszr-job-card--table {
+	border-block-end: var(--jszr-border);
+}
+
+.jszr-job-card__col {
+	min-inline-size: 0;
+}
+
+@media (min-width: 48em) {
+
+	.jszr-job-card--table {
+		grid-template-columns: 3fr 2fr 2fr 1.5fr auto;
+		align-items: center;
+	}
+
+	.jszr-job-card--table .jszr-job-card__col:not(.jszr-job-card__title) {
+		font-size: 0.92em;
+		opacity: 0.72;
+	}
+
+	.jszr-job-card__col--action {
+		text-align: end;
+	}
+}
+
+/* Filters: stacked variant for narrow columns and sidebars. */
+.jszr-filters--stacked {
+	flex-direction: column;
+	align-items: stretch;
+}
+
+.jszr-filters--stacked .jszr-filters__field {
+	flex: 1 1 auto;
+	min-inline-size: 0;
+}
+
+.jszr-job-meta--inline {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.35rem;
+	margin: 0.75rem 0 1.5rem;
+}
+
 /* Block style variation --------------------------------------------------- */
 
 .is-style-bordered.wp-block-jobs-sync-for-zoho-recruit-jobs {

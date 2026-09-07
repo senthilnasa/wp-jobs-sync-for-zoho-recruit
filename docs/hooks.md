@@ -226,6 +226,54 @@ add_filter( 'jszr_structured_data', function ( $schema, $post ) {
 add_filter( 'jszr_seo_plugin_handles_schema', '__return_false' );
 ```
 
+### Layouts and custom markup
+
+```php
+apply_filters( 'jszr_listing_presets',       array $presets );
+apply_filters( 'jszr_job_info_presets',      array $presets );
+apply_filters( 'jszr_allowed_template_html', array $allowed );
+apply_filters( 'jszr_template_tag_values',   array $values, int $post_id );
+apply_filters( 'jszr_rendered_template',     string $markup, string $template, int $post_id );
+apply_filters( 'jszr_visible_filters',       array $params );
+apply_filters( 'jszr_custom_css',            string $css );
+```
+
+Layouts written on **Settings → Display** are token templates, never PHP. These
+filters extend that system rather than escaping it.
+
+```php
+// Add a token of your own. Every value must arrive already escaped: nothing
+// here is escaped again when it is substituted.
+add_filter( 'jszr_template_tag_values', function ( $values, $post_id ) {
+	$values['reference'] = esc_html( 'REF-' . $post_id );
+
+	return $values;
+}, 10, 2 );
+
+// Offer another built-in layout in the dropdown.
+add_filter( 'jszr_listing_presets', function ( $presets ) {
+	$presets['banner'] = '<article class="jszr-job-card my-banner"><h3>{title}</h3>{apply_button}</article>';
+
+	return $presets;
+} );
+
+// Allow one more tag in custom templates.
+add_filter( 'jszr_allowed_template_html', function ( $allowed ) {
+	$allowed['svg'] = array( 'class' => true, 'viewbox' => true );
+
+	return $allowed;
+} );
+
+// Hide a filter from the front end while keeping it in the admin.
+add_filter( 'jszr_visible_filters', function ( $params ) {
+	return array_diff( $params, array( 'category' ) );
+} );
+```
+
+`jszr_allowed_template_html` is a security boundary. Whatever you add here can
+be written into a page by anyone who can edit plugin settings, so add tags, not
+`script`, `style` or event handler attributes.
+
 ### Titles and meta descriptions
 
 ```php
