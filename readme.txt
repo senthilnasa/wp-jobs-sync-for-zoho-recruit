@@ -1,7 +1,7 @@
 === Jobs Sync for Zoho Recruit ===
 Contributors: senthilnasa
 Tags: jobs, careers, recruitment, job board, hiring
-Requires at least: 6.2
+Requires at least: 6.6
 Tested up to: 6.7
 Requires PHP: 8.1
 Stable tag: 1.0.0

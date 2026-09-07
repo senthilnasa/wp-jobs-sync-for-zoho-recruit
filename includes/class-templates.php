@@ -36,6 +36,10 @@ class Templates {
 		add_filter( 'template_include', array( __CLASS__, 'template_include' ), 20 );
 		add_action( 'template_redirect', array( __CLASS__, 'handle_expired_job' ) );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'register_assets' ) );
+
+		// block.json names jszr-jobs as the block's style, so the handle has to
+		// exist in the editor too or the preview renders unstyled.
+		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'register_assets' ) );
 		add_action( 'pre_get_posts', array( __CLASS__, 'filter_archive_query' ) );
 
 		if ( function_exists( 'register_block_template' ) ) {

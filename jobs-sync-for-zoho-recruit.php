@@ -4,7 +4,7 @@
  * Plugin URI:        https://github.com/senthilnasa/wp-jobs-sync-for-zoho-recruit
  * Description:       Synchronizes Job Openings from Zoho Recruit into WordPress as a custom post type, with OAuth 2.0, field mapping, background sync, REST API, shortcode and block.
  * Version:           1.0.0
- * Requires at least: 6.2
+ * Requires at least: 6.6
  * Requires PHP:      8.1
  * Author:            senthilnasa
  * Author URI:        https://github.com/senthilnasa

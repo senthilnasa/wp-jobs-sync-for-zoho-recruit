@@ -8,7 +8,7 @@ is the published copy. Zoho is never contacted while rendering a page for a
 visitor.
 
 - **Plugin slug:** `jobs-sync-for-zoho-recruit`
-- **Requires:** WordPress 6.2+, PHP 8.1+
+- **Requires:** WordPress 6.6+, PHP 8.1+
 - **License:** GPL-2.0-or-later
 
 ## What it does
