@@ -14,6 +14,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
+
 	.jszr-jobs {
 		--jszr-border: 1px solid rgba(255, 255, 255, 0.18);
 		--jszr-muted: rgba(255, 255, 255, 0.7);
@@ -200,7 +201,7 @@
 .jszr-apply-button {
 	display: inline-block;
 	padding: 0.7rem 1.4rem;
-	border: 2px solid currentColor;
+	border: 2px solid currentcolor;
 	border-radius: var(--jszr-radius, 6px);
 	background: transparent;
 	color: inherit;
@@ -211,7 +212,7 @@
 .jszr-apply-button:focus-visible,
 .jszr-filters__submit:focus-visible,
 .jszr-job-card__title a:focus-visible {
-	outline: 2px solid currentColor;
+	outline: 2px solid currentcolor;
 	outline-offset: 2px;
 }
 
@@ -228,6 +229,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
+
 	.is-style-bordered.wp-block-jobs-sync-for-zoho-recruit-jobs {
 		border-color: rgba(255, 255, 255, 0.18);
 	}

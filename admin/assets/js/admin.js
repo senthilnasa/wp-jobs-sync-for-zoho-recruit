@@ -3,6 +3,9 @@
  *
  * Every request goes through wp.apiFetch, which attaches the REST nonce, and
  * every endpoint it calls performs its own capability check on the server.
+ *
+ * @param {Object} wp       The WordPress global, for wp.apiFetch.
+ * @param {Object} settings The localized jszrAdmin settings object.
  */
 ( function ( wp, settings ) {
 	'use strict';
@@ -11,23 +14,24 @@
 		return;
 	}
 
-	var apiFetch = wp && wp.apiFetch ? wp.apiFetch : null;
-	var i18n = settings.i18n || {};
+	const apiFetch = wp && wp.apiFetch ? wp.apiFetch : null;
+	const i18n = settings.i18n || {};
 
 	/**
 	 * Add and remove field mapping rows.
 	 */
 	function initMapping() {
-		var container = document.getElementById( 'jszr-mapping-rows' );
-		var template = document.getElementById( 'jszr-mapping-template' );
-		var addButton = document.getElementById( 'jszr-add-row' );
+		const container = document.getElementById( 'jszr-mapping-rows' );
 
 		if ( ! container ) {
 			return;
 		}
 
+		const template = document.getElementById( 'jszr-mapping-template' );
+		const addButton = document.getElementById( 'jszr-add-row' );
+
 		container.addEventListener( 'click', function ( event ) {
-			var button = event.target.closest( '.jszr-remove-row' );
+			const button = event.target.closest( '.jszr-remove-row' );
 
 			if ( ! button ) {
 				return;
@@ -35,7 +39,7 @@
 
 			event.preventDefault();
 
-			var row = button.closest( '.jszr-mapping-row' );
+			const row = button.closest( '.jszr-mapping-row' );
 
 			if ( row && row.parentNode ) {
 				row.parentNode.removeChild( row );
@@ -46,20 +50,23 @@
 			return;
 		}
 
-		var nextIndex = container.querySelectorAll( '.jszr-mapping-row' ).length;
+		let nextIndex =
+			container.querySelectorAll( '.jszr-mapping-row' ).length;
 
 		addButton.addEventListener( 'click', function () {
-			var markup = template.innerHTML.split( '__INDEX__' ).join( 'new' + nextIndex );
-			var holder = document.createElement( 'tbody' );
+			const markup = template.innerHTML
+				.split( '__INDEX__' )
+				.join( 'new' + nextIndex );
+			const holder = document.createElement( 'tbody' );
 
 			holder.innerHTML = markup;
 
-			var row = holder.querySelector( '.jszr-mapping-row' );
+			const row = holder.querySelector( '.jszr-mapping-row' );
 
 			if ( row ) {
 				container.appendChild( row );
 
-				var firstField = row.querySelector( 'select' );
+				const firstField = row.querySelector( 'select' );
 
 				if ( firstField ) {
 					firstField.focus();
@@ -74,22 +81,22 @@
 	 * Poll the protected status endpoint while a sync is running.
 	 */
 	function initProgress() {
-		var panel = document.getElementById( 'jszr-sync-progress' );
+		const panel = document.getElementById( 'jszr-sync-progress' );
 
 		if ( ! panel || ! apiFetch ) {
 			return;
 		}
 
-		var runId = parseInt( panel.getAttribute( 'data-run-id' ), 10 );
+		const runId = parseInt( panel.getAttribute( 'data-run-id' ), 10 );
 
 		if ( ! runId ) {
 			return;
 		}
 
-		var bar = panel.querySelector( '.jszr-progress-bar' );
-		var fill = panel.querySelector( '.jszr-progress-fill' );
-		var text = panel.querySelector( '.jszr-progress-text' );
-		var timer = null;
+		const bar = panel.querySelector( '.jszr-progress-bar' );
+		const fill = panel.querySelector( '.jszr-progress-fill' );
+		const text = panel.querySelector( '.jszr-progress-text' );
+		let timer = null;
 
 		function stop( message ) {
 			if ( timer ) {
@@ -104,58 +111,84 @@
 
 		function poll() {
 			apiFetch( {
-				path: '/' + settings.restNamespace + '/sync/status?run_id=' + runId
-			} ).then( function ( response ) {
-				var run = response && response.data ? response.data.run : null;
+				path:
+					'/' +
+					settings.restNamespace +
+					'/sync/status?run_id=' +
+					runId,
+			} )
+				.then( function ( response ) {
+					const run =
+						response && response.data ? response.data.run : null;
 
-				if ( ! run ) {
+					if ( ! run ) {
+						stop( i18n.genericError || '' );
+						return;
+					}
+
+					const total = parseInt( run.total, 10 ) || 0;
+					const processed = parseInt( run.processed, 10 ) || 0;
+					const percent =
+						total > 0
+							? Math.min(
+									100,
+									Math.round( ( processed / total ) * 100 )
+							  )
+							: 0;
+
+					if ( fill ) {
+						fill.style.width = percent + '%';
+					}
+
+					if ( bar ) {
+						bar.setAttribute( 'aria-valuenow', String( percent ) );
+					}
+
+					if ( text ) {
+						text.textContent = [
+							( i18n.processed || 'Processed' ) +
+								': ' +
+								processed +
+								( total ? ' / ' + total : '' ),
+							( i18n.page || 'Page' ) + ': ' + run.page,
+							run.state,
+						].join( ' — ' );
+					}
+
+					if (
+						[
+							'completed',
+							'failed',
+							'partial',
+							'cancelled',
+						].indexOf( run.state ) !== -1
+					) {
+						stop(
+							'failed' === run.state
+								? i18n.syncFailed || ''
+								: i18n.syncComplete || ''
+						);
+
+						window.setTimeout( function () {
+							window.location.reload();
+						}, 1500 );
+					}
+				} )
+				.catch( function () {
 					stop( i18n.genericError || '' );
-					return;
-				}
-
-				var total = parseInt( run.total, 10 ) || 0;
-				var processed = parseInt( run.processed, 10 ) || 0;
-				var percent = total > 0 ? Math.min( 100, Math.round( ( processed / total ) * 100 ) ) : 0;
-
-				if ( fill ) {
-					fill.style.width = percent + '%';
-				}
-
-				if ( bar ) {
-					bar.setAttribute( 'aria-valuenow', String( percent ) );
-				}
-
-				if ( text ) {
-					text.textContent = [
-						( i18n.processed || 'Processed' ) + ': ' + processed + ( total ? ' / ' + total : '' ),
-						( i18n.page || 'Page' ) + ': ' + run.page,
-						run.state
-					].join( ' — ' );
-				}
-
-				if ( [ 'completed', 'failed', 'partial', 'cancelled' ].indexOf( run.state ) !== -1 ) {
-					stop(
-						'failed' === run.state
-							? ( i18n.syncFailed || '' )
-							: ( i18n.syncComplete || '' )
-					);
-
-					window.setTimeout( function () {
-						window.location.reload();
-					}, 1500 );
-				}
-			} ).catch( function () {
-				stop( i18n.genericError || '' );
-			} );
+				} );
 		}
 
 		panel.hidden = false;
 		poll();
-		timer = window.setInterval( poll, parseInt( settings.pollInterval, 10 ) || 3000 );
+		timer = window.setInterval(
+			poll,
+			parseInt( settings.pollInterval, 10 ) || 3000
+		);
 	}
 
 	document.addEventListener( 'DOMContentLoaded', function () {
 		initMapping();
 		initProgress();
 	} );
-}( window.wp, window.jszrAdmin ) );
+} )( window.wp, window.jszrAdmin );

@@ -7,6 +7,13 @@ the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 
 ## [1.0.0] - 2026-09-07
 
+First release.
+
+Requires WordPress 6.6 or newer and PHP 8.1 or newer. The 6.6 floor comes from
+the block editor asset, which is built with the automatic JSX runtime and so
+depends on the `react-jsx-runtime` script handle WordPress registers from that
+version onwards.
+
 ### Added
 
 - OAuth 2.0 connection to Zoho Recruit with a random, expiring `state`

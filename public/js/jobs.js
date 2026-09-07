@@ -17,7 +17,7 @@
 	 */
 	function resetPaging( form ) {
 		form.addEventListener( 'submit', function () {
-			var stale = form.querySelector( 'input[name="jszr_page"]' );
+			const stale = form.querySelector( 'input[name="jszr_page"]' );
 
 			if ( stale && stale.parentNode ) {
 				stale.parentNode.removeChild( stale );
@@ -32,7 +32,7 @@
 	 * @param {HTMLFormElement} form Filter form.
 	 */
 	function markBusy( form ) {
-		var results = document.querySelector( '.jszr-jobs__results' );
+		const results = document.querySelector( '.jszr-jobs__results' );
 
 		if ( ! results ) {
 			return;
@@ -49,13 +49,13 @@
 	 * @param {HTMLFormElement} form Filter form.
 	 */
 	function toggleReset( form ) {
-		var reset = form.querySelector( '.jszr-filters__reset' );
+		const reset = form.querySelector( '.jszr-filters__reset' );
 
 		if ( ! reset ) {
 			return;
 		}
 
-		var hasValue = Array.prototype.some.call(
+		const hasValue = Array.prototype.some.call(
 			form.querySelectorAll( 'select, input[type="search"]' ),
 			function ( field ) {
 				return field.value !== '';
@@ -68,7 +68,7 @@
 	}
 
 	document.addEventListener( 'DOMContentLoaded', function () {
-		var forms = document.querySelectorAll( '.jszr-filters' );
+		const forms = document.querySelectorAll( '.jszr-filters' );
 
 		Array.prototype.forEach.call( forms, function ( form ) {
 			resetPaging( form );
@@ -76,4 +76,4 @@
 			toggleReset( form );
 		} );
 	} );
-}() );
+} )();
