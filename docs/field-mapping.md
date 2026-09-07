@@ -158,9 +158,21 @@ The third mode works by storing a hash of each field's last synced value in
 Zoho last wrote, it is safe to update; if it does not, someone edited it in
 WordPress and the plugin backs off.
 
-To give a hand-edited job back to Zoho, use **Resync from Zoho** on the job's
-edit screen — that clears the guard for that job and rewrites it from the
-current record.
+That guard is deliberate, so **Resync from Zoho** respects it too: a resync
+re-reads the record but still leaves your edits alone.
+
+To hand a job back to Zoho, use **Reset to Zoho values**, which appears beside
+the resync action on the job list and in the Zoho Recruit metabox whenever this
+mode is active. It asks for confirmation, then rewrites every mapped field from
+the current record and re-arms the guard against the new values.
+
+The reset is per-job and deliberately narrower than *Zoho always overwrites*:
+it replaces the mapped fields and nothing else, so meta another plugin attached
+to the job survives.
+
+Switching the whole site back to *Zoho updates mapped fields only* has the same
+effect on every job at once, with no way to undo it — prefer the per-job reset
+unless you really do want to abandon every local edit.
 
 ## Export and import
 

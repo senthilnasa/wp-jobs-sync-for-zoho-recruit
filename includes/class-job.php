@@ -137,6 +137,7 @@ class Job {
 		$record  = isset( $context['record'] ) && is_array( $context['record'] ) ? $context['record'] : array();
 		$status  = isset( $context['status'] ) ? (string) $context['status'] : 'active';
 		$dry_run = ! empty( $context['dry_run'] );
+		$force   = ! empty( $context['force'] );
 
 		$post_id = self::find_by_zoho_id( $zoho_id );
 
@@ -163,7 +164,16 @@ class Job {
 		}
 
 		try {
-			$mode      = (string) Settings::get( 'conflict_mode', 'mapped_only' );
+			$mode = (string) Settings::get( 'conflict_mode', 'mapped_only' );
+
+			// A forced reset is the administrator saying "discard my edits and
+			// take Zoho's values". It overrides preserve mode for this write
+			// only, and stops short of overwrite_all so unmapped meta the site
+			// added for its own purposes still survives.
+			if ( $force && 'preserve_manual' === $mode ) {
+				$mode = 'mapped_only';
+			}
+
 			$hashes    = $post_id ? (array) get_post_meta( $post_id, self::META_HASH, true ) : array();
 			$is_create = ! $post_id;
 

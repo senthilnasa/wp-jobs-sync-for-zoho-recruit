@@ -67,6 +67,8 @@ class Plugin {
 		Post_Type::init();
 		Templates::init();
 		Structured_Data::init();
+		SEO::init();
+		Page_Cache::init();
 		Privacy::init();
 		Site_Health::init();
 		Shortcode::init();

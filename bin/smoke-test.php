@@ -312,6 +312,146 @@ function jszr_run_smoke_test( array $cli_args ) {
 	$expired  = $sync->expire_due_jobs( true );
 	$checks[] = jszr_smoke_check( is_int( $expired ), 'dry-run expiry sweep runs', (string) $expired );
 
+	// Block renderers. All three are server rendered, so they can be exercised
+	// here without an editor. Earlier checks ran template code that leaves a
+	// global post behind, so clear it before asserting the no-context case.
+	wp_reset_postdata();
+	$GLOBALS['post'] = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Clearing the loop state the earlier checks left behind.
+
+	$jszr_meta_markup = \JobsSyncForZohoRecruit\Blocks::render_job_meta(
+		array( 'fields' => 'department,location,employment_type' ),
+		'',
+		null
+	);
+
+	$checks[] = jszr_smoke_check(
+		'' === $jszr_meta_markup,
+		'job meta block renders nothing outside a job',
+		$jszr_meta_markup
+	);
+
+	$GLOBALS['post'] = get_post( $first ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Simulating the loop for a render-callback check.
+	setup_postdata( $GLOBALS['post'] );
+
+	$jszr_meta_markup = \JobsSyncForZohoRecruit\Blocks::render_job_meta(
+		array( 'fields' => 'department,location' ),
+		'',
+		null
+	);
+
+	$checks[] = jszr_smoke_check(
+		false !== strpos( $jszr_meta_markup, 'jszr-job-meta' ) && false !== strpos( $jszr_meta_markup, 'Engineering' ),
+		'job meta block renders the job facts inside the loop'
+	);
+
+	$jszr_apply_markup = \JobsSyncForZohoRecruit\Blocks::render_apply_button( array(), '', null );
+
+	$checks[] = jszr_smoke_check(
+		false !== strpos( $jszr_apply_markup, 'jszr-apply-button' ),
+		'apply button block renders for an active job'
+	);
+
+	$checks[] = jszr_smoke_check(
+		false !== strpos( $jszr_apply_markup, 'rel="noopener nofollow"' ),
+		'apply link carries rel="noopener nofollow"'
+	);
+
+	wp_reset_postdata();
+
+	$GLOBALS['post'] = get_post( $second ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Simulating the loop for a render-callback check.
+	setup_postdata( $GLOBALS['post'] );
+
+	$checks[] = jszr_smoke_check(
+		'' === \JobsSyncForZohoRecruit\Blocks::render_apply_button( array(), '', null ),
+		'apply button block renders nothing for a closed job'
+	);
+
+	wp_reset_postdata();
+	$GLOBALS['post'] = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring the global after the loop simulation.
+
+	// Titles and descriptions offered to SEO plugins.
+	$jszr_title = \JobsSyncForZohoRecruit\SEO::job_title( $first );
+
+	$checks[] = jszr_smoke_check(
+		false !== strpos( $jszr_title, 'Senior PHP Developer' ) && false !== strpos( $jszr_title, 'Chennai' ),
+		'SEO title includes the job and its most specific location',
+		$jszr_title
+	);
+
+	$jszr_description = \JobsSyncForZohoRecruit\SEO::meta_description( $first );
+
+	$checks[] = jszr_smoke_check(
+		'' !== $jszr_description && false === strpos( $jszr_description, '<' ),
+		'SEO description is present and free of markup',
+		$jszr_description
+	);
+
+	// Forced reset overrides the preserve-edits conflict mode.
+	$jszr_conflict_before = jszr_get_setting( 'conflict_mode' );
+
+	\JobsSyncForZohoRecruit\Settings::update( array( 'conflict_mode' => 'preserve_manual' ) );
+
+	wp_update_post(
+		array(
+			'ID'         => $first,
+			'post_title' => 'Edited By Hand',
+		)
+	);
+
+	$jszr_payload = plugin()->mapper()->map( $jszr_records[0] );
+
+	Job::upsert( $jszr_records[0]['id'], $jszr_payload, array( 'status' => 'active' ) );
+
+	$checks[] = jszr_smoke_check(
+		'Edited By Hand' === get_the_title( $first ),
+		'a plain resync preserves a manual edit',
+		get_the_title( $first )
+	);
+
+	Job::upsert(
+		$jszr_records[0]['id'],
+		$jszr_payload,
+		array(
+			'status' => 'active',
+			'force'  => true,
+		)
+	);
+
+	$checks[] = jszr_smoke_check(
+		'Senior PHP Developer' === get_the_title( $first ),
+		'a forced reset restores the Zoho values',
+		get_the_title( $first )
+	);
+
+	\JobsSyncForZohoRecruit\Settings::update( array( 'conflict_mode' => $jszr_conflict_before ) );
+
+	// Page cache purging is best effort and must never throw.
+	$jszr_purge_ran = false;
+
+	add_filter(
+		'jszr_page_cache_purgers',
+		static function ( $purgers ) use ( &$jszr_purge_ran ) {
+			$purgers['smoke-test'] = static function () use ( &$jszr_purge_ran ) {
+				$jszr_purge_ran = true;
+
+				return true;
+			};
+
+			$purgers['smoke-test-throws'] = static function () {
+				throw new RuntimeException( 'a caching plugin blew up' );
+			};
+
+			return $purgers;
+		}
+	);
+
+	$sync->invalidate_caches();
+
+	$checks[] = jszr_smoke_check( $jszr_purge_ran, 'page cache purgers run when caches are invalidated' );
+	$checks[] = jszr_smoke_check( true, 'a purger that throws does not break the sync' );
+
+	remove_all_filters( 'jszr_page_cache_purgers' );
+
 	$failed = count(
 		array_filter(
 			$checks,

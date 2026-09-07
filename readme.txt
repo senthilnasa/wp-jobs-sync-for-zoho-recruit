@@ -45,6 +45,16 @@ Supported attributes: `per_page`, `search`, `department`, `location`, `employmen
 
 Two smaller shortcodes are available for single job layouts: `[zoho_job_apply]` and `[zoho_job_meta]`.
 
+**Blocks**
+
+Three blocks, all server rendered so the editor preview is the real output:
+
+* **Zoho Recruit Jobs** - a listing, with the shortcode options in the inspector.
+* **Job Details** - the department, location, employment type and other facts for one job.
+* **Apply Button** - a link to the application form, which renders nothing when a job is closed or has no application URL.
+
+The two single-job blocks read the job from block context, so they work inside a single job template, a query loop, or the editor.
+
 **REST API**
 
 `GET /wp-json/jobs-sync-zoho-recruit/v1/jobs`
@@ -120,7 +130,7 @@ Yes, on the Frontend settings tab. Rewrite rules are flushed automatically when 
 
 = How do I customize the markup? =
 
-Copy any file from the plugin's `templates/` directory into `yourtheme/jobs-sync-for-zoho-recruit/` and edit it there. Block themes can use the bundled block templates or build their own layout in the Site Editor with the job meta and Apply shortcodes.
+Copy any file from the plugin's `templates/` directory into `yourtheme/jobs-sync-for-zoho-recruit/` and edit it there. Block themes can use the bundled block templates or build their own layout in the Site Editor with the Job Details and Apply Button blocks.
 
 = Does it work on multisite? =
 

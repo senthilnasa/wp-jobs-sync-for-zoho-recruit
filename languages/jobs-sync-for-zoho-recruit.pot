@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-07T13:08:54+00:00\n"
+"POT-Creation-Date: 2026-09-07T15:42:05+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: jobs-sync-for-zoho-recruit\n"
@@ -47,7 +47,7 @@ msgstr ""
 
 #: admin/views/dashboard.php:26
 #: admin/views/settings.php:210
-#: includes/class-admin.php:343
+#: includes/class-admin.php:344
 msgid "Connection"
 msgstr ""
 
@@ -113,8 +113,8 @@ msgstr ""
 #: admin/views/dashboard.php:93
 #: admin/views/settings.php:468
 #: admin/views/settings.php:518
-#: includes/class-admin.php:1045
-#: includes/class-admin.php:1085
+#: includes/class-admin.php:1075
+#: includes/class-admin.php:1115
 msgid "Active"
 msgstr ""
 
@@ -122,31 +122,31 @@ msgstr ""
 #: admin/views/dashboard.php:213
 #: admin/views/logs.php:34
 #: admin/views/settings.php:471
-#: includes/class-admin.php:1047
-#: includes/class-admin.php:1087
+#: includes/class-admin.php:1077
+#: includes/class-admin.php:1117
 msgid "Expired"
 msgstr ""
 
 #: admin/views/dashboard.php:95
 #: admin/views/settings.php:469
 #: admin/views/settings.php:519
-#: includes/class-admin.php:1046
-#: includes/class-admin.php:1086
+#: includes/class-admin.php:1076
+#: includes/class-admin.php:1116
 msgid "Inactive"
 msgstr ""
 
 #: admin/views/dashboard.php:96
 #: admin/views/settings.php:470
-#: includes/class-admin.php:1048
-#: includes/class-admin.php:1088
+#: includes/class-admin.php:1078
+#: includes/class-admin.php:1118
 msgid "Closed"
 msgstr ""
 
 #: admin/views/dashboard.php:97
 #: admin/views/settings.php:472
 #: admin/views/settings.php:520
-#: includes/class-admin.php:1049
-#: includes/class-admin.php:1089
+#: includes/class-admin.php:1079
+#: includes/class-admin.php:1119
 msgid "Draft"
 msgstr ""
 
@@ -252,13 +252,13 @@ msgid "View full sync log"
 msgstr ""
 
 #: admin/views/logs.php:23
-#: includes/class-admin.php:195
 #: includes/class-admin.php:196
+#: includes/class-admin.php:197
 msgid "Sync Logs"
 msgstr ""
 
 #: admin/views/logs.php:31
-#: includes/class-admin.php:259
+#: includes/class-admin.php:260
 msgid "Processed"
 msgstr ""
 
@@ -354,8 +354,8 @@ msgid "Remove"
 msgstr ""
 
 #: admin/views/mapping.php:102
-#: includes/class-admin.php:186
 #: includes/class-admin.php:187
+#: includes/class-admin.php:188
 msgid "Field Mapping"
 msgstr ""
 
@@ -401,7 +401,7 @@ msgid "Mapping JSON file"
 msgstr ""
 
 #: admin/views/mapping.php:174
-#: templates/filters.php:96
+#: templates/filters.php:104
 msgid "Reset"
 msgstr ""
 
@@ -439,25 +439,39 @@ msgstr ""
 msgid "Last synced"
 msgstr ""
 
-#: admin/views/meta-box.php:89
-#: includes/class-admin.php:1180
+#: admin/views/meta-box.php:74
+#: includes/class-admin.php:1199
 msgid "Resync from Zoho"
 msgstr ""
 
-#: admin/views/meta-box.php:99
+#: admin/views/meta-box.php:82
+#: includes/class-admin.php:1208
+msgid "Discard the changes made to this job in WordPress and replace them with the values from Zoho Recruit?"
+msgstr ""
+
+#: admin/views/meta-box.php:83
+#: includes/class-admin.php:1209
+msgid "Reset to Zoho values"
+msgstr ""
+
+#: admin/views/meta-box.php:87
+msgid "A resync keeps fields you edited here. A reset replaces them."
+msgstr ""
+
+#: admin/views/meta-box.php:97
 msgid "View in Zoho Recruit"
 msgstr ""
 
-#: admin/views/meta-box.php:100
+#: admin/views/meta-box.php:98
 #: templates/single.php:65
 msgid "(opens in a new tab)"
 msgstr ""
 
-#: admin/views/meta-box.php:107
+#: admin/views/meta-box.php:105
 msgid "Mapped Zoho values"
 msgstr ""
 
-#: admin/views/meta-box.php:130
+#: admin/views/meta-box.php:128
 msgid "Mapped fields are refreshed on every sync. The Zoho ID is not editable."
 msgstr ""
 
@@ -709,7 +723,7 @@ msgid "Status for unmapped Zoho values"
 msgstr ""
 
 #: admin/views/settings.php:531
-#: includes/class-admin.php:345
+#: includes/class-admin.php:346
 msgid "Public API"
 msgstr ""
 
@@ -796,13 +810,13 @@ msgstr ""
 
 #: admin/views/settings.php:682
 #: blocks/jobs/build/index.js:1
-#: blocks/jobs/src/index.js:41
+#: blocks/jobs/src/index.js:57
 msgid "List"
 msgstr ""
 
 #: admin/views/settings.php:683
 #: blocks/jobs/build/index.js:1
-#: blocks/jobs/src/index.js:42
+#: blocks/jobs/src/index.js:64
 msgid "Grid"
 msgstr ""
 
@@ -974,226 +988,230 @@ msgstr ""
 msgid "Generate a new webhook URL"
 msgstr ""
 
-#: includes/class-admin.php:168
+#: includes/class-admin.php:169
 msgid "Zoho Recruit Dashboard"
 msgstr ""
 
-#: includes/class-admin.php:169
+#: includes/class-admin.php:170
 msgid "Dashboard"
 msgstr ""
 
-#: includes/class-admin.php:177
 #: includes/class-admin.php:178
-#: includes/class-admin.php:280
+#: includes/class-admin.php:179
+#: includes/class-admin.php:281
 msgid "Settings"
 msgstr ""
 
-#: includes/class-admin.php:251
+#: includes/class-admin.php:252
 msgid "Testing the connection..."
 msgstr ""
 
-#: includes/class-admin.php:252
+#: includes/class-admin.php:253
 msgid "Connection successful."
 msgstr ""
 
-#: includes/class-admin.php:253
+#: includes/class-admin.php:254
 msgid "Sync in progress..."
 msgstr ""
 
-#: includes/class-admin.php:254
+#: includes/class-admin.php:255
 #: includes/class-cli.php:112
 msgid "Sync finished."
 msgstr ""
 
-#: includes/class-admin.php:255
+#: includes/class-admin.php:256
 msgid "The sync failed. See the sync log for details."
 msgstr ""
 
-#: includes/class-admin.php:256
+#: includes/class-admin.php:257
 msgid "Refreshing this job from Zoho..."
 msgstr ""
 
-#: includes/class-admin.php:257
-#: includes/class-admin.php:936
+#: includes/class-admin.php:258
+#: includes/class-admin.php:965
 msgid "Job refreshed from Zoho Recruit."
 msgstr ""
 
-#: includes/class-admin.php:258
+#: includes/class-admin.php:259
 msgid "Something went wrong. Please try again."
 msgstr ""
 
-#: includes/class-admin.php:260
+#: includes/class-admin.php:261
 msgid "Page"
 msgstr ""
 
-#: includes/class-admin.php:344
+#: includes/class-admin.php:345
 msgid "Sync"
 msgstr ""
 
-#: includes/class-admin.php:346
+#: includes/class-admin.php:347
 msgid "Frontend"
 msgstr ""
 
-#: includes/class-admin.php:347
+#: includes/class-admin.php:348
 msgid "Structured Data"
 msgstr ""
 
-#: includes/class-admin.php:348
+#: includes/class-admin.php:349
 msgid "Advanced"
 msgstr ""
 
-#: includes/class-admin.php:453
+#: includes/class-admin.php:454
 msgid "You do not have permission to access this page."
 msgstr ""
 
-#: includes/class-admin.php:490
+#: includes/class-admin.php:491
 msgid "Zoho Recruit syncing is paused after repeated authentication failures."
 msgstr ""
 
-#: includes/class-admin.php:492
-#: includes/class-admin.php:499
+#: includes/class-admin.php:493
+#: includes/class-admin.php:500
 msgid "Reconnect Zoho Recruit"
 msgstr ""
 
-#: includes/class-admin.php:497
+#: includes/class-admin.php:498
 msgid "The stored Zoho Recruit credentials can no longer be decrypted because this site's security keys changed."
 msgstr ""
 
-#: includes/class-admin.php:504
+#: includes/class-admin.php:505
 msgid "This site is not connected to Zoho Recruit yet, so no jobs can be synchronized."
 msgstr ""
 
-#: includes/class-admin.php:506
+#: includes/class-admin.php:507
 msgid "Connect now"
 msgstr ""
 
-#: includes/class-admin.php:513
+#: includes/class-admin.php:514
 msgid "WP-Cron is disabled on this site (DISABLE_WP_CRON). Scheduled syncing will only run if a system cron job calls wp-cron.php."
 msgstr ""
 
-#: includes/class-admin.php:577
+#: includes/class-admin.php:578
 msgid "Dry run started. No changes will be written."
 msgstr ""
 
-#: includes/class-admin.php:578
+#: includes/class-admin.php:579
 msgid "Sync started. Progress is shown below."
 msgstr ""
 
-#: includes/class-admin.php:598
+#: includes/class-admin.php:599
 #: includes/class-cli.php:287
 msgid "The running sync was cancelled."
 msgstr ""
 
-#: includes/class-admin.php:599
+#: includes/class-admin.php:600
 #: includes/class-cli.php:292
 msgid "No sync was running."
 msgstr ""
 
 #. translators: 1: Zoho module name, 2: number of job openings.
-#: includes/class-admin.php:622
+#: includes/class-admin.php:623
 #, php-format
 msgid "Connection successful. Module \"%1$s\" reports %2$s job openings."
 msgstr ""
 
-#: includes/class-admin.php:654
+#: includes/class-admin.php:655
 msgid "Zoho credentials saved."
 msgstr ""
 
-#: includes/class-admin.php:689
+#: includes/class-admin.php:690
 msgid "Field mapping saved."
 msgstr ""
 
-#: includes/class-admin.php:703
+#: includes/class-admin.php:704
 msgid "The default field mapping was restored."
 msgstr ""
 
-#: includes/class-admin.php:727
+#: includes/class-admin.php:728
 msgid "Field mapping imported."
 msgstr ""
 
-#: includes/class-admin.php:796
+#: includes/class-admin.php:797
 #: includes/class-field-mapper.php:871
 msgid "The uploaded file is not valid JSON."
 msgstr ""
 
-#: includes/class-admin.php:809
+#: includes/class-admin.php:810
 msgid "Settings imported. Credentials and tokens were not changed."
 msgstr ""
 
-#: includes/class-admin.php:826
+#: includes/class-admin.php:827
 msgid "Choose a JSON file to upload."
 msgstr ""
 
-#: includes/class-admin.php:833
+#: includes/class-admin.php:834
 msgid "The upload could not be read."
 msgstr ""
 
-#: includes/class-admin.php:840
+#: includes/class-admin.php:841
 msgid "The file is empty or larger than 1 MB."
 msgstr ""
 
-#: includes/class-admin.php:851
+#: includes/class-admin.php:852
 msgid "The uploaded file could not be read."
 msgstr ""
 
-#: includes/class-admin.php:868
+#: includes/class-admin.php:869
 msgid "Sync logs cleared."
 msgstr ""
 
 #. translators: %s: number of fields.
-#: includes/class-admin.php:889
+#: includes/class-admin.php:890
 #, php-format
 msgid "Loaded %s fields from Zoho Recruit."
 msgstr ""
 
-#: includes/class-admin.php:908
+#: includes/class-admin.php:909
 msgid "A new webhook URL was generated. Update it in Zoho Recruit."
 msgstr ""
 
-#: includes/class-admin.php:923
+#: includes/class-admin.php:948
 msgid "You do not have permission to refresh this job."
 msgstr ""
 
-#: includes/class-admin.php:929
-#: includes/class-rest-api.php:623
+#: includes/class-admin.php:954
+#: includes/class-rest-api.php:650
 msgid "This job was not imported from Zoho Recruit."
 msgstr ""
 
-#: includes/class-admin.php:963
+#: includes/class-admin.php:964
+msgid "Job reset to its Zoho Recruit values."
+msgstr ""
+
+#: includes/class-admin.php:993
 msgid "Job Status"
 msgstr ""
 
-#: includes/class-admin.php:964
+#: includes/class-admin.php:994
 msgid "Job Code"
 msgstr ""
 
-#: includes/class-admin.php:965
+#: includes/class-admin.php:995
 msgid "Closing Date"
 msgstr ""
 
-#: includes/class-admin.php:966
+#: includes/class-admin.php:996
 msgid "Last Sync"
 msgstr ""
 
-#: includes/class-admin.php:984
+#: includes/class-admin.php:1014
 msgid "Manual"
 msgstr ""
 
 #. translators: %s: human readable time difference.
-#: includes/class-admin.php:1028
+#: includes/class-admin.php:1058
 #, php-format
 msgid "%s ago"
 msgstr ""
 
-#: includes/class-admin.php:1084
+#: includes/class-admin.php:1114
 msgid "All job statuses"
 msgstr ""
 
-#: includes/class-admin.php:1092
+#: includes/class-admin.php:1122
 msgid "Filter by job status"
 msgstr ""
 
-#: includes/class-admin.php:1198
+#: includes/class-admin.php:1248
 #: includes/class-site-health.php:70
 msgid "Zoho Recruit"
 msgstr ""
@@ -1326,6 +1344,8 @@ msgstr ""
 #: includes/class-field-mapper.php:75
 #: includes/class-settings.php:505
 #: templates/job-meta.php:24
+#: blocks/job-meta/build/index.js:1
+#: blocks/job-meta/src/index.js:44
 msgid "Job code"
 msgstr ""
 
@@ -1347,12 +1367,16 @@ msgstr ""
 #: includes/class-field-mapper.php:81
 #: includes/class-settings.php:516
 #: templates/job-meta.php:26
+#: blocks/job-meta/build/index.js:1
+#: blocks/job-meta/src/index.js:49
 msgid "Industry"
 msgstr ""
 
 #: includes/class-field-mapper.php:82
 #: includes/class-settings.php:517
 #: templates/job-meta.php:27
+#: blocks/job-meta/build/index.js:1
+#: blocks/job-meta/src/index.js:51
 msgid "Client"
 msgstr ""
 
@@ -1364,20 +1388,26 @@ msgstr ""
 #: includes/class-field-mapper.php:84
 #: includes/class-settings.php:519
 #: templates/job-meta.php:25
+#: blocks/job-meta/build/index.js:1
+#: blocks/job-meta/src/index.js:46
 msgid "Salary"
 msgstr ""
 
 #: includes/class-field-mapper.php:85
 #: includes/class-settings.php:520
+#: blocks/job-meta/build/index.js:1
+#: blocks/job-meta/src/index.js:62
 #: blocks/jobs/build/index.js:1
-#: blocks/jobs/src/index.js:62
+#: blocks/jobs/src/index.js:115
 msgid "Posted date"
 msgstr ""
 
 #: includes/class-field-mapper.php:86
 #: includes/class-settings.php:521
+#: blocks/job-meta/build/index.js:1
+#: blocks/job-meta/src/index.js:66
 #: blocks/jobs/build/index.js:1
-#: blocks/jobs/src/index.js:61
+#: blocks/jobs/src/index.js:108
 msgid "Closing date"
 msgstr ""
 
@@ -1430,7 +1460,7 @@ msgstr ""
 msgid "The Zoho record has no usable ID."
 msgstr ""
 
-#: includes/class-job.php:160
+#: includes/class-job.php:161
 msgid "Another sync process is already importing this job."
 msgstr ""
 
@@ -1513,7 +1543,7 @@ msgid "Edit Job"
 msgstr ""
 
 #: includes/class-post-type.php:78
-#: templates/card.php:70
+#: templates/card.php:76
 msgid "View Job"
 msgstr ""
 
@@ -1568,10 +1598,11 @@ msgstr ""
 #: includes/class-post-type.php:172
 #: includes/class-post-type.php:174
 #: includes/class-settings.php:507
-#: templates/filters.php:19
 #: templates/job-meta.php:35
+#: blocks/job-meta/build/index.js:1
+#: blocks/job-meta/src/index.js:24
 #: blocks/jobs/build/index.js:1
-#: blocks/jobs/src/index.js:87
+#: blocks/jobs/src/index.js:157
 msgid "Department"
 msgstr ""
 
@@ -1582,10 +1613,11 @@ msgstr ""
 #: includes/class-post-type.php:181
 #: includes/class-post-type.php:183
 #: includes/class-settings.php:508
-#: templates/filters.php:20
 #: templates/job-meta.php:36
+#: blocks/job-meta/build/index.js:1
+#: blocks/job-meta/src/index.js:28
 #: blocks/jobs/build/index.js:1
-#: blocks/jobs/src/index.js:93
+#: blocks/jobs/src/index.js:171
 msgid "Location"
 msgstr ""
 
@@ -1604,10 +1636,11 @@ msgstr ""
 
 #: includes/class-post-type.php:199
 #: includes/class-settings.php:515
-#: templates/filters.php:22
 #: templates/job-meta.php:38
+#: blocks/job-meta/build/index.js:1
+#: blocks/job-meta/src/index.js:36
 #: blocks/jobs/build/index.js:1
-#: blocks/jobs/src/index.js:103
+#: blocks/jobs/src/index.js:188
 msgid "Category"
 msgstr ""
 
@@ -1622,10 +1655,11 @@ msgstr ""
 #: includes/class-post-type.php:208
 #: includes/class-post-type.php:210
 #: includes/class-settings.php:514
-#: templates/filters.php:23
 #: templates/job-meta.php:39
+#: blocks/job-meta/build/index.js:1
+#: blocks/job-meta/src/index.js:40
 #: blocks/jobs/build/index.js:1
-#: blocks/jobs/src/index.js:108
+#: blocks/jobs/src/index.js:195
 msgid "Experience"
 msgstr ""
 
@@ -1661,21 +1695,25 @@ msgstr ""
 msgid "WordPress post ID of the job."
 msgstr ""
 
-#: includes/class-rest-api.php:258
+#: includes/class-rest-api.php:197
+msgid "Overwrite fields that were edited in WordPress, when the conflict mode preserves them."
+msgstr ""
+
+#: includes/class-rest-api.php:263
 msgid "The jobs API is disabled on this site."
 msgstr ""
 
-#: includes/class-rest-api.php:275
+#: includes/class-rest-api.php:280
 msgid "You do not have permission to manage Zoho Recruit synchronization."
 msgstr ""
 
 #. translators: %s: taxonomy name.
-#: includes/class-rest-api.php:338
+#: includes/class-rest-api.php:343
 #, php-format
 msgid "Comma separated term slugs or names for %s."
 msgstr ""
 
-#: includes/class-rest-api.php:1006
+#: includes/class-rest-api.php:1033
 msgid "Job not found."
 msgstr ""
 
@@ -1736,10 +1774,11 @@ msgid "Description"
 msgstr ""
 
 #: includes/class-settings.php:513
-#: templates/filters.php:21
 #: templates/job-meta.php:37
+#: blocks/job-meta/build/index.js:1
+#: blocks/job-meta/src/index.js:32
 #: blocks/jobs/build/index.js:1
-#: blocks/jobs/src/index.js:98
+#: blocks/jobs/src/index.js:178
 msgid "Employment type"
 msgstr ""
 
@@ -1751,7 +1790,7 @@ msgstr ""
 msgid "Zoho record ID"
 msgstr ""
 
-#: includes/class-shortcode.php:208
+#: includes/class-shortcode.php:211
 #: templates/single.php:63
 msgid "Apply Now"
 msgstr ""
@@ -1964,17 +2003,17 @@ msgid "Could not acquire the sync lock."
 msgstr ""
 
 #. translators: 1: percentage of jobs, 2: configured threshold percentage, 3: number of jobs.
-#: includes/class-sync.php:780
+#: includes/class-sync.php:784
 #, php-format
 msgid "Deactivation was skipped: the sync would have deactivated %1$d%% of jobs (%3$d jobs), which is above the %2$d%% safety threshold. Check the Zoho connection and filters, then run a full sync again."
 msgstr ""
 
-#: includes/class-sync.php:1012
+#: includes/class-sync.php:1018
 #: includes/class-zoho-api.php:135
 msgid "Invalid Zoho record ID."
 msgstr ""
 
-#: includes/class-sync.php:1044
+#: includes/class-sync.php:1050
 msgid "That job no longer exists in Zoho Recruit."
 msgstr ""
 
@@ -2206,33 +2245,41 @@ msgstr ""
 msgid "Next &raquo;"
 msgstr ""
 
+#: templates/card.php:64
+msgid "Remote"
+msgstr ""
+
 #. translators: %s: closing date.
-#: templates/card.php:80
+#: templates/card.php:86
 #, php-format
 msgid "Closes %s"
 msgstr ""
 
-#: templates/filters.php:56
+#: templates/filters.php:64
 msgid "Search jobs"
 msgstr ""
 
-#: templates/filters.php:59
+#: templates/filters.php:67
 msgid "Job title or code"
 msgstr ""
 
-#: templates/filters.php:82
+#: templates/filters.php:90
 msgid "All"
 msgstr ""
 
-#: templates/filters.php:95
+#: templates/filters.php:103
 msgid "Filter"
 msgstr ""
 
 #: templates/job-meta.php:28
+#: blocks/job-meta/build/index.js:1
+#: blocks/job-meta/src/index.js:54
 msgid "Work mode"
 msgstr ""
 
 #: templates/job-meta.php:29
+#: blocks/job-meta/build/index.js:1
+#: blocks/job-meta/src/index.js:58
 msgid "Openings"
 msgstr ""
 
@@ -2278,94 +2325,175 @@ msgstr ""
 msgid "See all open positions"
 msgstr ""
 
+#: blocks/apply-button/build/index.js:1
+#: blocks/apply-button/src/index.js:32
+msgid "Button"
+msgstr ""
+
+#: blocks/apply-button/build/index.js:1
+#: blocks/apply-button/src/index.js:35
+msgid "Label"
+msgstr ""
+
+#: blocks/apply-button/build/index.js:1
+#: blocks/apply-button/src/index.js:36
+msgid "Leave blank to use the label from the plugin settings."
+msgstr ""
+
+#: blocks/job-meta/build/index.js:1
+#: blocks/job-meta/src/index.js:118
+msgid "Fields"
+msgstr ""
+
 #: blocks/jobs/build/index.js:1
-#: blocks/jobs/src/index.js:29
+#: blocks/jobs/src/index.js:37
 msgid "Listing"
 msgstr ""
 
 #: blocks/jobs/build/index.js:1
-#: blocks/jobs/src/index.js:31
+#: blocks/jobs/src/index.js:40
 msgid "Jobs to show"
 msgstr ""
 
 #: blocks/jobs/build/index.js:1
-#: blocks/jobs/src/index.js:38
+#: blocks/jobs/src/index.js:50
 msgid "Listing style"
 msgstr ""
 
 #: blocks/jobs/build/index.js:1
-#: blocks/jobs/src/index.js:48
+#: blocks/jobs/src/index.js:77
 msgid "Columns"
 msgstr ""
 
 #: blocks/jobs/build/index.js:1
-#: blocks/jobs/src/index.js:56
+#: blocks/jobs/src/index.js:90
 msgid "Order by"
 msgstr ""
 
 #: blocks/jobs/build/index.js:1
-#: blocks/jobs/src/index.js:59
+#: blocks/jobs/src/index.js:94
 msgid "Date published"
 msgstr ""
 
 #: blocks/jobs/build/index.js:1
-#: blocks/jobs/src/index.js:60
+#: blocks/jobs/src/index.js:101
 msgid "Title"
 msgstr ""
 
 #: blocks/jobs/build/index.js:1
-#: blocks/jobs/src/index.js:67
+#: blocks/jobs/src/index.js:125
 msgid "Order"
 msgstr ""
 
 #: blocks/jobs/build/index.js:1
-#: blocks/jobs/src/index.js:70
+#: blocks/jobs/src/index.js:129
 msgid "Descending"
 msgstr ""
 
 #: blocks/jobs/build/index.js:1
-#: blocks/jobs/src/index.js:71
+#: blocks/jobs/src/index.js:136
 msgid "Ascending"
 msgstr ""
 
 #: blocks/jobs/build/index.js:1
-#: blocks/jobs/src/index.js:78
+#: blocks/jobs/src/index.js:148
 msgid "Filters"
 msgstr ""
 
 #: blocks/jobs/build/index.js:1
-#: blocks/jobs/src/index.js:82
+#: blocks/jobs/src/index.js:152
 msgid "Keyword"
 msgstr ""
 
 #: blocks/jobs/build/index.js:1
-#: blocks/jobs/src/index.js:88
+#: blocks/jobs/src/index.js:161
 msgid "Term slug or name. Separate several with commas."
 msgstr ""
 
 #: blocks/jobs/build/index.js:1
-#: blocks/jobs/src/index.js:115
+#: blocks/jobs/src/index.js:207
 msgid "Visitor controls"
 msgstr ""
 
 #: blocks/jobs/build/index.js:1
-#: blocks/jobs/src/index.js:119
+#: blocks/jobs/src/index.js:214
 msgid "Show filter dropdowns"
 msgstr ""
 
 #: blocks/jobs/build/index.js:1
-#: blocks/jobs/src/index.js:124
+#: blocks/jobs/src/index.js:224
 msgid "Show search box"
 msgstr ""
 
 #: blocks/jobs/build/index.js:1
-#: blocks/jobs/src/index.js:129
+#: blocks/jobs/src/index.js:234
 msgid "Show pagination"
 msgstr ""
 
 #: blocks/jobs/build/index.js:1
-#: blocks/jobs/src/index.js:134
+#: blocks/jobs/src/index.js:244
 msgid "Show excerpts"
+msgstr ""
+
+#: blocks/apply-button/block.json
+msgctxt "block title"
+msgid "Apply Button"
+msgstr ""
+
+#: blocks/apply-button/block.json
+msgctxt "block description"
+msgid "A link to the application form for a job. Renders nothing when the job has no application URL or is closed."
+msgstr ""
+
+#: blocks/apply-button/block.json
+#: blocks/job-meta/block.json
+msgctxt "block keyword"
+msgid "job"
+msgstr ""
+
+#: blocks/apply-button/block.json
+msgctxt "block keyword"
+msgid "apply"
+msgstr ""
+
+#: blocks/apply-button/block.json
+msgctxt "block keyword"
+msgid "application"
+msgstr ""
+
+#: blocks/apply-button/block.json
+msgctxt "block keyword"
+msgid "button"
+msgstr ""
+
+#: blocks/job-meta/block.json
+msgctxt "block title"
+msgid "Job Details"
+msgstr ""
+
+#: blocks/job-meta/block.json
+msgctxt "block description"
+msgid "The department, location, employment type and other facts for a job. Use it inside a single job template."
+msgstr ""
+
+#: blocks/job-meta/block.json
+msgctxt "block keyword"
+msgid "details"
+msgstr ""
+
+#: blocks/job-meta/block.json
+msgctxt "block keyword"
+msgid "meta"
+msgstr ""
+
+#: blocks/job-meta/block.json
+msgctxt "block keyword"
+msgid "location"
+msgstr ""
+
+#: blocks/job-meta/block.json
+msgctxt "block keyword"
+msgid "department"
 msgstr ""
 
 #: blocks/jobs/block.json

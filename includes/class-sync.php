@@ -450,9 +450,12 @@ class Sync {
 	 * @param array $record  Raw Zoho record.
 	 * @param int   $run_id  Run ID.
 	 * @param bool  $dry_run Whether to skip writes.
+	 * @param bool  $force   Overwrite fields even when they were edited in
+	 *                       WordPress. Only ever set by an explicit
+	 *                       administrator action, never by a scheduled sync.
 	 * @return string created|updated|skipped|error
 	 */
-	public function process_record( array $record, $run_id = 0, $dry_run = false ) {
+	public function process_record( array $record, $run_id = 0, $dry_run = false, $force = false ) {
 		$zoho_id = Job::sanitize_zoho_id( $record['id'] ?? '' );
 
 		if ( '' === $zoho_id ) {
@@ -504,6 +507,7 @@ class Sync {
 			array(
 				'record' => $record,
 				'status' => $status,
+				'force'  => (bool) $force,
 			)
 		);
 
@@ -1000,12 +1004,14 @@ class Sync {
 	 * Re-fetch and rewrite a single job from Zoho.
 	 *
 	 * @param string $zoho_id Zoho record ID.
+	 * @param bool   $force   Discard local edits and take Zoho's values, even in
+	 *                        "preserve fields edited in WordPress" mode.
 	 * @return array|\WP_Error {
 	 *     @type string $action created|updated|skipped|deleted.
 	 *     @type int    $post_id Post ID when one exists.
 	 * }
 	 */
-	public function sync_single( $zoho_id ) {
+	public function sync_single( $zoho_id, $force = false ) {
 		$zoho_id = Job::sanitize_zoho_id( $zoho_id );
 
 		if ( '' === $zoho_id ) {
@@ -1047,7 +1053,7 @@ class Sync {
 		self::$syncing = true;
 
 		try {
-			$action = $this->process_record( $record );
+			$action = $this->process_record( $record, 0, false, (bool) $force );
 		} finally {
 			self::$syncing = false;
 		}

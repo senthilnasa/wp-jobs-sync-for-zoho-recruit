@@ -1,0 +1,32 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "jobs-sync-for-zoho-recruit/job-meta",
+	"version": "1.0.0",
+	"title": "Job Details",
+	"category": "widgets",
+	"icon": "list-view",
+	"description": "The department, location, employment type and other facts for a job. Use it inside a single job template.",
+	"keywords": [ "job", "details", "meta", "location", "department" ],
+	"textdomain": "jobs-sync-for-zoho-recruit",
+	"usesContext": [ "postId" ],
+	"supports": {
+		"html": false,
+		"anchor": true,
+		"spacing": {
+			"margin": true,
+			"padding": true
+		},
+		"typography": {
+			"fontSize": true
+		}
+	},
+	"attributes": {
+		"fields": {
+			"type": "string",
+			"default": "department,location,employment_type,experience,closing_date"
+		}
+	},
+	"editorScript": "file:./build/index.js",
+	"style": "jszr-jobs"
+}

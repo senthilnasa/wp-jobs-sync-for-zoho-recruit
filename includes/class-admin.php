@@ -133,6 +133,7 @@ class Admin {
 		add_action( 'admin_post_jszr_refresh_fields', array( $this, 'handle_refresh_fields' ) );
 		add_action( 'admin_post_jszr_regenerate_webhook', array( $this, 'handle_regenerate_webhook' ) );
 		add_action( 'admin_post_jszr_resync_job', array( $this, 'handle_resync_job' ) );
+		add_action( 'admin_post_jszr_reset_job', array( $this, 'handle_reset_job' ) );
 
 		// Job list table.
 		add_filter( 'manage_' . Post_Type::POST_TYPE . '_posts_columns', array( $this, 'list_columns' ) );
@@ -915,9 +916,33 @@ class Admin {
 	 * @return void
 	 */
 	public function handle_resync_job() {
-		jszr_verify_admin_request( 'jszr_resync_job' );
+		$this->refresh_job( 'jszr_resync_job', false );
+	}
 
-		$post_id = isset( $_REQUEST['post'] ) ? (int) $_REQUEST['post'] : 0; // phpcs:ignore WordPress.Security.NonceVerification -- Nonce and capability verified by jszr_verify_admin_request() at the top of the handler.
+	/**
+	 * Discard local edits for a single job and take Zoho's values.
+	 *
+	 * This is the escape hatch for "preserve fields edited in WordPress" mode,
+	 * where an ordinary resync deliberately leaves edited fields alone. It has
+	 * its own nonce so a resync link can never be escalated into a reset.
+	 *
+	 * @return void
+	 */
+	public function handle_reset_job() {
+		$this->refresh_job( 'jszr_reset_job', true );
+	}
+
+	/**
+	 * Re-import one job from Zoho.
+	 *
+	 * @param string $nonce_action Nonce action to verify.
+	 * @param bool   $force        Whether to overwrite locally edited fields.
+	 * @return void
+	 */
+	private function refresh_job( $nonce_action, $force ) {
+		jszr_verify_admin_request( $nonce_action );
+
+		$post_id = isset( $_REQUEST['post'] ) ? (int) $_REQUEST['post'] : 0; // phpcs:ignore WordPress.Security.NonceVerification -- Nonce and capability verified by jszr_verify_admin_request() above.
 
 		if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
 			wp_die( esc_html__( 'You do not have permission to refresh this job.', 'jobs-sync-for-zoho-recruit' ), 403 );
@@ -928,12 +953,17 @@ class Admin {
 		if ( '' === $zoho_id ) {
 			$this->notice( 'error', __( 'This job was not imported from Zoho Recruit.', 'jobs-sync-for-zoho-recruit' ) );
 		} else {
-			$result = $this->sync->sync_single( $zoho_id );
+			$result = $this->sync->sync_single( $zoho_id, $force );
 
 			if ( is_wp_error( $result ) ) {
 				$this->notice( 'error', $result->get_error_message() );
 			} else {
-				$this->notice( 'success', __( 'Job refreshed from Zoho Recruit.', 'jobs-sync-for-zoho-recruit' ) );
+				$this->notice(
+					'success',
+					$force
+						? __( 'Job reset to its Zoho Recruit values.', 'jobs-sync-for-zoho-recruit' )
+						: __( 'Job refreshed from Zoho Recruit.', 'jobs-sync-for-zoho-recruit' )
+				);
 			}
 		}
 
@@ -1163,22 +1193,22 @@ class Admin {
 			return $actions;
 		}
 
-		$url = wp_nonce_url(
-			add_query_arg(
-				array(
-					'action' => 'jszr_resync_job',
-					'post'   => (int) $post->ID,
-				),
-				admin_url( 'admin-post.php' )
-			),
-			'jszr_resync_job'
-		);
-
 		$actions['jszr_resync'] = sprintf(
 			'<a href="%1$s">%2$s</a>',
-			esc_url( $url ),
+			esc_url( self::job_action_url( 'jszr_resync_job', (int) $post->ID ) ),
 			esc_html__( 'Resync from Zoho', 'jobs-sync-for-zoho-recruit' )
 		);
+
+		// The reset only means something different from a resync when local
+		// edits are being preserved, so it is offered only in that mode.
+		if ( 'preserve_manual' === Settings::get( 'conflict_mode', 'mapped_only' ) ) {
+			$actions['jszr_reset'] = sprintf(
+				'<a href="%1$s" class="jszr-confirm" data-jszr-confirm="%2$s">%3$s</a>',
+				esc_url( self::job_action_url( 'jszr_reset_job', (int) $post->ID ) ),
+				esc_attr__( 'Discard the changes made to this job in WordPress and replace them with the values from Zoho Recruit?', 'jobs-sync-for-zoho-recruit' ),
+				esc_html__( 'Reset to Zoho values', 'jobs-sync-for-zoho-recruit' )
+			);
+		}
 
 		return $actions;
 	}
@@ -1186,6 +1216,26 @@ class Admin {
 	// ----------------------------------------------------------------------
 	// Job edit screen
 	// ----------------------------------------------------------------------
+
+	/**
+	 * Build a nonced admin-post URL for a per-job action.
+	 *
+	 * @param string $action  Admin-post action and nonce action name.
+	 * @param int    $post_id Job post ID.
+	 * @return string
+	 */
+	public static function job_action_url( $action, $post_id ) {
+		return wp_nonce_url(
+			add_query_arg(
+				array(
+					'action' => $action,
+					'post'   => (int) $post_id,
+				),
+				admin_url( 'admin-post.php' )
+			),
+			$action
+		);
+	}
 
 	/**
 	 * Register the Zoho details metabox.

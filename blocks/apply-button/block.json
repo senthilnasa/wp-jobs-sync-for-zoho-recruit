@@ -1,0 +1,33 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "jobs-sync-for-zoho-recruit/apply-button",
+	"version": "1.0.0",
+	"title": "Apply Button",
+	"category": "widgets",
+	"icon": "external",
+	"description": "A link to the application form for a job. Renders nothing when the job has no application URL or is closed.",
+	"keywords": [ "job", "apply", "application", "button" ],
+	"textdomain": "jobs-sync-for-zoho-recruit",
+	"usesContext": [ "postId" ],
+	"supports": {
+		"html": false,
+		"anchor": true,
+		"align": [ "left", "center", "right" ],
+		"spacing": {
+			"margin": true,
+			"padding": true
+		},
+		"typography": {
+			"fontSize": true
+		}
+	},
+	"attributes": {
+		"label": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"editorScript": "file:./build/index.js",
+	"style": "jszr-jobs"
+}

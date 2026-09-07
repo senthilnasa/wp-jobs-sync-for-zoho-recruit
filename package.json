@@ -23,11 +23,14 @@
 		"languages"
 	],
 	"scripts": {
-		"build": "wp-scripts build blocks/jobs/src/index.js --output-path=blocks/jobs/build",
+		"build": "npm run build:jobs && npm run build:job-meta && npm run build:apply-button",
+		"build:jobs": "wp-scripts build blocks/jobs/src/index.js --output-path=blocks/jobs/build",
+		"build:job-meta": "wp-scripts build blocks/job-meta/src/index.js --output-path=blocks/job-meta/build",
+		"build:apply-button": "wp-scripts build blocks/apply-button/src/index.js --output-path=blocks/apply-button/build",
 		"start": "wp-scripts start blocks/jobs/src/index.js --output-path=blocks/jobs/build",
-		"lint:js": "wp-scripts lint-js blocks/jobs/src admin/assets/js public/js",
+		"lint:js": "wp-scripts lint-js blocks/jobs/src blocks/job-meta/src blocks/apply-button/src admin/assets/js public/js",
 		"lint:css": "wp-scripts lint-style \"**/*.css\"",
-		"format": "wp-scripts format blocks/jobs/src",
+		"format": "wp-scripts format blocks/jobs/src blocks/job-meta/src blocks/apply-button/src",
 		"makepot": "wp-env run cli --env-cwd=wp-content/plugins/jobs-sync-for-zoho-recruit wp i18n make-pot . languages/jobs-sync-for-zoho-recruit.pot --exclude=node_modules,vendor,tests,bin,dist,.wordpress-org",
 		"makejson": "wp-env run cli --env-cwd=wp-content/plugins/jobs-sync-for-zoho-recruit wp i18n make-json languages --no-purge",
 		"plugin-zip": "wp-scripts plugin-zip",

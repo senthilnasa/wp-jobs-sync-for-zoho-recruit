@@ -187,8 +187,32 @@
 		);
 	}
 
+	/**
+	 * Ask before following a link marked as destructive.
+	 *
+	 * The prompt lives here rather than in an inline onclick attribute so the
+	 * plugin ships no inline script.
+	 */
+	function initConfirm() {
+		document.addEventListener( 'click', function ( event ) {
+			const link = event.target.closest( '.jszr-confirm' );
+
+			if ( ! link ) {
+				return;
+			}
+
+			const message = link.getAttribute( 'data-jszr-confirm' );
+
+			// eslint-disable-next-line no-alert -- A destructive, irreversible link deserves a prompt, and a native one is keyboard accessible everywhere.
+			if ( message && ! window.confirm( message ) ) {
+				event.preventDefault();
+			}
+		} );
+	}
+
 	document.addEventListener( 'DOMContentLoaded', function () {
 		initMapping();
 		initProgress();
+		initConfirm();
 	} );
 } )( window.wp, window.jszrAdmin );

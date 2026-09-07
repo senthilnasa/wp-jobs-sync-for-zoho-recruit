@@ -87,9 +87,11 @@ Three invariants the code is built around:
 | `Notifications` | Failure, connection and threshold emails, throttled |
 | `Cron` | `jszr_scheduled_sync`, `jszr_check_expired`, `jszr_prune_logs`, custom `jszr_six_hours` schedule |
 | `Post_Type` | CPT + taxonomies + `register_post_meta`, slug stability, rewrite flush on slug change, sitemap toggle |
-| `REST_API` | Public `jobs`, `jobs/{id}`, `jobs/filters`; protected `sync`, `sync/status`, `sync/cancel`, `jobs/{id}/resync`, `zoho-fields`, `test-connection`, `webhook`; `build_query_args()` shared with the shortcode; transient cache with version-bump invalidation |
+| `REST_API` | Public `jobs`, `jobs/{id}`, `jobs/filters`; protected `sync`, `sync/status`, `sync/cancel`, `jobs/{id}/resync` (`force`), `zoho-fields`, `test-connection`, `webhook`; `filter_map()` derived from the registered taxonomies; `build_query_args()` shared with the shortcode; transient cache with version-bump invalidation |
 | `Webhook` | Secret-token receiver used **only as a trigger**; re-fetches by ID; rate limited and deduplicated |
 | `Structured_Data` | JobPosting JSON-LD; omits anything it cannot state accurately; never for expired/inactive |
+| `SEO` | Suggested title and meta description, both filterable; prints nothing when an SEO plugin is detected |
+| `Page_Cache` | Best-effort purge of nine caching plugins on `jszr_caches_invalidated`; every call guarded, throws swallowed |
 | `Templates` | Theme override resolution, `template_include` fallback (classic themes only), expired-job behaviour, asset registration, `register_block_template()` |
 | `Shortcode` | `[zoho_jobs]`, `[zoho_job_apply]`, `[zoho_job_meta]`; shared renderer with the block |
 | `Blocks` | `register_block_type` from `block.json` with `render_callback` → `Shortcode::render` |
@@ -103,7 +105,9 @@ Three invariants the code is built around:
 - `admin/views/`: `dashboard.php`, `settings.php` (6 tabs), `mapping.php`, `logs.php`, `meta-box.php`
 - `admin/assets/`, `public/css/jobs.css`, `public/js/jobs.js` (progressive enhancement only)
 - `templates/`: `listing.php`, `card.php`, `filters.php`, `pagination.php`, `no-results.php`, `archive.php`, `single.php`, `job-meta.php`, `block-templates/{single,archive}-zoho_job.html`
-- `blocks/jobs/`: `block.json` (apiVersion 3), `editor.css`, `src/index.js`, `build/` (generated)
+- `blocks/`: three blocks, each `block.json` (apiVersion 3) + `src/index.js` + `build/`
+  (generated) — `jobs` (listing, also has `editor.css`), `job-meta` and `apply-button`
+  (both read the job from `postId` block context)
 
 ### Project files
 `readme.txt`, `LICENSE`, `CHANGELOG.md`, `README.md`, `docs/` (10 documents),
@@ -160,6 +164,15 @@ anywhere, deliberately.
   `currentcolor` instead. A theme is not obliged to follow the OS preference, and
   keying off it painted white secondary text and white card borders onto light
   themes for any visitor with dark mode enabled.
+- **A resync respects local edits; only a reset discards them.** In
+  `preserve_manual` mode `Job::upsert()` skips hand-edited fields, and that
+  applies to the row action too. `$context['force']` downgrades the mode to
+  `mapped_only` for one write — deliberately not to `overwrite_all`, so meta
+  another plugin attached to the job survives a reset.
+- **The taxonomy filter map is derived, not listed.** `REST_API::filter_map()`
+  builds itself from `Post_Type::taxonomies()`, stripping the `zoho_job_`
+  prefix. Adding a taxonomy through `jszr_taxonomies` is now the whole job;
+  `jszr_filter_map` is only for overriding that derivation.
 - **Shell heredocs mangle backslashes in this environment.** Write PHP with the
   file tools, not `cat > file.php <<'EOF'`.
 
@@ -168,14 +181,17 @@ anywhere, deliberately.
 ## 5. Verified vs. not verified
 
 **Verified in a live WordPress 7.1 / PHP 8.1 (wp-env)**
-- PHPCS: 0 errors, 0 warnings across 46 files.
-- PHPUnit: 47 tests, 84 assertions, all passing.
-- `bin/smoke-test.php`: 37 checks, all passing.
+- PHPCS: 0 errors, 0 warnings across 49 files.
+- PHPUnit: 57 tests, 102 assertions, all passing.
+- `bin/smoke-test.php`: 48 checks, all passing.
 - Plugin Check: nothing reported against any file that ships.
-- ESLint and Stylelint clean; `npm run build` produces the shipped bundle.
+- ESLint and Stylelint clean; `npm run build` produces all three shipped bundles.
 - Every admin screen rendered: dashboard, all six settings tabs, field mapping,
   sync logs, and the job list table with its custom columns and status filter.
-- The block renders in the editor and on the front end, no console errors.
+- All three blocks register with the right script handles, and the two
+  single-job renderers were exercised through the smoke test: they render the
+  facts and the apply link inside the loop, and nothing outside it or for a
+  closed job.
 - Archive and single pages render under both Twenty Twenty-Five (block) and
   Twenty Twenty-One (classic) with a clean `debug.log`.
 - No-JS filtering, keyword search matching a job code, REST filtering,
@@ -215,6 +231,15 @@ anywhere, deliberately.
    `[zoho_*]` names as aliases. Shortcode names are effectively permanent once
    sites have them in post content, and `[zoho_jobs]` is generic enough that
    another Zoho plugin could plausibly claim it. Cheap now, breaking later.
+   The same argument applies to the three block names, which are already
+   namespaced under `jobs-sync-for-zoho-recruit/` and so are not at risk.
+7. Re-shoot `screenshot-1.png` if you want the two new single-job blocks
+   visible in the listing screenshots; the current five predate them.
+8. The two `PluginCheck.Security.DirectDB.UnescapedDBParameter` warnings in
+   `class-logger.php` and `class-sync-queue.php` are false positives — the SQL
+   is assembled from a hard-coded allow-list of column names and then run
+   through `$wpdb->prepare()`. Worth a comment in the submission notes if a
+   reviewer queries them.
 
 ---
 

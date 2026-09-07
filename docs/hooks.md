@@ -157,16 +157,35 @@ add_filter( 'jszr_taxonomies', function ( $taxonomies ) {
 	);
 	return $taxonomies;
 } );
-
-add_filter( 'jszr_filter_map', function ( $map ) {
-	$map['skill'] = 'zoho_job_skill';
-	return $map;
-} );
 ```
 
-Registering it this way puts it in the mapping dropdowns, the REST filters, the
-`/jobs/filters` response and the listing filter form — no further wiring.
-Flush permalinks after adding one.
+That one filter is the whole job. The parameter map is derived from the
+registered taxonomies, so the new taxonomy immediately becomes:
+
+- a target in the field mapping dropdowns,
+- a `?skill=` parameter on `/jobs`, with the same term resolution and
+  `include_children` behaviour as the built-in five,
+- an entry in the `/jobs/filters` response,
+- a `skill="…"` shortcode attribute,
+- a labelled dropdown in the listing filter form.
+
+The parameter name is the taxonomy name with the `zoho_job_` prefix removed, so
+`zoho_job_skill` becomes `skill`. A taxonomy registered under some other name
+keeps that name as its parameter. Use `jszr_filter_map` only to override that
+derivation — to rename a parameter, or to hide a taxonomy from the public API
+while keeping it in the admin.
+
+Flush permalinks after adding a taxonomy.
+
+To expose the new taxonomy in the public REST response as well, add it to the
+allow-list; the response shape and JSON schema are handled for you.
+
+```php
+add_filter( 'jszr_available_rest_fields', function ( $fields ) {
+	$fields['skill'] = 'Skill';
+	return $fields;
+} );
+```
 
 ### REST and listings
 
@@ -205,6 +224,77 @@ add_filter( 'jszr_structured_data', function ( $schema, $post ) {
 
 // Emit JobPosting even though an SEO plugin also does.
 add_filter( 'jszr_seo_plugin_handles_schema', '__return_false' );
+```
+
+### Titles and meta descriptions
+
+```php
+apply_filters( 'jszr_job_title',              string $title, int $post_id, array $parts );
+apply_filters( 'jszr_meta_description',       string $description, int $post_id );
+apply_filters( 'jszr_seo_plugin_active',      bool $active );
+apply_filters( 'jszr_output_meta_description', bool $output );
+```
+
+The plugin suggests a title (job title plus the most specific location term)
+and a description (excerpt, falling back to the trimmed content). When an SEO
+plugin is detected it prints neither and only exposes the values, so an SEO
+plugin can read what the plugin would have used:
+
+```php
+// Feed the plugin's suggestion into an SEO plugin.
+add_filter( 'wpseo_title', function ( $title ) {
+	if ( ! is_singular( 'zoho_job' ) ) {
+		return $title;
+	}
+
+	return JobsSyncForZohoRecruit\SEO::job_title( get_queried_object_id() );
+} );
+
+// Build the description from the mapped fields instead.
+add_filter( 'jszr_meta_description', function ( $description, $post_id ) {
+	$location = jszr_get_job_meta( $post_id, 'city' );
+
+	return sprintf( '%s in %s. Apply now.', get_the_title( $post_id ), $location );
+}, 10, 2 );
+
+// Keep the filters available but never print the tag.
+add_filter( 'jszr_output_meta_description', '__return_false' );
+```
+
+`SEO::job_title()` and `SEO::meta_description()` are safe to call directly; both
+are static and take a post ID.
+
+### Page caching
+
+```php
+apply_filters( 'jszr_purge_page_cache',   bool $purge );
+apply_filters( 'jszr_page_cache_purgers', array $purgers );
+do_action( 'jszr_caches_invalidated' );
+```
+
+After a sync completes the plugin clears its own transients and then asks any
+page caching plugin it recognises to purge. Every call is guarded, and a purger
+that throws is logged and skipped rather than allowed to break the sync.
+
+```php
+// Teach it about a caching plugin it does not know.
+add_filter( 'jszr_page_cache_purgers', function ( $purgers ) {
+	$purgers['my-cache'] = function () {
+		if ( ! function_exists( 'my_cache_flush' ) ) {
+			return false;
+		}
+
+		my_cache_flush();
+
+		return true;
+	};
+
+	return $purgers;
+} );
+
+// Or take over invalidation entirely.
+add_filter( 'jszr_purge_page_cache', '__return_false' );
+add_action( 'jszr_caches_invalidated', 'my_selective_purge' );
 ```
 
 ### Permissions and notifications

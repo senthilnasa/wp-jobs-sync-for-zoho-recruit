@@ -15,13 +15,21 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$jszr_labels = array(
-	'department'      => __( 'Department', 'jobs-sync-for-zoho-recruit' ),
-	'location'        => __( 'Location', 'jobs-sync-for-zoho-recruit' ),
-	'employment_type' => __( 'Employment type', 'jobs-sync-for-zoho-recruit' ),
-	'category'        => __( 'Category', 'jobs-sync-for-zoho-recruit' ),
-	'experience'      => __( 'Experience', 'jobs-sync-for-zoho-recruit' ),
-);
+// Labels come from the registered taxonomies, so a taxonomy added through
+// jszr_taxonomies gets a correctly labelled filter with no template change.
+$jszr_taxonomies = \JobsSyncForZohoRecruit\Post_Type::taxonomies();
+$jszr_labels     = array();
+
+foreach ( \JobsSyncForZohoRecruit\REST_API::filter_map() as $jszr_param => $jszr_taxonomy ) {
+	if ( isset( $jszr_taxonomies[ $jszr_taxonomy ]['label'] ) ) {
+		$jszr_labels[ $jszr_param ] = $jszr_taxonomies[ $jszr_taxonomy ]['label'];
+		continue;
+	}
+
+	$jszr_object = get_taxonomy( $jszr_taxonomy );
+
+	$jszr_labels[ $jszr_param ] = $jszr_object ? $jszr_object->labels->singular_name : $jszr_param;
+}
 
 $jszr_action = remove_query_arg(
 	array_merge(

@@ -32,23 +32,26 @@ class Shortcode {
 	 * @return array
 	 */
 	public static function defaults() {
-		return array(
-			'per_page'        => (int) Settings::get( 'rest_per_page', 20 ),
-			'search'          => '',
-			'department'      => '',
-			'location'        => '',
-			'employment_type' => '',
-			'category'        => '',
-			'experience'      => '',
-			'orderby'         => 'date',
-			'order'           => 'desc',
-			'status'          => 'active',
-			'style'           => (string) Settings::get( 'default_style', 'list' ),
-			'columns'         => 3,
-			'show_filters'    => 'false',
-			'show_search'     => 'false',
-			'show_pagination' => 'true',
-			'show_excerpt'    => 'true',
+		// One empty attribute per registered taxonomy, so a taxonomy added
+		// through jszr_taxonomies is filterable from the shortcode with no
+		// further wiring.
+		$taxonomy_atts = array_fill_keys( array_keys( REST_API::filter_map() ), '' );
+
+		return array_merge(
+			$taxonomy_atts,
+			array(
+				'per_page'        => (int) Settings::get( 'rest_per_page', 20 ),
+				'search'          => '',
+				'orderby'         => 'date',
+				'order'           => 'desc',
+				'status'          => 'active',
+				'style'           => (string) Settings::get( 'default_style', 'list' ),
+				'columns'         => 3,
+				'show_filters'    => 'false',
+				'show_search'     => 'false',
+				'show_pagination' => 'true',
+				'show_excerpt'    => 'true',
+			)
 		);
 	}
 

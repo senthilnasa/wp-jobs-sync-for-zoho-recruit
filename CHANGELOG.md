@@ -48,10 +48,30 @@ version onwards.
 - Protected REST endpoints for starting, watching and cancelling a sync,
   refreshing one job, reading Zoho fields and testing the connection, all behind
   the `manage_zoho_recruit` capability.
-- `[zoho_jobs]`, `[zoho_job_apply]` and `[zoho_job_meta]` shortcodes and a
-  server-rendered block that share one renderer with the archive template.
+- `[zoho_jobs]`, `[zoho_job_apply]` and `[zoho_job_meta]` shortcodes, and three
+  server-rendered blocks — Zoho Recruit Jobs, Job Details and Apply Button — that
+  share their renderers with the shortcodes and the archive template. The two
+  single-job blocks read the job from block context, so they work in a template,
+  a query loop or the editor, and render nothing when there is no job.
 - Classic theme templates with theme override support, plus block templates for
   block themes.
+- A per-job **Reset to Zoho values** action, in the job list and the metabox,
+  for sites running the "preserve fields edited in WordPress" conflict mode. A
+  resync respects local edits by design; the reset is the deliberate escape
+  hatch, and it replaces only the mapped fields. Also available as
+  `force=true` on `POST /jobs/{id}/resync`.
+- Filters for the job title and meta description (`jszr_job_title`,
+  `jszr_meta_description`), so SEO plugins can read what the plugin would use.
+  When no SEO plugin is detected the plugin prints a description itself; when
+  one is, it prints nothing and only exposes the values.
+- Best-effort page cache purging after a sync for WP Rocket, W3 Total Cache, WP
+  Super Cache, LiteSpeed, Cache Enabler, SG Optimizer, Nginx Helper, Kinsta and
+  Autoptimize, extensible through `jszr_page_cache_purgers`. Every call is
+  guarded, nothing is a dependency, and a purger that throws is logged and
+  skipped rather than allowed to fail the sync.
+- Taxonomies registered through `jszr_taxonomies` now become REST parameters,
+  shortcode attributes, `/jobs/filters` entries and labelled filter dropdowns
+  automatically, with no second registration through `jszr_filter_map`.
 - JobPosting structured data that omits any property it cannot state accurately,
   and is never emitted for expired or inactive jobs.
 - Optional webhook receiver, protected by a per-site secret, rate limited and

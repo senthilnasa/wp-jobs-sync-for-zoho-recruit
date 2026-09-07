@@ -70,25 +70,23 @@ $jszr_format = get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
 		<?php if ( current_user_can( Plugin::capability() ) ) : ?>
 			<p>
 				<a class="button button-secondary"
-					href="
-					<?php
-					echo esc_url(
-						wp_nonce_url(
-							add_query_arg(
-								array(
-									'action' => 'jszr_resync_job',
-									'post'   => (int) $post->ID,
-								),
-								admin_url( 'admin-post.php' )
-							),
-							'jszr_resync_job'
-						)
-					);
-					?>
-							">
+					href="<?php echo esc_url( Admin::job_action_url( 'jszr_resync_job', (int) $post->ID ) ); ?>">
 					<?php esc_html_e( 'Resync from Zoho', 'jobs-sync-for-zoho-recruit' ); ?>
 				</a>
 			</p>
+
+			<?php if ( 'preserve_manual' === Settings::get( 'conflict_mode', 'mapped_only' ) ) : ?>
+				<p>
+					<a class="button button-link-delete jszr-confirm"
+						href="<?php echo esc_url( Admin::job_action_url( 'jszr_reset_job', (int) $post->ID ) ); ?>"
+						data-jszr-confirm="<?php esc_attr_e( 'Discard the changes made to this job in WordPress and replace them with the values from Zoho Recruit?', 'jobs-sync-for-zoho-recruit' ); ?>">
+						<?php esc_html_e( 'Reset to Zoho values', 'jobs-sync-for-zoho-recruit' ); ?>
+					</a>
+				</p>
+				<p class="description">
+					<?php esc_html_e( 'A resync keeps fields you edited here. A reset replaces them.', 'jobs-sync-for-zoho-recruit' ); ?>
+				</p>
+			<?php endif; ?>
 		<?php endif; ?>
 
 		<?php $jszr_zoho_link = Job::get_zoho_link( $post->ID ); ?>

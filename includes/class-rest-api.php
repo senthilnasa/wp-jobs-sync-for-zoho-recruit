@@ -187,9 +187,14 @@ class REST_API {
 					'permission_callback' => array( $this, 'manage_permission' ),
 					'args'                => self::validated(
 						array(
-							'id' => array(
+							'id'    => array(
 								'type'     => 'integer',
 								'required' => true,
+							),
+							'force' => array(
+								'type'        => 'boolean',
+								'default'     => false,
+								'description' => __( 'Overwrite fields that were edited in WordPress, when the conflict mode preserves them.', 'jobs-sync-for-zoho-recruit' ),
 							),
 						)
 					),
@@ -381,13 +386,14 @@ class REST_API {
 	 * @return array<string,string>
 	 */
 	public static function filter_map() {
-		$map = array(
-			'department'      => Post_Type::TAX_DEPARTMENT,
-			'location'        => Post_Type::TAX_LOCATION,
-			'employment_type' => Post_Type::TAX_EMPLOYMENT_TYPE,
-			'category'        => Post_Type::TAX_CATEGORY,
-			'experience'      => Post_Type::TAX_EXPERIENCE,
-		);
+		// Derived from the registered taxonomies rather than hard coded, so a
+		// taxonomy added through jszr_taxonomies becomes a REST, shortcode and
+		// block filter without the developer having to wire it up twice.
+		$map = array();
+
+		foreach ( array_keys( Post_Type::taxonomies() ) as $taxonomy ) {
+			$map[ self::filter_param_for( $taxonomy ) ] = $taxonomy;
+		}
 
 		/**
 		 * Filter the query parameter to taxonomy map used by listings and REST.
@@ -395,6 +401,27 @@ class REST_API {
 		 * @param array $map Parameter => taxonomy.
 		 */
 		return (array) apply_filters( 'jszr_filter_map', $map );
+	}
+
+	/**
+	 * The public query parameter name for a taxonomy.
+	 *
+	 * The plugin's own taxonomies drop their `zoho_job_` prefix, so the public
+	 * API keeps the short, documented parameter names. A taxonomy registered by
+	 * another plugin keeps its own name.
+	 *
+	 * @param string $taxonomy Taxonomy name.
+	 * @return string
+	 */
+	public static function filter_param_for( $taxonomy ) {
+		$taxonomy = (string) $taxonomy;
+		$prefix   = Post_Type::POST_TYPE . '_';
+
+		if ( 0 === strpos( $taxonomy, $prefix ) ) {
+			return substr( $taxonomy, strlen( $prefix ) );
+		}
+
+		return $taxonomy;
 	}
 
 	/**
@@ -625,7 +652,7 @@ class REST_API {
 			);
 		}
 
-		$result = $this->sync->sync_single( $zoho_id );
+		$result = $this->sync->sync_single( $zoho_id, (bool) $request['force'] );
 
 		if ( is_wp_error( $result ) ) {
 			return $result;
@@ -1009,6 +1036,31 @@ class REST_API {
 	}
 
 	/**
+	 * The public representation of a job's terms in one taxonomy.
+	 *
+	 * @param int    $post_id  Job post ID.
+	 * @param string $taxonomy Taxonomy name.
+	 * @return array<int,array{name:string,slug:string}>
+	 */
+	private static function prepare_terms( $post_id, $taxonomy ) {
+		$terms = get_the_terms( $post_id, $taxonomy );
+		$out   = array();
+
+		if ( ! is_array( $terms ) ) {
+			return $out;
+		}
+
+		foreach ( $terms as $term ) {
+			$out[] = array(
+				'name' => $term->name,
+				'slug' => $term->slug,
+			);
+		}
+
+		return $out;
+	}
+
+	/**
 	 * Build the public representation of a job.
 	 *
 	 * @param \WP_Post $post Job post.
@@ -1019,9 +1071,18 @@ class REST_API {
 		$post_id = (int) $post->ID;
 		$data    = array();
 
-		$meta_map = Post_Type::rest_field_meta_map();
+		$meta_map   = Post_Type::rest_field_meta_map();
+		$filter_map = self::filter_map();
 
 		foreach ( $allowed as $field ) {
+			// Any registered taxonomy is rendered the same way, so a custom one
+			// exposed through jszr_available_rest_fields works without a case.
+			if ( isset( $filter_map[ $field ] ) ) {
+				$data[ $field ] = self::prepare_terms( $post_id, $filter_map[ $field ] );
+
+				continue;
+			}
+
 			switch ( $field ) {
 				case 'id':
 					$data['id'] = $post_id;
@@ -1045,32 +1106,6 @@ class REST_API {
 
 				case 'content':
 					$data['content'] = wp_kses_post( $post->post_content );
-					break;
-
-				case 'department':
-				case 'location':
-				case 'employment_type':
-				case 'category':
-				case 'experience':
-					$map      = self::filter_map();
-					$taxonomy = isset( $map[ $field ] ) ? $map[ $field ] : '';
-
-					if ( '' === $taxonomy ) {
-						break;
-					}
-
-					$terms = get_the_terms( $post_id, $taxonomy );
-
-					$data[ $field ] = array();
-
-					if ( is_array( $terms ) ) {
-						foreach ( $terms as $term ) {
-							$data[ $field ][] = array(
-								'name' => $term->name,
-								'slug' => $term->slug,
-							);
-						}
-					}
 					break;
 
 				case 'apply_url':
@@ -1153,32 +1188,32 @@ class REST_API {
 	 */
 	public function get_public_schema() {
 		$properties = array();
+		$filter_map = self::filter_map();
 
 		foreach ( (array) Settings::get( 'rest_fields', array() ) as $field ) {
+			// Every taxonomy field has the same shape, custom ones included.
+			if ( isset( $filter_map[ $field ] ) ) {
+				$properties[ $field ] = array(
+					'type'    => 'array',
+					'context' => array( 'view' ),
+					'items'   => array(
+						'type'       => 'object',
+						'properties' => array(
+							'name' => array( 'type' => 'string' ),
+							'slug' => array( 'type' => 'string' ),
+						),
+					),
+				);
+
+				continue;
+			}
+
 			switch ( $field ) {
 				case 'id':
 				case 'positions':
 					$properties[ $field ] = array(
 						'type'    => 'integer',
 						'context' => array( 'view' ),
-					);
-					break;
-
-				case 'department':
-				case 'location':
-				case 'employment_type':
-				case 'category':
-				case 'experience':
-					$properties[ $field ] = array(
-						'type'    => 'array',
-						'context' => array( 'view' ),
-						'items'   => array(
-							'type'       => 'object',
-							'properties' => array(
-								'name' => array( 'type' => 'string' ),
-								'slug' => array( 'type' => 'string' ),
-							),
-						),
 					);
 					break;
 

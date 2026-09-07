@@ -197,8 +197,20 @@ Stops the active run and unschedules its remaining batches.
 ### `POST /jobs/{id}/resync`
 
 Re-fetches one job from Zoho by its stored record ID and rewrites it. This is
-the "Resync from Zoho" row action. It also clears the manual-edit guard for
-that job, so it is how you hand a hand-edited job back to Zoho.
+the **Resync from Zoho** row action.
+
+| Parameter | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `force` | boolean | `false` | Overwrite fields that were edited in WordPress |
+
+A plain resync respects the conflict mode, so under *Preserve fields edited in
+WordPress* it deliberately leaves hand-edited fields alone. Pass `force=true` —
+the **Reset to Zoho values** action — to discard those edits and take Zoho's
+values instead. The force path still stops short of *Zoho always overwrites*:
+meta the site added for its own purposes is left untouched either way.
+
+If the record no longer exists in Zoho, the configured orphan action is applied
+and the response reports `"action": "deleted"`.
 
 ### `GET /zoho-fields`
 

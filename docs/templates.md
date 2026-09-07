@@ -56,14 +56,29 @@ Two more, for use on a single job page (or inside a loop):
 Frontend CSS and JS are enqueued only when one of these actually renders. A page
 without jobs on it loads nothing.
 
-## Block
+## Blocks
 
-Insert **Zoho Recruit Jobs**. The inspector carries the same options as the
-shortcode attributes. It is server-rendered, so the editor preview comes from
-the same PHP as the front end.
+Three blocks, all server-rendered, so every editor preview comes from the same
+PHP as the front end.
 
-Supports wide and full alignment, an anchor, margin and padding, font size, and
-two style variations (Default, Bordered).
+| Block | Use | Attributes |
+| --- | --- | --- |
+| **Zoho Recruit Jobs** | A listing, anywhere | The shortcode attributes, in the inspector |
+| **Job Details** | Inside a single job template | Which facts to show, as toggles |
+| **Apply Button** | Inside a single job template | An optional label override |
+
+**Zoho Recruit Jobs** supports wide and full alignment, an anchor, margin and
+padding, font size, and two style variations (Default, Bordered).
+
+**Job Details** and **Apply Button** read the job from block context
+(`postId`), so they work inside a single job template, a query loop, or the
+post editor for a job. Placed anywhere with no job in context they render
+nothing rather than erroring.
+
+**Apply Button** also renders nothing when the job is closed or has no
+application URL — the same decision the `[zoho_job_apply]` shortcode makes, and
+the reason a closed job's page shows the "position closed" notice instead of a
+dead button.
 
 ## Classic theme templates
 
@@ -131,8 +146,11 @@ They are built from ordinary core blocks plus the plugin's own, so you can
 rearrange them freely:
 
 - **Zoho Recruit Jobs** — the listing
-- `[zoho_job_meta]` — the meta table
-- `[zoho_job_apply]` — the apply button
+- **Job Details** — the facts table
+- **Apply Button** — the apply link
+
+The `[zoho_job_meta]` and `[zoho_job_apply]` shortcodes render exactly the same
+markup, for classic templates and for pages built before the blocks existed.
 
 Block template registration needs WordPress 6.7. On 6.6 a block theme falls
 back to its own generic templates, which render job posts correctly if plainly.

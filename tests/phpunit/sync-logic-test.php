@@ -208,6 +208,76 @@ class JSZR_Sync_Logic_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A forced reset is the one thing that overrides preserve mode.
+	 */
+	public function test_force_overrides_preserved_edits() {
+		Settings::update( array( 'conflict_mode' => 'preserve_manual' ) );
+
+		$payload = array(
+			'post'   => array( 'post_title' => 'Software Developer' ),
+			'meta'   => array( '_zoho_recruit_city' => 'Chennai' ),
+			'terms'  => array(),
+			'mapped' => array(),
+		);
+
+		$created = Job::upsert( '223', $payload, array( 'status' => 'active' ) );
+
+		wp_update_post(
+			array(
+				'ID'         => $created['post_id'],
+				'post_title' => 'Edited By Hand',
+			)
+		);
+
+		$payload['post']['post_title'] = 'Software Engineer';
+
+		// Without force the edit survives, exactly as the previous test asserts.
+		Job::upsert( '223', $payload, array( 'status' => 'active' ) );
+		$this->assertSame( 'Edited By Hand', get_the_title( $created['post_id'] ) );
+
+		// With it, Zoho wins.
+		Job::upsert(
+			'223',
+			$payload,
+			array(
+				'status' => 'active',
+				'force'  => true,
+			)
+		);
+
+		$this->assertSame( 'Software Engineer', get_the_title( $created['post_id'] ) );
+	}
+
+	/**
+	 * A forced reset must not wipe meta the site added for its own purposes.
+	 */
+	public function test_force_leaves_unmapped_meta_alone() {
+		Settings::update( array( 'conflict_mode' => 'preserve_manual' ) );
+
+		$payload = array(
+			'post'   => array( 'post_title' => 'Software Developer' ),
+			'meta'   => array( '_zoho_recruit_city' => 'Chennai' ),
+			'terms'  => array(),
+			'mapped' => array(),
+		);
+
+		$created = Job::upsert( '224', $payload, array( 'status' => 'active' ) );
+
+		update_post_meta( $created['post_id'], '_site_specific_flag', 'keep me' );
+
+		Job::upsert(
+			'224',
+			$payload,
+			array(
+				'status' => 'active',
+				'force'  => true,
+			)
+		);
+
+		$this->assertSame( 'keep me', get_post_meta( $created['post_id'], '_site_specific_flag', true ) );
+	}
+
+	/**
 	 * A job past its closing date is not active, even before the cron runs.
 	 */
 	public function test_job_past_closing_date_is_inactive() {

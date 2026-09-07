@@ -1,0 +1,203 @@
+<?php
+/**
+ * Extension point tests.
+ *
+ * @package JobsSyncForZohoRecruit
+ */
+
+use JobsSyncForZohoRecruit\Field_Mapper;
+use JobsSyncForZohoRecruit\Job;
+use JobsSyncForZohoRecruit\Post_Type;
+use JobsSyncForZohoRecruit\REST_API;
+use JobsSyncForZohoRecruit\SEO;
+use JobsSyncForZohoRecruit\Settings;
+
+/**
+ * Covers the promises the plugin makes to other developers: a taxonomy added
+ * through the filter really is filterable everywhere, and the title and
+ * description an SEO plugin would read are the ones the plugin would use.
+ */
+class JSZR_Extensibility_Test extends WP_UnitTestCase {
+
+	/**
+	 * Reset shared state.
+	 */
+	public function set_up() {
+		parent::set_up();
+
+		delete_option( Settings::OPTION );
+		Settings::flush_cache();
+		Field_Mapper::flush_cache();
+	}
+
+	/**
+	 * Remove anything a test registered.
+	 */
+	public function tear_down() {
+		remove_all_filters( 'jszr_taxonomies' );
+		remove_all_filters( 'jszr_job_title' );
+		remove_all_filters( 'jszr_meta_description' );
+
+		parent::tear_down();
+	}
+
+	/**
+	 * Register an extra taxonomy the way a third-party plugin would.
+	 *
+	 * @return void
+	 */
+	private function register_extra_taxonomy() {
+		add_filter(
+			'jszr_taxonomies',
+			static function ( $taxonomies ) {
+				$taxonomies['zoho_job_shift'] = array(
+					'label' => 'Shift',
+					'args'  => array(
+						'hierarchical' => false,
+						'public'       => true,
+						'show_ui'      => true,
+					),
+				);
+
+				return $taxonomies;
+			}
+		);
+	}
+
+	/**
+	 * A taxonomy added through the filter becomes a REST and shortcode filter
+	 * without the developer wiring it up a second time.
+	 */
+	public function test_custom_taxonomy_becomes_a_filter_parameter() {
+		$this->register_extra_taxonomy();
+
+		$map = REST_API::filter_map();
+
+		$this->assertArrayHasKey( 'shift', $map );
+		$this->assertSame( 'zoho_job_shift', $map['shift'] );
+
+		// The built-in five keep their documented short names.
+		$this->assertSame( Post_Type::TAX_DEPARTMENT, $map['department'] );
+		$this->assertSame( Post_Type::TAX_EMPLOYMENT_TYPE, $map['employment_type'] );
+	}
+
+	/**
+	 * The same taxonomy also becomes a shortcode attribute.
+	 */
+	public function test_custom_taxonomy_becomes_a_shortcode_attribute() {
+		$this->register_extra_taxonomy();
+
+		$defaults = \JobsSyncForZohoRecruit\Shortcode::defaults();
+
+		$this->assertArrayHasKey( 'shift', $defaults );
+		$this->assertSame( '', $defaults['shift'] );
+	}
+
+	/**
+	 * And a mapping target, so Zoho values can reach it.
+	 */
+	public function test_custom_taxonomy_becomes_a_mapping_target() {
+		$this->register_extra_taxonomy();
+
+		$targets = Field_Mapper::targets();
+
+		$this->assertArrayHasKey( 'tax:zoho_job_shift', $targets );
+	}
+
+	/**
+	 * A taxonomy name that is not prefixed keeps its own name as the parameter.
+	 */
+	public function test_unprefixed_taxonomy_keeps_its_name() {
+		$this->assertSame( 'shift', REST_API::filter_param_for( 'zoho_job_shift' ) );
+		$this->assertSame( 'other_plugin_tax', REST_API::filter_param_for( 'other_plugin_tax' ) );
+	}
+
+	/**
+	 * The meta description falls back through excerpt, then content.
+	 */
+	public function test_meta_description_falls_back_to_content() {
+		$result = Job::upsert(
+			'700',
+			array(
+				'post'   => array(
+					'post_title'   => 'Software Developer',
+					'post_content' => '<p>We are looking for someone to build and maintain our internal tooling.</p>',
+					'post_excerpt' => '',
+				),
+				'meta'   => array(),
+				'terms'  => array(),
+				'mapped' => array(),
+			),
+			array( 'status' => 'active' )
+		);
+
+		$description = SEO::meta_description( $result['post_id'] );
+
+		$this->assertStringContainsString( 'internal tooling', $description );
+		$this->assertStringNotContainsString( '<p>', $description );
+	}
+
+	/**
+	 * An excerpt wins over the content when one exists.
+	 */
+	public function test_meta_description_prefers_the_excerpt() {
+		$result = Job::upsert(
+			'701',
+			array(
+				'post'   => array(
+					'post_title'   => 'Software Developer',
+					'post_content' => 'The long description.',
+					'post_excerpt' => 'The short summary.',
+				),
+				'meta'   => array(),
+				'terms'  => array(),
+				'mapped' => array(),
+			),
+			array( 'status' => 'active' )
+		);
+
+		$this->assertSame( 'The short summary.', SEO::meta_description( $result['post_id'] ) );
+	}
+
+	/**
+	 * Both values are filterable, which is how an SEO plugin integrates.
+	 */
+	public function test_title_and_description_are_filterable() {
+		$result = Job::upsert(
+			'702',
+			array(
+				'post'   => array( 'post_title' => 'Software Developer' ),
+				'meta'   => array(),
+				'terms'  => array(),
+				'mapped' => array(),
+			),
+			array( 'status' => 'active' )
+		);
+
+		add_filter( 'jszr_job_title', static fn() => 'Replaced title' );
+		add_filter( 'jszr_meta_description', static fn() => 'Replaced description' );
+
+		$this->assertSame( 'Replaced title', SEO::job_title( $result['post_id'] ) );
+		$this->assertSame( 'Replaced description', SEO::meta_description( $result['post_id'] ) );
+	}
+
+	/**
+	 * The suggested title includes the most specific location term.
+	 */
+	public function test_job_title_includes_the_location() {
+		$result = Job::upsert(
+			'703',
+			array(
+				'post'   => array( 'post_title' => 'Software Developer' ),
+				'meta'   => array(),
+				'terms'  => array(
+					Post_Type::TAX_LOCATION => array( array( 'India', 'Tamil Nadu', 'Chennai' ) ),
+				),
+				'mapped' => array(),
+			),
+			array( 'status' => 'active' )
+		);
+
+		$this->assertSame( 'Software Developer - Chennai', SEO::job_title( $result['post_id'] ) );
+	}
+}
