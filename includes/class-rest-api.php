@@ -53,6 +53,13 @@ class REST_API {
 
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
 
+		// Any change to a job, from any source, drops the cached listings.
+		add_action( 'save_post_' . Post_Type::POST_TYPE, array( __CLASS__, 'flush_cache_for_post' ), 10, 2 );
+		add_action( 'deleted_post', array( __CLASS__, 'flush_cache_for_post' ), 10, 2 );
+		add_action( 'trashed_post', array( __CLASS__, 'flush_cache_for_post' ) );
+		add_action( 'untrashed_post', array( __CLASS__, 'flush_cache_for_post' ) );
+		add_action( 'update_option_' . Settings::OPTION, array( __CLASS__, 'flush_cache' ) );
+
 		// Widen keyword search to cover the job code.
 		add_filter( 'posts_join', array( __CLASS__, 'search_join' ), 10, 2 );
 		add_filter( 'posts_search', array( __CLASS__, 'search_where' ), 10, 2 );
@@ -99,12 +106,14 @@ class REST_API {
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_job' ),
 					'permission_callback' => array( $this, 'public_permission' ),
-					'args'                => array(
-						'id' => array(
-							'type'        => 'integer',
-							'required'    => true,
-							'description' => __( 'WordPress post ID of the job.', 'jobs-sync-for-zoho-recruit' ),
-						),
+					'args'                => self::validated(
+						array(
+							'id' => array(
+								'type'        => 'integer',
+								'required'    => true,
+								'description' => __( 'WordPress post ID of the job.', 'jobs-sync-for-zoho-recruit' ),
+							),
+						)
 					),
 				),
 				'schema' => array( $this, 'get_public_schema' ),
@@ -119,16 +128,18 @@ class REST_API {
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'start_sync' ),
 					'permission_callback' => array( $this, 'manage_permission' ),
-					'args'                => array(
-						'type'    => array(
-							'type'    => 'string',
-							'enum'    => array( 'full', 'incremental' ),
-							'default' => 'incremental',
-						),
-						'dry_run' => array(
-							'type'    => 'boolean',
-							'default' => false,
-						),
+					'args'                => self::validated(
+						array(
+							'type'    => array(
+								'type'    => 'string',
+								'enum'    => array( 'full', 'incremental' ),
+								'default' => 'incremental',
+							),
+							'dry_run' => array(
+								'type'    => 'boolean',
+								'default' => false,
+							),
+						)
 					),
 				),
 			)
@@ -142,11 +153,13 @@ class REST_API {
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_sync_status' ),
 					'permission_callback' => array( $this, 'manage_permission' ),
-					'args'                => array(
-						'run_id' => array(
-							'type'     => 'integer',
-							'required' => false,
-						),
+					'args'                => self::validated(
+						array(
+							'run_id' => array(
+								'type'     => 'integer',
+								'required' => false,
+							),
+						)
 					),
 				),
 			)
@@ -172,11 +185,13 @@ class REST_API {
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'resync_job' ),
 					'permission_callback' => array( $this, 'manage_permission' ),
-					'args'                => array(
-						'id' => array(
-							'type'     => 'integer',
-							'required' => true,
-						),
+					'args'                => self::validated(
+						array(
+							'id' => array(
+								'type'     => 'integer',
+								'required' => true,
+							),
+						)
 					),
 				),
 			)
@@ -190,11 +205,13 @@ class REST_API {
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_zoho_fields' ),
 					'permission_callback' => array( $this, 'manage_permission' ),
-					'args'                => array(
-						'refresh' => array(
-							'type'    => 'boolean',
-							'default' => false,
-						),
+					'args'                => self::validated(
+						array(
+							'refresh' => array(
+								'type'    => 'boolean',
+								'default' => false,
+							),
+						)
 					),
 				),
 			)
@@ -322,6 +339,37 @@ class REST_API {
 					$taxonomy
 				),
 			);
+		}
+
+		return self::validated( $args );
+	}
+
+	/**
+	 * Attach the schema validator to every argument.
+	 *
+	 * WordPress only runs an argument's schema — its type, enum, minimum and
+	 * maximum — when the argument declares a validate_callback. Without this a
+	 * route can carry a perfectly good schema that is never enforced, and
+	 * per_page=5000 sails through with a 200.
+	 *
+	 * @param array $args Argument definitions.
+	 * @return array
+	 */
+	private static function validated( array $args ) {
+		foreach ( $args as $name => $definition ) {
+			if ( ! is_array( $definition ) ) {
+				continue;
+			}
+
+			if ( ! isset( $definition['validate_callback'] ) ) {
+				$definition['validate_callback'] = 'rest_validate_request_arg';
+			}
+
+			if ( ! isset( $definition['sanitize_callback'] ) ) {
+				$definition['sanitize_callback'] = 'rest_sanitize_request_arg';
+			}
+
+			$args[ $name ] = $definition;
 		}
 
 		return $args;
@@ -1208,5 +1256,34 @@ class REST_API {
 		$version = (int) get_option( self::CACHE_VERSION_OPTION, 1 );
 
 		update_option( self::CACHE_VERSION_OPTION, $version + 1, false );
+
+		wp_cache_delete( 'jszr_job_counts', 'jszr' );
+	}
+
+	/**
+	 * Flush cached listings when a single job changes outside a sync.
+	 *
+	 * A sync flushes once at the end of a run, but a job edited, trashed or
+	 * deleted in wp-admin would otherwise stay in the cached listings until the
+	 * TTL expired.
+	 *
+	 * @param int           $post_id Post ID.
+	 * @param \WP_Post|null $post    Post object, when the hook provides one.
+	 * @return void
+	 */
+	public static function flush_cache_for_post( $post_id, $post = null ) {
+		// A sync writes thousands of posts and flushes once when it finishes;
+		// bumping the option per record would be a write per job.
+		if ( Sync::is_syncing() ) {
+			return;
+		}
+
+		$type = $post instanceof \WP_Post ? $post->post_type : get_post_type( (int) $post_id );
+
+		if ( Post_Type::POST_TYPE !== $type ) {
+			return;
+		}
+
+		self::flush_cache();
 	}
 }

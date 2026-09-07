@@ -57,12 +57,10 @@ class Templates {
 		$template = ltrim( (string) $template, '/' );
 		$template = str_replace( array( '..', "\0" ), '', $template );
 
-		$found = locate_template(
-			array(
-				self::THEME_DIR . '/' . $template,
-				$template,
-			)
-		);
+		// Only the namespaced directory counts as an override. Looking for a
+		// bare "archive.php" or "single.php" would match the theme's own blog
+		// templates and quietly render those instead of the job listing.
+		$found = locate_template( array( self::THEME_DIR . '/' . $template ) );
 
 		if ( '' === $found ) {
 			$found = PLUGIN_DIR . 'templates/' . $template;
@@ -118,6 +116,16 @@ class Templates {
 	 * @return string
 	 */
 	public static function template_include( $template ) {
+		// A block theme composes its own header and footer through templates and
+		// template parts. Loading the plugin's classic PHP templates there would
+		// call get_header()/get_footer() on a theme that has neither, which both
+		// raises a deprecation notice and drops the site's real chrome. Block
+		// themes get the block templates registered in register_block_templates()
+		// instead, or the theme's own fallback.
+		if ( function_exists( 'wp_is_block_theme' ) && wp_is_block_theme() ) {
+			return $template;
+		}
+
 		if ( is_singular( Post_Type::POST_TYPE ) ) {
 			if ( self::theme_has( array( 'single-' . Post_Type::POST_TYPE . '.php' ) ) ) {
 				return $template;

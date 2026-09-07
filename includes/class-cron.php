@@ -87,6 +87,13 @@ class Cron {
 	 * @return void
 	 */
 	public static function schedule() {
+		// Activation runs after plugins_loaded, so the container — and with it
+		// the constructor that normally registers jszr_six_hours — has not been
+		// built yet. Without the schedule registered, wp_schedule_event() would
+		// silently refuse the recurrence. Adding the same callback twice is a
+		// no-op in WordPress, so this is safe to repeat.
+		add_filter( 'cron_schedules', array( __CLASS__, 'add_schedules' ) );
+
 		$frequency = (string) Settings::get( 'sync_frequency', 'jszr_six_hours' );
 
 		wp_clear_scheduled_hook( self::SYNC_HOOK );

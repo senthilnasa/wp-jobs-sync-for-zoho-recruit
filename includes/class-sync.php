@@ -477,6 +477,14 @@ class Sync {
 			return 'skipped';
 		}
 
+		// A job that is not published to the website and has never been imported
+		// stays out of WordPress entirely — importing it would only add a hidden
+		// post nobody asked for. One that already exists is deactivated instead,
+		// so losing the flag never deletes content.
+		if ( self::is_unpublished( $record ) && ! Job::find_by_zoho_id( $zoho_id ) ) {
+			return 'skipped';
+		}
+
 		$payload = $this->mapper->map( $record );
 
 		// Expiry is decided from the mapped closing date, not from Zoho's status.
@@ -582,14 +590,8 @@ class Sync {
 		}
 
 		// The "publish to website" flag overrides an otherwise active status.
-		if ( Settings::get( 'only_published', true ) ) {
-			$flag_field = Settings::sanitize_api_name( (string) Settings::get( 'published_field', '' ) );
-
-			if ( '' !== $flag_field && array_key_exists( $flag_field, $record ) ) {
-				if ( ! Field_Mapper::to_boolean( $record[ $flag_field ] ) ) {
-					$status = 'inactive';
-				}
-			}
+		if ( self::is_unpublished( $record ) ) {
+			$status = 'inactive';
 		}
 
 		/**
@@ -599,6 +601,30 @@ class Sync {
 		 * @param array  $record Raw Zoho record.
 		 */
 		return (string) apply_filters( 'jszr_record_status', $status, $record );
+	}
+
+	/**
+	 * Whether the "publish to website" filter rules this record out.
+	 *
+	 * Returns false when the filter is off, when no field is configured, or when
+	 * the record does not carry the field at all — an absent field is not
+	 * evidence that a job is unpublished.
+	 *
+	 * @param array $record Raw Zoho record.
+	 * @return bool
+	 */
+	public static function is_unpublished( array $record ) {
+		if ( ! Settings::get( 'only_published', true ) ) {
+			return false;
+		}
+
+		$flag_field = Settings::sanitize_api_name( (string) Settings::get( 'published_field', '' ) );
+
+		if ( '' === $flag_field || ! array_key_exists( $flag_field, $record ) ) {
+			return false;
+		}
+
+		return ! Field_Mapper::to_boolean( $record[ $flag_field ] );
 	}
 
 	/**

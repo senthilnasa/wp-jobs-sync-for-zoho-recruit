@@ -470,7 +470,7 @@ class Field_Mapper {
 
 		switch ( $transform ) {
 			case 'html':
-				$html = wp_kses_post( self::stringify( $value ) );
+				$html = wp_kses_post( self::strip_code_blocks( self::stringify( $value ) ) );
 
 				return self::tidy_html( $html );
 
@@ -694,7 +694,31 @@ class Field_Mapper {
 	}
 
 	/**
-	 * Remove empty tags and inline styles from sanitized HTML.
+	 * Remove script and style elements, contents included.
+	 *
+	 * @param string $html Raw HTML from Zoho.
+	 * @return string
+	 */
+	public static function strip_code_blocks( $html ) {
+		$html = (string) $html;
+
+		// wp_kses_post() removes the <script> and <style> tags but leaves what
+		// was between them as visible text, which then leaks into the excerpt as
+		// a line of stray JavaScript. Drop the whole element instead.
+		$stripped = preg_replace( '#<(script|style)\b[^>]*>.*?</\1\s*>#is', '', $html );
+
+		if ( ! is_string( $stripped ) ) {
+			return $html;
+		}
+
+		// An unclosed <script> would otherwise survive the pattern above.
+		$stripped = preg_replace( '#<(script|style)\b[^>]*>.*$#is', '', $stripped );
+
+		return is_string( $stripped ) ? $stripped : $html;
+	}
+
+	/**
+	 * Remove empty wrappers and, optionally, inline styles.
 	 *
 	 * @param string $html Sanitized HTML.
 	 * @return string
