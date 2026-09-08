@@ -82,6 +82,38 @@ have no application link.
 
 ---
 
+## A field is empty on every job
+
+Department blank everywhere, or salary, or the closing date. The sync reports
+success, the jobs appear, and one value is simply never there.
+
+This is almost always a field name. Every Zoho account renames and re-purposes
+fields, and the plugin's defaults are only the names a stock account uses. A
+mapping pointing at a field your account does not have fails silently: nothing
+errors, the value is just never found.
+
+**Run check** on the Sync Logs screen now names them. It compares the mapping
+against the field list read from your own account and reports anything that is
+not there.
+
+To fix one, open **Field Mapping** and re-point the row. The dropdown shows both
+the label and the API name, which is what matters. Some real examples from an
+account with customised labels:
+
+| Plugin default | What that account actually had |
+| --- | --- |
+| `Department_Name` | `Client_Name`, relabelled "Department Name" |
+| `Salary` | `Salary_Budget` |
+| `Expected_Closing_Date` | `Target_Date` |
+| `Publish_in_Career_Website` | `Publish` |
+| `Website` | no equivalent at all |
+
+The last one is worth knowing: there is no field on a job opening that holds a
+link to the public posting, so the apply button is built from the career site
+address instead. See [No apply button appears on any job](#no-apply-button-appears-on-any-job).
+
+---
+
 ## The website lists more jobs than the career site
 
 If your Zoho career site shows six jobs and the website shows sixteen, the

@@ -148,28 +148,62 @@ class Diagnostics {
 		);
 
 		/*
-		 * "Only sync published jobs" quietly does nothing when the configured
-		 * flag field is not the one this Zoho account actually uses, because
-		 * a field missing from a record is treated as "no opinion" rather than
-		 * as unpublished. The symptom is jobs on the website that are not on
-		 * the career site, which is easy to blame on the sync.
+		 * Every Zoho account renames and re-purposes fields, and the plugin's
+		 * defaults are only the common names. A mapping that points at a field
+		 * this account does not have fails silently -- the sync succeeds, the
+		 * job appears, and one value is quietly empty forever. That is a
+		 * miserable thing to debug from the outside, so it is checked here
+		 * against the field list read from the account itself.
 		 */
-		$flag = (string) Settings::get( 'published_field', '' );
-
-		if ( Settings::get( 'only_published', true ) && '' !== $flag && plugin()->metadata()->has_cached_fields() ) {
+		if ( plugin()->metadata()->has_cached_fields() ) {
 			$known = array_keys( (array) plugin()->metadata()->get_fields() );
 
+			$missing = array();
+
+			foreach ( Field_Mapper::get_mapping() as $row ) {
+				$field = isset( $row['zoho_field'] ) ? (string) $row['zoho_field'] : '';
+
+				if ( '' !== $field && ! in_array( $field, $known, true ) ) {
+					$missing[] = $field;
+				}
+			}
+
+			$missing = array_values( array_unique( $missing ) );
+
 			$checks[] = self::check(
-				'Publish flag field exists',
-				in_array( $flag, $known, true ),
-				in_array( $flag, $known, true )
-					? sprintf( '%s found in this account', $flag )
+				'Mapped fields exist in Zoho',
+				empty( $missing ),
+				empty( $missing )
+					? 'every mapped field exists on this account'
 					: sprintf(
-						'%s is not a field on this account, so "only sync published jobs" is having no effect and unpublished jobs are being synced. Pick the right field on the Field Mapping screen.',
-						$flag
+						'not a field on this account: %s. Anything mapped from these stays empty on every job. Pick the right field on the Field Mapping screen.',
+						implode( ', ', $missing )
 					),
 				'warning'
 			);
+
+			/*
+			 * The publish flag is not part of the mapping, so it needs its own
+			 * line. A field missing from a record counts as "no opinion" rather
+			 * than as unpublished -- deliberate, so an account that does not use
+			 * the flag still syncs -- which means a wrong name silently disables
+			 * the filter and unpublished jobs reach the website.
+			 */
+			$flag = (string) Settings::get( 'published_field', '' );
+
+			if ( Settings::get( 'only_published', true ) && '' !== $flag ) {
+				$checks[] = self::check(
+					'Publish flag field exists',
+					in_array( $flag, $known, true ),
+					in_array( $flag, $known, true )
+						? sprintf( '%s found on this account', $flag )
+						: sprintf(
+							'%s is not a field on this account, so "only sync published jobs" is having no effect and jobs that are not on your career site are being synced anyway.',
+							$flag
+						),
+					'warning'
+				);
+			}
 		}
 
 		// An empty apply button is invisible on the frontend: the job renders,
