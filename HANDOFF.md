@@ -154,6 +154,17 @@ anywhere, deliberately.
   `get_header()`, which a block theme has no answer for.
 - **`jszr_verify_admin_request()` is a global function, not a method,** so PHPCS
   and Plugin Check can both see the nonce check at the call site.
+- **Two settings look similar and are not.** `public_jobs` unregisters the job
+  URLs entirely. `disable_default_jobs_frontend` keeps every URL and only stops
+  the plugin's own templates, assets, block templates and expired-job redirect,
+  so a site can render the pages itself. Both default to the behaviour existing
+  sites already have.
+- **`/jobs/render` is the AJAX surface, and it lives in the REST namespace.**
+  There is deliberately no `admin-ajax.php` layer: the plugin already has a
+  public API with a permission callback and caching, and a second one would be
+  another thing to keep in step. The bundled `public/js/jobs.js` does not use
+  the endpoint -- it fetches the page URL and swaps the results region -- so the
+  shipped frontend keeps working when `rest_enabled` is off.
 - **A page cache will hide a working sync.** A live site showed an empty
   archive for weeks while the data, the query and the individual job pages were
   all correct: Breeze had cached the archive when it was empty and nothing
@@ -199,7 +210,7 @@ anywhere, deliberately.
 ## 5. Verified vs. not verified
 
 **Verified in a live WordPress 7.1 / PHP 8.1 (wp-env)**
-- PHPCS: 0 errors, 0 warnings across 57 files. PHPCompatibility clean for 8.1+.
+- PHPCS: 0 errors, 0 warnings across 63 files. PHPCompatibility clean for 8.1+.
 - PHPUnit: 116 tests single site, 116 multisite (`npm run test:php:multisite`).
 - `bin/smoke-test.php`: 66 checks. `bin/lifecycle-test.php`: 26 checks.
   `bin/scale-test.php 2000`: 26 checks.
@@ -219,6 +230,18 @@ anywhere, deliberately.
 - **Scale now covered**: 2,000 records over ten pages, no duplicates, ~83 MB
   peak, one token fetch for the whole run, threshold refusing to deactivate,
   and an interrupted run deactivating nothing.
+- **Frontend control**: the setting verified over HTTP in both modes on a
+  classic theme -- default mode renders the plugin UI, custom mode returns 200
+  with no plugin markup, no plugin stylesheet and zero redirects, while REST,
+  the shortcode and the admin list keep working. A real theme override written
+  into `twentytwentyone/jobs-sync-for-zoho-recruit/card.php` was picked up (4
+  override cards, 0 plugin cards) and the plugin default returned when it was
+  deleted.
+- **CI**: the `svn: command not found` failure reproduced inside an
+  `ubuntu:24.04` container, and the fixed step proven there -- Subversion and
+  the MySQL client installed, then the exact CI command
+  (`bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1:3306 latest`)
+  ran to completion and produced a usable test suite.
 - **The redesign**: hero, filter bar, cards, empty state and error state
   rendered and measured in a browser on both a classic theme (Twenty
   Twenty-One, which is what the live site's hello-elementor is) and a block

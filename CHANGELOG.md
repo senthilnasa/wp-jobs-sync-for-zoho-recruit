@@ -140,7 +140,32 @@ version onwards.
   employment type, job-code search, and an edit-screen panel grouped into
   synchronization, basic information and actions.
 
+- A **Disable default jobs frontend** setting, off by default. Turning it on
+  stops the plugin rendering the job archive and single job pages -- templates,
+  frontend assets, block templates and the expired-job redirect -- so a theme,
+  a page builder or a custom frontend can own them. The URLs, the post type,
+  the admin, the sync, the REST API and the structured data are untouched. It
+  is deliberately separate from *Public job pages*, which unregisters the URLs
+  altogether.
+- `jszr_get_jobs()` and `jszr_get_job()`, which run the same query and return
+  the same shape as the REST API, so a hand-written template cannot end up with
+  a different set of jobs than the shortcode or the block.
+- `jszr_before_jobs`, `jszr_after_jobs`, `jszr_before_job` and `jszr_after_job`
+  actions, and `jszr_frontend_enabled`, `jszr_jobs_template`,
+  `jszr_job_template`, `jszr_jobs_query_args` and `jszr_job_data` filters.
+- `GET /jobs/render`, which answers with rendered markup, the data behind it and
+  pagination in one response, with `redirect` always false, so a custom
+  frontend can search, filter and page without a navigation. Added to the
+  existing REST namespace rather than as a second admin-ajax layer.
+
 ### Fixed
+
+- The PHPUnit workflow failed on a fresh runner with `svn: command not found`.
+  `bin/install-wp-tests.sh` checks the WordPress test suite out of
+  `develop.svn.wordpress.org`, and Subversion is not on the ubuntu-24.04 image
+  that `ubuntu-latest` now resolves to. The workflow installs Subversion and the
+  MySQL client -- the script calls `mysqladmin` too -- before running the
+  script, and verifies both are present.
 
 - Job listings could be served indefinitely from a stale page cache. The purger
   covered nine caching plugins but not Breeze, the one that ships with

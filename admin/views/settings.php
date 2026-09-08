@@ -684,6 +684,29 @@ $jszr_input = static function ( $key, $values, $type = 'text', $help = '', $attr
 							</td>
 						</tr>
 						<tr>
+							<th scope="row"><?php esc_html_e( 'Default jobs frontend', 'jobs-sync-for-zoho-recruit' ); ?></th>
+							<td>
+								<?php
+								$jszr_checkbox(
+									'disable_default_jobs_frontend',
+									$settings,
+									__( 'Disable the default jobs frontend', 'jobs-sync-for-zoho-recruit' ),
+									__( 'Stops the plugin rendering its own layout on the jobs archive and single job pages, so your theme, a custom template, a page builder or your own frontend can control them instead. The URLs stay exactly as they are, and job management, applications, the REST API, structured data and everything in the admin keep working. Leave this off unless you are replacing the job pages yourself.', 'jobs-sync-for-zoho-recruit' )
+								);
+								?>
+
+								<p class="description">
+									<?php
+									printf(
+										/* translators: %s: link to the customization documentation. */
+										esc_html__( 'See %s for the template names, hooks and functions to build against.', 'jobs-sync-for-zoho-recruit' ),
+										'<code>docs/frontend-customization.md</code>'
+									);
+									?>
+								</p>
+							</td>
+						</tr>
+						<tr>
 							<th scope="row"><label for="jszr-job_slug"><?php esc_html_e( 'Job URL slug', 'jobs-sync-for-zoho-recruit' ); ?></label></th>
 							<td>
 								<?php

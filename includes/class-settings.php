@@ -94,19 +94,19 @@ class Settings {
 	public static function defaults() {
 		$defaults = array(
 			// Connection.
-			'data_center'             => 'com',
-			'oauth_scopes'            => '',
+			'data_center'                   => 'com',
+			'oauth_scopes'                  => '',
 
 			// Sync.
-			'sync_frequency'          => 'jszr_six_hours',
-			'cron_sync_type'          => 'incremental',
-			'full_sync_interval_days' => 7,
-			'per_request'             => 200,
-			'batch_size'              => 200,
-			'request_timeout'         => 30,
-			'only_published'          => true,
-			'published_field'         => 'Publish_in_Career_Website',
-			'status_map'              => array(
+			'sync_frequency'                => 'jszr_six_hours',
+			'cron_sync_type'                => 'incremental',
+			'full_sync_interval_days'       => 7,
+			'per_request'                   => 200,
+			'batch_size'                    => 200,
+			'request_timeout'               => 30,
+			'only_published'                => true,
+			'published_field'               => 'Publish_in_Career_Website',
+			'status_map'                    => array(
 				'In-progress'          => 'active',
 				'Active'               => 'active',
 				'Submitted'            => 'active',
@@ -119,21 +119,21 @@ class Settings {
 				'Filled'               => 'closed',
 				'Closed-Won'           => 'closed',
 			),
-			'default_status'          => 'active',
-			'expire_action'           => 'inactive',
-			'orphan_action'           => 'draft',
-			'deactivation_threshold'  => 50,
-			'conflict_mode'           => 'mapped_only',
-			'store_raw'               => true,
-			'notify_on_failure'       => true,
-			'notify_email'            => '',
+			'default_status'                => 'active',
+			'expire_action'                 => 'inactive',
+			'orphan_action'                 => 'draft',
+			'deactivation_threshold'        => 50,
+			'conflict_mode'                 => 'mapped_only',
+			'store_raw'                     => true,
+			'notify_on_failure'             => true,
+			'notify_email'                  => '',
 
 			// Public REST API.
-			'rest_enabled'            => true,
-			'rest_per_page'           => 20,
-			'rest_max_per_page'       => 100,
-			'rest_allow_inactive'     => false,
-			'rest_fields'             => array(
+			'rest_enabled'                  => true,
+			'rest_per_page'                 => 20,
+			'rest_max_per_page'             => 100,
+			'rest_allow_inactive'           => false,
+			'rest_fields'                   => array(
 				'id',
 				'title',
 				'slug',
@@ -155,53 +155,62 @@ class Settings {
 				'closing_date',
 				'apply_url',
 			),
-			'cache_ttl'               => 300,
+			'cache_ttl'                     => 300,
 
 			// Frontend.
-			'job_slug'                => 'jobs',
-			'archive_slug'            => 'jobs',
-			'public_jobs'             => true,
-			'default_style'           => 'list',
-			'expired_behavior'        => 'notice',
-			'apply_label'             => '',
-			'apply_target'            => 'new_tab',
-			'apply_url_template'      => '',
-			'apply_utm'               => '',
+			'job_slug'                      => 'jobs',
+			'archive_slug'                  => 'jobs',
+			'public_jobs'                   => true,
+
+			/*
+			 * Off by default. Existing sites must keep the frontend they have;
+			 * this is opt-in for sites that want to render the job pages
+			 * themselves. Distinct from public_jobs, which unregisters the URLs
+			 * altogether -- this one keeps them and only stands the plugin's own
+			 * templates down.
+			 */
+			'disable_default_jobs_frontend' => false,
+			'default_style'                 => 'list',
+			'expired_behavior'              => 'notice',
+			'apply_label'                   => '',
+			'apply_target'                  => 'new_tab',
+			'apply_url_template'            => '',
+			'apply_utm'                     => '',
 
 			// Display: layouts, filters and custom CSS.
-			'listing_layout'          => 'default',
-			'card_template'           => '',
-			'job_info_layout'         => 'default',
-			'job_info_template'       => '',
-			'job_info_fields'         => array( 'department', 'location', 'employment_type', 'experience', 'salary', 'posted_date', 'closing_date' ),
-			'custom_css'              => '',
-			'show_filters_default'    => true,
-			'show_search_default'     => true,
-			'filters_layout'          => 'inline',
-			'filter_fields'           => array( 'department', 'location', 'employment_type', 'experience' ),
-			'show_sort'               => false,
-			'search_placeholder'      => '',
-			'filters_button_label'    => '',
+			'listing_layout'                => 'default',
+			'card_template'                 => '',
+			'job_info_layout'               => 'default',
+			'job_info_template'             => '',
+			'job_info_fields'               => array( 'department', 'location', 'employment_type', 'experience', 'salary', 'posted_date', 'closing_date' ),
+			'custom_css'                    => '',
+			'show_filters_default'          => true,
+			'show_search_default'           => true,
+			'filters_layout'                => 'inline',
+			'filter_fields'                 => array( 'department', 'location', 'employment_type', 'experience' ),
+			'show_sort'                     => false,
+			'search_placeholder'            => '',
+			'filters_button_label'          => '',
 
 			// Structured data.
-			'schema_enabled'          => true,
-			'schema_skip_if_seo'      => true,
-			'org_name'                => '',
-			'org_logo'                => '',
-			'org_url'                 => '',
+			'schema_enabled'                => true,
+			'schema_skip_if_seo'            => true,
+			'org_name'                      => '',
+			'org_logo'                      => '',
+			'org_url'                       => '',
 
 			// SEO.
-			'sitemap_enabled'         => true,
+			'sitemap_enabled'               => true,
 
 			// Webhook.
-			'webhook_enabled'         => false,
+			'webhook_enabled'               => false,
 
 			// Advanced.
-			'debug_logging'           => false,
-			'log_retention_days'      => 30,
-			'log_retention_max'       => 200,
-			'uninstall_delete_jobs'   => false,
-			'uninstall_delete_data'   => true,
+			'debug_logging'                 => false,
+			'log_retention_days'            => 30,
+			'log_retention_max'             => 200,
+			'uninstall_delete_jobs'         => false,
+			'uninstall_delete_data'         => true,
 		);
 
 		/**
@@ -346,6 +355,7 @@ class Settings {
 			'rest_enabled',
 			'rest_allow_inactive',
 			'public_jobs',
+			'disable_default_jobs_frontend',
 			'schema_enabled',
 			'schema_skip_if_seo',
 			'sitemap_enabled',

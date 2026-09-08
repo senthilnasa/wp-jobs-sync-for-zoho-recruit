@@ -77,6 +77,13 @@ get_header();
 		}
 	}
 
+	/**
+	 * Fires on the job archive, before the listing.
+	 *
+	 * @param array $params Filter parameters read from the request.
+	 */
+	do_action( 'jszr_before_jobs', $jszr_params );
+
 	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Renderer escapes its own output.
 	echo \JobsSyncForZohoRecruit\Shortcode::render(
 		array_merge(
@@ -92,6 +99,13 @@ get_header();
 			)
 		)
 	);
+
+	/**
+	 * Fires on the job archive, after the listing.
+	 *
+	 * @param array $params Filter parameters read from the request.
+	 */
+	do_action( 'jszr_after_jobs', $jszr_params );
 	?>
 </main>
 <?php

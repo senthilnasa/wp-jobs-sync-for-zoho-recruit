@@ -116,6 +116,14 @@ class Templates {
 	 * @return string
 	 */
 	public static function template_include( $template ) {
+		// Stand down entirely when the site has taken the frontend over. The
+		// URL, the query and the post are all still there -- WordPress simply
+		// resolves the template through its own hierarchy, so a theme file, a
+		// page builder or a custom controller gets the request untouched.
+		if ( ! self::frontend_enabled() ) {
+			return $template;
+		}
+
 		// A block theme composes its own header and footer through templates and
 		// template parts. Loading the plugin's classic PHP templates there would
 		// call get_header()/get_footer() on a theme that has neither, which both
@@ -133,7 +141,15 @@ class Templates {
 
 			self::enqueue_assets();
 
-			return self::locate( 'single.php' );
+			/**
+			 * Filter the template file used for a single job.
+			 *
+			 * Return an absolute path to render something else entirely.
+			 *
+			 * @param string $path     Absolute path to the template.
+			 * @param string $template The theme's resolved template.
+			 */
+			return (string) apply_filters( 'jszr_job_template', self::locate( 'single.php' ), $template );
 		}
 
 		if ( is_post_type_archive( Post_Type::POST_TYPE ) || self::is_job_taxonomy() ) {
@@ -149,10 +165,41 @@ class Templates {
 
 			self::enqueue_assets();
 
-			return self::locate( 'archive.php' );
+			/**
+			 * Filter the template file used for the job archive.
+			 *
+			 * @param string $path     Absolute path to the template.
+			 * @param string $template The theme's resolved template.
+			 */
+			return (string) apply_filters( 'jszr_jobs_template', self::locate( 'archive.php' ), $template );
 		}
 
 		return $template;
+	}
+
+	/**
+	 * Whether the plugin should render its own frontend for job pages.
+	 *
+	 * False means the site has taken the job pages over: nothing else changes.
+	 * The post type, the URLs, the REST API, the admin screens, the sync and
+	 * the structured data all carry on exactly as before -- only the plugin's
+	 * own templates and their assets stand down.
+	 *
+	 * @return bool
+	 */
+	public static function frontend_enabled() {
+		$enabled = ! Settings::get( 'disable_default_jobs_frontend', false );
+
+		/**
+		 * Filter whether the plugin renders its default job frontend.
+		 *
+		 * Lets a site take over the job pages conditionally -- for one template,
+		 * one language, or one section of the site -- without touching the
+		 * setting.
+		 *
+		 * @param bool $enabled Whether the plugin renders its own frontend.
+		 */
+		return (bool) apply_filters( 'jszr_frontend_enabled', $enabled );
 	}
 
 	/**
@@ -224,6 +271,14 @@ class Templates {
 	 */
 	public static function handle_expired_job() {
 		if ( ! is_singular( Post_Type::POST_TYPE ) ) {
+			return;
+		}
+
+		// This can redirect or send a 410, and either would fight a custom
+		// implementation that has taken the job pages over. The job data and
+		// jszr_is_job_active() are still there for a template that wants to
+		// make the same decision itself.
+		if ( ! self::frontend_enabled() ) {
 			return;
 		}
 
@@ -351,6 +406,14 @@ class Templates {
 			true
 		);
 
+		// Only load the plugin's frontend assets on job pages it actually
+		// renders. A site that has taken the pages over should not be shipped
+		// stylesheet and script it does not use; shortcodes and blocks still
+		// enqueue on demand through Shortcode::render().
+		if ( ! self::frontend_enabled() ) {
+			return;
+		}
+
 		if ( is_singular( Post_Type::POST_TYPE ) || is_post_type_archive( Post_Type::POST_TYPE ) || self::is_job_taxonomy() ) {
 			self::enqueue_assets();
 		}
@@ -409,6 +472,12 @@ class Templates {
 	 */
 	public static function register_block_templates() {
 		if ( ! function_exists( 'register_block_template' ) || ! wp_is_block_theme() ) {
+			return;
+		}
+
+		// These are the plugin's default frontend on a block theme, so they
+		// stand down with the rest of it and the theme's own templates apply.
+		if ( ! self::frontend_enabled() ) {
 			return;
 		}
 

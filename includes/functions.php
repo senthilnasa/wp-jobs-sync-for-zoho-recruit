@@ -253,3 +253,114 @@ if ( ! function_exists( 'jszr_icon' ) ) {
 		echo wp_kses( $svg, jszr_svg_allowed_html() );
 	}
 }
+
+if ( ! function_exists( 'jszr_jobs_frontend_enabled' ) ) {
+	/**
+	 * Whether the plugin renders its own frontend for the job pages.
+	 *
+	 * False when "Disable default jobs frontend" is on, or when something has
+	 * filtered jszr_frontend_enabled. Everything else -- the URLs, the post
+	 * type, the REST API, the admin, the sync -- is unaffected either way.
+	 *
+	 * @return bool
+	 */
+	function jszr_jobs_frontend_enabled() {
+		return \JobsSyncForZohoRecruit\Templates::frontend_enabled();
+	}
+}
+
+if ( ! function_exists( 'jszr_get_jobs' ) ) {
+	/**
+	 * Query jobs for a custom frontend.
+	 *
+	 * The same query builder the REST endpoint, the shortcode and the block all
+	 * use, so a hand-written template gets identical results -- including the
+	 * active-only rule and the closing-date cutoff -- without repeating any of
+	 * it. Returns plain arrays shaped exactly like the REST response, so markup
+	 * can be written against one documented structure.
+	 *
+	 * @param array $args {
+	 *     Optional. Query arguments.
+	 *
+	 *     @type int    $page            Page number. Default 1.
+	 *     @type int    $per_page        Jobs per page.
+	 *     @type string $search          Keyword, matched against title, body and job code.
+	 *     @type string $orderby         date|title|closing_date|posted_date.
+	 *     @type string $order           asc|desc.
+	 *     @type string $status          active|any, or one stored status.
+	 *     @type string $department      Term slug.
+	 *     @type string $location        Term slug.
+	 *     @type string $employment_type Term slug.
+	 *     @type string $category        Term slug.
+	 *     @type string $experience      Term slug.
+	 * }
+	 * @return array {
+	 *     @type array[] $jobs  Prepared jobs.
+	 *     @type int     $total Total matching jobs.
+	 *     @type int     $pages Total pages.
+	 *     @type int     $page  Current page.
+	 * }
+	 */
+	function jszr_get_jobs( array $args = array() ) {
+		$query_args = \JobsSyncForZohoRecruit\REST_API::build_query_args( $args );
+
+		/**
+		 * Filter the query arguments used by jszr_get_jobs().
+		 *
+		 * @param array $query_args WP_Query arguments.
+		 * @param array $args       Arguments passed in.
+		 */
+		$query_args = (array) apply_filters( 'jszr_jobs_query_args', $query_args, $args );
+
+		$query = new \WP_Query( $query_args );
+		$jobs  = array();
+
+		foreach ( $query->posts as $post ) {
+			/**
+			 * Filter one prepared job before it reaches a custom frontend.
+			 *
+			 * @param array    $job  Prepared job data.
+			 * @param \WP_Post $post Job post.
+			 */
+			$jobs[] = (array) apply_filters(
+				'jszr_job_data',
+				\JobsSyncForZohoRecruit\REST_API::prepare_job( $post ),
+				$post
+			);
+		}
+
+		wp_reset_postdata();
+
+		$per_page = max( 1, (int) $query_args['posts_per_page'] );
+
+		return array(
+			'jobs'  => $jobs,
+			'total' => (int) $query->found_posts,
+			'pages' => (int) ceil( $query->found_posts / $per_page ),
+			'page'  => max( 1, (int) $query_args['paged'] ),
+		);
+	}
+}
+
+if ( ! function_exists( 'jszr_get_job' ) ) {
+	/**
+	 * One job, shaped the same way jszr_get_jobs() shapes them.
+	 *
+	 * @param int|\WP_Post|null $post Job post or ID. Defaults to the current post.
+	 * @return array Empty array when the post is not a job.
+	 */
+	function jszr_get_job( $post = null ) {
+		$post = get_post( $post );
+
+		if ( ! $post instanceof \WP_Post || \JobsSyncForZohoRecruit\Post_Type::POST_TYPE !== $post->post_type ) {
+			return array();
+		}
+
+		/** This filter is documented in includes/functions.php */
+		return (array) apply_filters(
+			'jszr_job_data',
+			\JobsSyncForZohoRecruit\REST_API::prepare_job( $post ),
+			$post
+		);
+	}
+}

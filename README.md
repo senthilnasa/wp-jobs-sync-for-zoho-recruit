@@ -33,6 +33,7 @@ visitor.
 | [Data model](docs/data-model.md) | Post type, taxonomies, every meta key, both custom tables |
 | [REST API](docs/rest-api.md) | Public and protected endpoints, parameters, responses, caching |
 | [Templates](docs/templates.md) | Theme overrides, block themes, shortcodes, CSS classes |
+| [Frontend customization](docs/frontend-customization.md) | Disabling the default jobs frontend, template overrides, the job data API, AJAX |
 | [Hooks](docs/hooks.md) | Every action and filter, with signatures and examples |
 | [Testing](docs/testing.md) | Test matrix, how to run PHPUnit, PHPCS and Plugin Check |
 | [Troubleshooting](docs/troubleshooting.md) | Common Zoho errors, Site Health, logs |

@@ -29,6 +29,15 @@ while ( have_posts() ) :
 	$jszr_archive = get_post_type_archive_link( \JobsSyncForZohoRecruit\Post_Type::POST_TYPE );
 	?>
 	<main id="primary" class="jszr-single jszr-archive jszr-scope site-main">
+		<?php
+		/**
+		 * Fires on a single job, before the job.
+		 *
+		 * @param int $post_id Job post ID.
+		 */
+		do_action( 'jszr_before_job', $jszr_post_id );
+		?>
+
 		<article <?php post_class( 'jszr-job' ); ?>>
 			<?php if ( $jszr_archive ) : ?>
 				<a class="jszr-job__back" href="<?php echo esc_url( $jszr_archive ); ?>">
@@ -109,6 +118,15 @@ while ( have_posts() ) :
 				</aside>
 			</div>
 		</article>
+
+		<?php
+		/**
+		 * Fires on a single job, after the job.
+		 *
+		 * @param int $post_id Job post ID.
+		 */
+		do_action( 'jszr_after_job', $jszr_post_id );
+		?>
 	</main>
 	<?php
 endwhile;

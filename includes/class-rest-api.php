@@ -96,6 +96,24 @@ class REST_API {
 			)
 		);
 
+		// Rendered markup for a custom frontend doing AJAX. Deliberately part of
+		// the existing REST namespace rather than a second admin-ajax layer:
+		// the plugin already has a public API, its permission callback and its
+		// caching, and a parallel endpoint would only be a second thing to keep
+		// in step.
+		register_rest_route(
+			self::NAMESPACE_V1,
+			'/jobs/render',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'render_jobs' ),
+					'permission_callback' => array( $this, 'public_permission' ),
+					'args'                => $this->render_args(),
+				),
+			)
+		);
+
 		register_rest_route(
 			self::NAMESPACE_V1,
 			'/jobs/(?P<id>[\d]+)',
@@ -1048,6 +1066,113 @@ class REST_API {
 		}
 
 		return $out;
+	}
+
+	/**
+	 * Arguments for the render endpoint: the collection's, plus display flags.
+	 *
+	 * @return array
+	 */
+	public function render_args() {
+		$args = $this->collection_args();
+
+		return array_merge(
+			$args,
+			self::validated(
+				array(
+					'style'           => array(
+						'type'        => 'string',
+						'enum'        => array( 'list', 'grid' ),
+						'default'     => 'list',
+						'description' => __( 'Listing style.', 'jobs-sync-for-zoho-recruit' ),
+					),
+					'columns'         => array(
+						'type'    => 'integer',
+						'minimum' => 1,
+						'maximum' => 4,
+						'default' => 3,
+					),
+					'show_filters'    => array(
+						'type'    => 'boolean',
+						'default' => false,
+					),
+					'show_search'     => array(
+						'type'    => 'boolean',
+						'default' => false,
+					),
+					'show_sort'       => array(
+						'type'    => 'boolean',
+						'default' => false,
+					),
+					'show_pagination' => array(
+						'type'    => 'boolean',
+						'default' => true,
+					),
+					'show_excerpt'    => array(
+						'type'    => 'boolean',
+						'default' => true,
+					),
+				)
+			)
+		);
+	}
+
+	/**
+	 * Return rendered listing markup plus the data behind it.
+	 *
+	 * Answers an AJAX request with markup a frontend can drop straight in, so a
+	 * search, a filter change or a page turn never needs a navigation or a
+	 * redirect. `redirect` is always false and is part of the contract: a
+	 * caller can rely on the response being the end of the interaction.
+	 *
+	 * @param \WP_REST_Request $request Request.
+	 * @return \WP_REST_Response
+	 */
+	public function render_jobs( $request ) {
+		$atts = array(
+			'page'            => (int) $request['page'],
+			'per_page'        => (int) $request['per_page'],
+			'search'          => (string) $request['search'],
+			'orderby'         => (string) $request['orderby'],
+			'order'           => (string) $request['order'],
+			'status'          => (string) $request['status'],
+			'department'      => (string) $request['department'],
+			'location'        => (string) $request['location'],
+			'employment_type' => (string) $request['employment_type'],
+			'category'        => (string) $request['category'],
+			'experience'      => (string) $request['experience'],
+			'style'           => (string) $request['style'],
+			'columns'         => (int) $request['columns'],
+			'show_filters'    => $request['show_filters'] ? 'true' : 'false',
+			'show_search'     => $request['show_search'] ? 'true' : 'false',
+			'show_sort'       => $request['show_sort'] ? 'true' : 'false',
+			'show_pagination' => $request['show_pagination'] ? 'true' : 'false',
+			'show_excerpt'    => $request['show_excerpt'] ? 'true' : 'false',
+		);
+
+		// One renderer for every surface: the shortcode, the block, the archive
+		// template and this endpoint all produce the same markup, so a custom
+		// frontend cannot drift from the server-rendered one.
+		$html = Shortcode::render( $atts );
+
+		$listing = jszr_get_jobs( $atts );
+
+		return new \WP_REST_Response(
+			array(
+				'success'    => true,
+				'html'       => $html,
+				'data'       => $listing['jobs'],
+				'pagination' => array(
+					'page'     => $listing['page'],
+					'pages'    => $listing['pages'],
+					'total'    => $listing['total'],
+					'per_page' => max( 1, (int) $atts['per_page'] ),
+				),
+				'redirect'   => false,
+				'message'    => '',
+			),
+			200
+		);
 	}
 
 	/**

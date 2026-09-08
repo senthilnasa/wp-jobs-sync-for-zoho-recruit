@@ -77,12 +77,33 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          extensions: mysqli
+          # mysqli for the test database; sodium and openssl back
+          # Encryption::is_available(), and a missing one silently changes which
+          # branch the encryption tests take.
+          extensions: mysqli, sodium, openssl, mbstring, dom, curl
           coverage: none
           tools: composer
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
+
+      # bin/install-wp-tests.sh checks the WordPress test suite out of
+      # develop.svn.wordpress.org, and it also calls mysqladmin to create the
+      # database. Neither Subversion nor the MySQL client ships on the
+      # ubuntu-24.04 image that ubuntu-latest now resolves to, which is why the
+      # script died with "svn: command not found". Both are installed here, on
+      # the runner, so the workflow does not depend on what an image happens to
+      # preinstall.
+      - name: Install Subversion and the MySQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends subversion default-mysql-client
+
+      - name: Verify the test-suite dependencies are present
+        run: |
+          svn --version --quiet
+          mysqladmin --version
+          php -m
 
       - name: Install the WordPress test suite
         run: bash bin/install-wp-tests.sh wordpress_test root root 127.0.0.1:3306 latest

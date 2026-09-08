@@ -141,6 +141,10 @@ Yes. **Settings -> Display** has layouts for the listing (Default, Card, Compact
 
 Custom HTML uses simple tags rather than PHP: `{title}`, `{location}`, `{salary}`, `{apply_button}` and so on, with `{if:salary}...{/if:salary}` to drop a section when a job has no value for it. The screen lists every tag available on your site. The plugin never runs what you type - storing executable code in a setting would be a security hole - and the HTML is filtered through an allow-list when you save.
 
+= Can I build my own jobs pages instead of using the plugin's? =
+
+Yes. Turn on *Settings → Frontend → Disable the default jobs frontend* and the plugin stops rendering the jobs archive and the single job pages, so your theme, template, page builder or custom frontend can own them. The URLs stay the same and everything else -- job management, synchronization, the admin, the REST API, structured data -- carries on. Use `jszr_get_jobs()` and `jszr_get_job()` to fetch the data, or `GET /wp-json/jobs-sync-zoho-recruit/v1/jobs/render` for markup and data in one AJAX response. Full details are in `docs/frontend-customization.md`.
+
 = How do I customize the markup? =
 
 Copy any file from the plugin's `templates/` directory into `yourtheme/jobs-sync-for-zoho-recruit/` and edit it there. Block themes can use the bundled block templates or build their own layout in the Site Editor with the Job Details and Apply Button blocks.

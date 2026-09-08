@@ -226,6 +226,50 @@ add_filter( 'jszr_structured_data', function ( $schema, $post ) {
 add_filter( 'jszr_seo_plugin_handles_schema', '__return_false' );
 ```
 
+### Frontend control
+
+```php
+apply_filters( 'jszr_frontend_enabled', bool $enabled );
+apply_filters( 'jszr_jobs_template',    string $path, string $theme_template );
+apply_filters( 'jszr_job_template',     string $path, string $theme_template );
+apply_filters( 'jszr_jobs_query_args',  array $query_args, array $args );
+apply_filters( 'jszr_job_data',         array $job, WP_Post $post );
+```
+
+```php
+do_action( 'jszr_before_jobs', array $params );
+do_action( 'jszr_after_jobs',  array $params );
+do_action( 'jszr_before_job',  int $post_id );
+do_action( 'jszr_after_job',   int $post_id );
+```
+
+`jszr_frontend_enabled` is the filter form of the **Disable default jobs
+frontend** setting. Return false and the plugin stops rendering the job archive
+and single job pages, leaving the URLs, the data, the admin and the REST API
+exactly as they are.
+
+```php
+// Take over only the archive, and only for logged-out visitors.
+add_filter( 'jszr_frontend_enabled', function ( $enabled ) {
+	return ! ( is_post_type_archive( 'zoho_job' ) && ! is_user_logged_in() );
+} );
+
+// Render the archive from a template in the theme.
+add_filter( 'jszr_jobs_template', function () {
+	return get_stylesheet_directory() . '/careers/archive.php';
+} );
+
+// Add a computed field every custom template can use.
+add_filter( 'jszr_job_data', function ( $job, $post ) {
+	$job['is_new'] = get_post_time( 'U', true, $post ) > strtotime( '-14 days' );
+
+	return $job;
+}, 10, 2 );
+```
+
+See [frontend-customization.md](frontend-customization.md) for the whole
+picture, including `jszr_get_jobs()` and the render endpoint.
+
 ### Careers hero
 
 ```php
@@ -414,7 +458,17 @@ jszr_is_job_active( int $post_id );
 jszr_locate_template( string $template );
 jszr_get_template( string $template, array $args = array() );
 jszr_verify_admin_request( string $action );      // capability + nonce, for your own admin-post handlers
+
+jszr_get_jobs( array $args = array() );           // the shared query, as plain arrays
+jszr_get_job( int|WP_Post|null $post = null );    // one job, same shape
+jszr_jobs_frontend_enabled();                     // whether the plugin renders the job pages
+jszr_apply_link( int $post_id, array $args = array() );
 ```
+
+`jszr_get_jobs()` and `jszr_get_job()` return the same structure the REST API
+returns, and run the same query the shortcode and the block run, so a custom
+template cannot end up with a different set of jobs than the rest of the
+plugin. See [frontend-customization.md](frontend-customization.md).
 
 Always build links to the plugin's screens with `jszr_admin_url()` — they live
 under the job post type menu, not at `admin.php?page=`, and the helper is the
