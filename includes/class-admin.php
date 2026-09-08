@@ -644,8 +644,20 @@ class Admin {
 		$client_secret = isset( $_POST['jszr_client_secret'] ) ? sanitize_text_field( wp_unslash( $_POST['jszr_client_secret'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- Nonce and capability verified by jszr_verify_admin_request() at the top of the handler.
 		$data_center   = isset( $_POST['jszr_data_center'] ) ? sanitize_key( wp_unslash( $_POST['jszr_data_center'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification -- Nonce and capability verified by jszr_verify_admin_request() at the top of the handler.
 
+		$scopes = isset( $_POST['jszr_oauth_scopes'] ) ? sanitize_text_field( wp_unslash( $_POST['jszr_oauth_scopes'] ) ) : null; // phpcs:ignore WordPress.Security.NonceVerification -- Nonce and capability verified by jszr_verify_admin_request() at the top of the handler.
+
+		$updates = array();
+
 		if ( '' !== $data_center && ! Zoho_Auth::data_center_is_constant() ) {
-			Settings::update( Settings::sanitize( array( 'data_center' => $data_center ) ) );
+			$updates['data_center'] = $data_center;
+		}
+
+		if ( null !== $scopes ) {
+			$updates['oauth_scopes'] = $scopes;
+		}
+
+		if ( ! empty( $updates ) ) {
+			Settings::update( Settings::sanitize( $updates ) );
 		}
 
 		$result = $this->auth->save_credentials( $client_id, $client_secret );

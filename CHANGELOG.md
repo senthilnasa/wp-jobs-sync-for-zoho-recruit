@@ -123,5 +123,12 @@ version onwards.
   two are configured that way on purpose.
 - `uninstall.php` guards its function declarations, so including it twice in one
   process cannot fatal on a redeclaration.
+- The requested OAuth permissions are editable on the Connection screen. Zoho
+  refuses an authorization request when any single scope is unrecognised for
+  that account, and its error does not say which one, so a hard-coded list left
+  a site with no way forward. Only `ZohoRecruit.modules.jobopenings.READ` is
+  actually required; the field-discovery scope is a convenience that already
+  falls back to a bundled field list, and it can now be removed without editing
+  code. The error message for a refused scope says so.
 
 [1.0.0]: https://github.com/senthilnasa/wp-jobs-sync-for-zoho-recruit/releases/tag/v1.0.0

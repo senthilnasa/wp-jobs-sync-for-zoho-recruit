@@ -145,8 +145,22 @@ $jszr_input = static function ( $key, $values, $type = 'text', $help = '', $attr
 					</td>
 				</tr>
 				<tr>
-					<th scope="row"><?php esc_html_e( 'Required scopes', 'jobs-sync-for-zoho-recruit' ); ?></th>
-					<td><code><?php echo esc_html( implode( ', ', $auth->scopes() ) ); ?></code></td>
+					<th scope="row"><?php esc_html_e( 'Permissions requested', 'jobs-sync-for-zoho-recruit' ); ?></th>
+					<td>
+						<code><?php echo esc_html( implode( ', ', $auth->scopes() ) ); ?></code>
+						<p class="description">
+							<?php
+							printf(
+								/* translators: %s: the required OAuth scope name. */
+								esc_html__( 'Only %s is required. The second scope fills the Field Mapping dropdowns from your account; without it the plugin falls back to the standard Zoho Recruit field names and everything else still works.', 'jobs-sync-for-zoho-recruit' ),
+								'<code>' . esc_html( Zoho_Auth::required_scope() ) . '</code>'
+							);
+							?>
+						</p>
+						<p class="description">
+							<?php esc_html_e( 'If Zoho answers "Invalid OAuth Scope / Scope does not exist", it has rejected one of these without saying which. Remove the second one below and try again.', 'jobs-sync-for-zoho-recruit' ); ?>
+						</p>
+					</td>
 				</tr>
 			</tbody>
 		</table>
@@ -199,6 +213,25 @@ $jszr_input = static function ( $key, $values, $type = 'text', $help = '', $attr
 								</select>
 								<p class="description"><?php esc_html_e( 'Choose the region your Zoho Recruit account is hosted in. The wrong region will reject the connection.', 'jobs-sync-for-zoho-recruit' ); ?></p>
 							<?php endif; ?>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="jszr-oauth-scopes"><?php esc_html_e( 'Permissions', 'jobs-sync-for-zoho-recruit' ); ?></label></th>
+						<td>
+							<input type="text" id="jszr-oauth-scopes" name="jszr_oauth_scopes" class="large-text code"
+								value="<?php echo esc_attr( implode( ',', $auth->scopes() ) ); ?>" />
+							<p class="description">
+								<?php esc_html_e( 'The permissions to ask Zoho for, comma separated. Leave as they are unless Zoho refuses them.', 'jobs-sync-for-zoho-recruit' ); ?>
+							</p>
+							<p class="description">
+								<?php
+								printf(
+									/* translators: %s: the minimum working scope list. */
+									esc_html__( 'To connect with the minimum, use just %s.', 'jobs-sync-for-zoho-recruit' ),
+									'<code>' . esc_html( Zoho_Auth::required_scope() ) . '</code>'
+								);
+								?>
+							</p>
 						</td>
 					</tr>
 				</tbody>

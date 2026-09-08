@@ -14,6 +14,58 @@ From the command line, `wp jszr status` shows most of the same in one table.
 
 ---
 
+## "Invalid OAuth Scope — Scope does not exist"
+
+Zoho refuses the authorization request when **any one** of the requested
+permissions is not one it recognises for your account, and its error page does
+not say which one. Nothing is wrong with your Client ID, Client Secret or
+redirect URI when you see this.
+
+The plugin asks for two permissions:
+
+| Scope | Needed for |
+| --- | --- |
+| `ZohoRecruit.modules.jobopenings.READ` | Reading job openings. **Required.** |
+| `ZohoRecruit.settings.fields.READ` | Filling the Field Mapping dropdowns from your account |
+
+The second is a convenience. Without it the mapping screen falls back to the
+standard Zoho Recruit field names and everything else — syncing, publishing,
+the API — works unchanged.
+
+**The fix:** on **Settings → Connection**, clear the **Permissions** field down
+to just the first scope, save, and connect again.
+
+```
+ZohoRecruit.modules.jobopenings.READ
+```
+
+Some accounts accept a broader form instead. If the minimum above is also
+refused, try one of these, in order of how much access they grant:
+
+```
+ZohoRecruit.modules.jobopenings.ALL
+ZohoRecruit.modules.ALL
+```
+
+To check a scope without changing anything, open this in a browser, replacing
+the client ID and redirect URI with your own. Zoho either shows its consent
+screen — meaning the scope is fine — or the error. You can close the tab
+without approving either way.
+
+```
+https://accounts.zoho.com/oauth/v2/auth?response_type=code&access_type=offline
+  &client_id=YOUR_CLIENT_ID
+  &redirect_uri=YOUR_REDIRECT_URI
+  &scope=ZohoRecruit.modules.jobopenings.READ
+```
+
+Use the accounts domain for your data centre — `accounts.zoho.in`,
+`accounts.zoho.eu` and so on — and put it all on one line.
+
+Once field discovery is unavailable, **Field Mapping → Reload fields from Zoho**
+will report a scope error. That is expected, and the bundled field list is still
+there to map against.
+
 ## Site Health tests
 
 ### Zoho Recruit connection

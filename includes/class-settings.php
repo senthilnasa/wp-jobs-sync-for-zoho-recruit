@@ -95,6 +95,7 @@ class Settings {
 		$defaults = array(
 			// Connection.
 			'data_center'             => 'com',
+			'oauth_scopes'            => '',
 
 			// Sync.
 			'sync_frequency'          => 'jszr_six_hours',
@@ -418,6 +419,12 @@ class Settings {
 				$value       = sanitize_title( (string) $input[ $key ] );
 				$out[ $key ] = '' === $value ? $defaults[ $key ] : $value;
 			}
+		}
+
+		if ( isset( $input['oauth_scopes'] ) ) {
+			// Stored as the cleaned list, so what the settings screen shows is
+			// exactly what will be sent to Zoho.
+			$out['oauth_scopes'] = implode( ',', Zoho_Auth::parse_scopes( (string) $input['oauth_scopes'] ) );
 		}
 
 		if ( isset( $input['published_field'] ) ) {

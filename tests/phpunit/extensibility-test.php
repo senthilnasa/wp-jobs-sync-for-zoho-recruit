@@ -113,6 +113,82 @@ class JSZR_Extensibility_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The default scope list starts with the one scope that is required.
+	 */
+	public function test_default_scopes_include_the_required_one() {
+		$defaults = \JobsSyncForZohoRecruit\Zoho_Auth::default_scopes();
+
+		$this->assertContains( \JobsSyncForZohoRecruit\Zoho_Auth::required_scope(), $defaults );
+	}
+
+	/**
+	 * A site can narrow the scopes when its Zoho account refuses one.
+	 *
+	 * Zoho rejects the whole authorization request if any single scope is
+	 * unrecognised, and its error does not say which, so this has to be
+	 * changeable without editing code.
+	 */
+	public function test_scopes_can_be_narrowed_from_settings() {
+		Settings::update( array( 'oauth_scopes' => 'ZohoRecruit.modules.jobopenings.READ' ) );
+
+		$scopes = \JobsSyncForZohoRecruit\plugin()->auth()->scopes();
+
+		$this->assertSame( array( 'ZohoRecruit.modules.jobopenings.READ' ), $scopes );
+	}
+
+	/**
+	 * An empty or unusable setting falls back rather than asking for nothing.
+	 */
+	public function test_empty_scope_setting_falls_back_to_defaults() {
+		Settings::update( array( 'oauth_scopes' => '   ' ) );
+
+		$this->assertSame(
+			\JobsSyncForZohoRecruit\Zoho_Auth::default_scopes(),
+			\JobsSyncForZohoRecruit\plugin()->auth()->scopes()
+		);
+	}
+
+	/**
+	 * Anything not shaped like a scope is dropped before it reaches Zoho.
+	 */
+	public function test_malformed_scopes_are_dropped() {
+		$parsed = \JobsSyncForZohoRecruit\Zoho_Auth::parse_scopes(
+			"ZohoRecruit.modules.jobopenings.READ\nnot a scope, <script>, ZohoRecruit.settings.ALL, ZohoRecruit.modules.jobopenings.READ"
+		);
+
+		$this->assertSame(
+			array( 'ZohoRecruit.modules.jobopenings.READ', 'ZohoRecruit.settings.ALL' ),
+			$parsed,
+			'malformed entries dropped and duplicates collapsed'
+		);
+	}
+
+	/**
+	 * The authorization URL carries exactly the configured scopes.
+	 */
+	public function test_authorization_url_carries_the_configured_scopes() {
+		$auth = \JobsSyncForZohoRecruit\plugin()->auth();
+
+		$auth->save_credentials( 'test.client.id', 'test-secret' );
+
+		Settings::update( array( 'oauth_scopes' => 'ZohoRecruit.modules.jobopenings.READ' ) );
+
+		$url = $auth->authorization_url();
+
+		$this->assertNotWPError( $url );
+
+		$query = array();
+		wp_parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
+
+		$this->assertSame( 'ZohoRecruit.modules.jobopenings.READ', $query['scope'] );
+		$this->assertSame( 'code', $query['response_type'] );
+		$this->assertSame( 'offline', $query['access_type'] );
+		$this->assertNotEmpty( $query['state'], 'the CSRF state is always present' );
+
+		delete_option( 'jszr_credentials' );
+	}
+
+	/**
 	 * The meta description falls back through excerpt, then content.
 	 */
 	public function test_meta_description_falls_back_to_content() {

@@ -238,10 +238,15 @@ class Zoho_Auth {
 	 * @return string[]
 	 */
 	public function scopes() {
-		$scopes = array(
-			'ZohoRecruit.modules.jobopenings.READ',
-			'ZohoRecruit.settings.fields.READ',
-		);
+		$configured = trim( (string) Settings::get( 'oauth_scopes', '' ) );
+
+		$scopes = '' !== $configured
+			? self::parse_scopes( $configured )
+			: self::default_scopes();
+
+		if ( empty( $scopes ) ) {
+			$scopes = self::default_scopes();
+		}
 
 		/**
 		 * Filter the requested OAuth scopes.
@@ -251,6 +256,60 @@ class Zoho_Auth {
 		 * @param string[] $scopes Scope names.
 		 */
 		return array_values( array_unique( (array) apply_filters( 'jszr_oauth_scopes', $scopes ) ) );
+	}
+
+	/**
+	 * The scopes the plugin asks for out of the box.
+	 *
+	 * Only the first one is required. Field discovery is a convenience that
+	 * falls back to a bundled list of standard fields, so a Zoho account whose
+	 * edition does not offer the settings scope can drop it and still sync.
+	 *
+	 * @return string[]
+	 */
+	public static function default_scopes() {
+		return array(
+			'ZohoRecruit.modules.jobopenings.READ',
+			'ZohoRecruit.settings.fields.READ',
+		);
+	}
+
+	/**
+	 * The one scope without which nothing works.
+	 *
+	 * @return string
+	 */
+	public static function required_scope() {
+		return 'ZohoRecruit.modules.jobopenings.READ';
+	}
+
+	/**
+	 * Turn a comma or newline separated list into clean scope names.
+	 *
+	 * Zoho rejects the whole authorization request when a single scope in the
+	 * list is not one it recognises, and the error it shows ("Scope does not
+	 * exist") does not say which. Anything that is not shaped like a scope is
+	 * dropped here rather than sent.
+	 *
+	 * @param string $raw Raw list.
+	 * @return string[]
+	 */
+	public static function parse_scopes( $raw ) {
+		$parts  = preg_split( '/[\s,]+/', (string) $raw );
+		$scopes = array();
+
+		foreach ( (array) $parts as $part ) {
+			$part = trim( (string) $part );
+
+			// service.scope[.sub].operation -- letters, digits, dots only.
+			if ( '' === $part || ! preg_match( '/^[A-Za-z0-9]+(\.[A-Za-z0-9_]+){1,3}$/', $part ) ) {
+				continue;
+			}
+
+			$scopes[] = $part;
+		}
+
+		return array_values( array_unique( $scopes ) );
 	}
 
 	/**
@@ -823,7 +882,7 @@ class Zoho_Auth {
 			'invalid_grant'        => __( 'Zoho rejected the grant. The refresh token may have been revoked; please reconnect.', 'jobs-sync-for-zoho-recruit' ),
 			'invalid_redirect_uri' => __( 'The redirect URI does not match the one registered in the Zoho API console.', 'jobs-sync-for-zoho-recruit' ),
 			'access_denied'        => __( 'Access was denied in the Zoho consent screen.', 'jobs-sync-for-zoho-recruit' ),
-			'invalid_scope'        => __( 'One or more requested scopes are not available for this Zoho account.', 'jobs-sync-for-zoho-recruit' ),
+			'invalid_scope'        => __( 'Zoho did not recognise one of the requested permissions, and its error does not say which one. Edit the Permissions field below, remove the field discovery scope, and connect again — syncing jobs does not need it.', 'jobs-sync-for-zoho-recruit' ),
 			'invalid_token'        => __( 'The stored token is no longer valid. Please reconnect.', 'jobs-sync-for-zoho-recruit' ),
 		);
 
