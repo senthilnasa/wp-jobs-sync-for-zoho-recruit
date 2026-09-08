@@ -230,6 +230,26 @@ class Site_Health {
 			$problems[] = esc_html__( 'The admin area is not served over HTTPS. Zoho requires an HTTPS redirect URI for production credentials.', 'jobs-sync-for-zoho-recruit' );
 		}
 
+		/*
+		 * A batch fetches one API page and then writes only batch_size records
+		 * from it, so a batch smaller than a page makes the sync read the same
+		 * page once per chunk. It still works, it just spends several times the
+		 * Zoho API credits, which is the kind of thing nobody notices until the
+		 * daily limit is hit.
+		 */
+		$per_request = (int) Settings::get( 'per_request', 200 );
+		$batch_size  = (int) Settings::get( 'batch_size', 200 );
+
+		if ( $batch_size > 0 && $batch_size < $per_request ) {
+			$problems[] = sprintf(
+				/* translators: 1: batch size, 2: records per request, 3: how many times the API is read per page. */
+				esc_html__( 'Each background batch writes %1$d records but reads a page of %2$d, so every page is read about %3$d times and the sync costs that many times more Zoho API calls. Raise the background batch size to match, unless your host needs the shorter requests.', 'jobs-sync-for-zoho-recruit' ),
+				$batch_size,
+				$per_request,
+				(int) ceil( $per_request / $batch_size )
+			);
+		}
+
 		$slug = (string) Settings::get( 'job_slug', 'jobs' );
 
 		foreach ( get_post_types( array( '_builtin' => false ), 'objects' ) as $post_type ) {

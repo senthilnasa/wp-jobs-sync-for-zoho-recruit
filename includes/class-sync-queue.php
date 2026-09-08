@@ -149,6 +149,8 @@ class Sync_Queue {
 	public static function get_active() {
 		global $wpdb;
 
+		self::reap_abandoned();
+
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table, read fresh on purpose.
 		$row = $wpdb->get_row(
 			$wpdb->prepare(
@@ -158,6 +160,70 @@ class Sync_Queue {
 		);
 
 		return $row ? $row : null;
+	}
+
+	/**
+	 * Fail runs that were abandoned by a process that never came back.
+	 *
+	 * A batch that dies -- the PHP process is killed, the host restarts, a fatal
+	 * error escapes -- leaves its row saying "running" with nothing scheduled to
+	 * continue it. The lock expires on its own after LOCK_TTL, but the row does
+	 * not, and Sync::start() refuses to begin while any run is still active. One
+	 * crash would otherwise block every future sync, cron included, until an
+	 * administrator noticed and clicked Cancel.
+	 *
+	 * A run only counts as abandoned when it has had no update for well over a
+	 * batch cycle *and* has no batch queued, so a slow-but-alive run is safe.
+	 *
+	 * @return int Number of runs reaped.
+	 */
+	public static function reap_abandoned() {
+		global $wpdb;
+
+		/**
+		 * Filter how long a run may go without an update before it is abandoned.
+		 *
+		 * @param int $seconds Idle time in seconds.
+		 */
+		$timeout = (int) apply_filters( 'jszr_abandoned_run_timeout', 2 * self::LOCK_TTL );
+		$cutoff  = gmdate( 'Y-m-d H:i:s', time() - max( 60, $timeout ) );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table.
+		$candidates = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT id FROM %i WHERE state IN ('pending','running') AND updated_at < %s",
+				self::table(),
+				$cutoff
+			)
+		);
+
+		$reaped = 0;
+
+		foreach ( (array) $candidates as $run_id ) {
+			$run_id = (int) $run_id;
+
+			// Still queued to continue: slow, not dead.
+			if ( wp_next_scheduled( self::BATCH_HOOK, array( $run_id ) ) ) {
+				continue;
+			}
+
+			self::finish(
+				$run_id,
+				'failed',
+				__( 'The sync stopped without finishing and was not resumed. It was closed automatically so later syncs can run.', 'jobs-sync-for-zoho-recruit' )
+			);
+
+			Logger::warning(
+				'sync_abandoned',
+				'Closed a sync run that stopped without finishing.',
+				array( 'idle_seconds' => $timeout ),
+				$run_id
+			);
+
+			++$reaped;
+		}
+
+		return $reaped;
 	}
 
 	/**

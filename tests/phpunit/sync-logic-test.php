@@ -347,6 +347,104 @@ class JSZR_Sync_Logic_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The batch size must not be smaller than the page size by default.
+	 *
+	 * A batch fetches one API page and writes batch_size records from it, so a
+	 * smaller batch re-reads the same page for each remaining chunk. That is a
+	 * silent multiplier on Zoho API credits, and it was the shipped default
+	 * until a scale run counted the requests.
+	 */
+	public function test_default_batch_size_does_not_multiply_api_calls() {
+		$defaults = Settings::defaults();
+
+		$this->assertGreaterThanOrEqual(
+			$defaults['per_request'],
+			$defaults['batch_size'],
+			'the default batch size must cover a whole API page'
+		);
+	}
+
+	/**
+	 * Site Health says so when a site configures them that way anyway.
+	 */
+	public function test_site_health_flags_a_costly_batch_size() {
+		Settings::update(
+			array(
+				'per_request' => 200,
+				'batch_size'  => 50,
+			)
+		);
+
+		$result = JobsSyncForZohoRecruit\Site_Health::test_environment();
+
+		$this->assertSame( 'recommended', $result['status'] );
+		$this->assertStringContainsString( 'API calls', $result['description'] );
+	}
+
+	/**
+	 * A run abandoned by a killed process must not block every later sync.
+	 */
+	public function test_abandoned_run_is_reaped() {
+		global $wpdb;
+
+		$run_id = JobsSyncForZohoRecruit\Sync_Queue::create( 'full', array( 'trigger' => 'test' ) );
+
+		JobsSyncForZohoRecruit\Sync_Queue::update( $run_id, array( 'state' => 'running' ) );
+
+		// Nothing is scheduled to continue it, and its last update is old: the
+		// exact shape a crashed batch leaves behind.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Test fixture.
+		$wpdb->query(
+			$wpdb->prepare(
+				'UPDATE %i SET updated_at = %s WHERE id = %d',
+				JobsSyncForZohoRecruit\Sync_Queue::table(),
+				gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS ),
+				$run_id
+			)
+		);
+
+		$this->assertNull(
+			JobsSyncForZohoRecruit\Sync_Queue::get_active(),
+			'an abandoned run no longer counts as active'
+		);
+
+		$run = JobsSyncForZohoRecruit\Sync_Queue::get( $run_id );
+
+		$this->assertSame( 'failed', $run->state );
+		$this->assertNotSame( '', (string) $run->message, 'it says why it was closed' );
+	}
+
+	/**
+	 * A slow run that still has a batch queued is left alone.
+	 */
+	public function test_a_queued_run_is_not_reaped() {
+		global $wpdb;
+
+		$run_id = JobsSyncForZohoRecruit\Sync_Queue::create( 'full', array( 'trigger' => 'test' ) );
+
+		JobsSyncForZohoRecruit\Sync_Queue::update( $run_id, array( 'state' => 'running' ) );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Test fixture.
+		$wpdb->query(
+			$wpdb->prepare(
+				'UPDATE %i SET updated_at = %s WHERE id = %d',
+				JobsSyncForZohoRecruit\Sync_Queue::table(),
+				gmdate( 'Y-m-d H:i:s', time() - DAY_IN_SECONDS ),
+				$run_id
+			)
+		);
+
+		wp_schedule_single_event( time() + 60, JobsSyncForZohoRecruit\Sync_Queue::BATCH_HOOK, array( (int) $run_id ) );
+
+		$active = JobsSyncForZohoRecruit\Sync_Queue::get_active();
+
+		$this->assertNotNull( $active, 'a run with work still queued is left running' );
+		$this->assertSame( (int) $run_id, (int) $active->id );
+
+		wp_clear_scheduled_hook( JobsSyncForZohoRecruit\Sync_Queue::BATCH_HOOK, array( (int) $run_id ) );
+	}
+
+	/**
 	 * A Zoho ID with unexpected characters is rejected rather than trusted.
 	 */
 	public function test_zoho_id_is_sanitized() {

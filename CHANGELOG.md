@@ -107,4 +107,21 @@ version onwards.
 - Privacy policy suggestion, multisite-aware activation and uninstall, and an
   uninstall routine that keeps jobs unless you ask for them to be removed.
 
+### Fixed
+
+- A sync run abandoned by a killed process no longer blocks every later sync.
+  The lock already expired on its own, but the run row kept saying "running"
+  forever, and `Sync::start()` refuses to begin while a run is active — so one
+  crashed batch would have stopped syncing permanently, cron included, until an
+  administrator noticed and clicked Cancel. A run with no update for well over a
+  batch cycle *and* nothing queued to continue it is now closed automatically.
+  Found by killing a batch mid-run during testing.
+- The default records-per-batch is now 200, matching the records-per-request
+  default. A batch reads one API page and writes `batch_size` records from it,
+  so the previous default of 50 made every 200-record page be read four times,
+  quadrupling the Zoho API credits a sync spent. Site Health now warns when the
+  two are configured that way on purpose.
+- `uninstall.php` guards its function declarations, so including it twice in one
+  process cannot fatal on a redeclaration.
+
 [1.0.0]: https://github.com/senthilnasa/wp-jobs-sync-for-zoho-recruit/releases/tag/v1.0.0

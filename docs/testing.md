@@ -51,6 +51,15 @@ bash bin/install-wp-tests.sh wordpress_test root root localhost latest
 vendor/bin/phpunit
 ```
 
+To run the same suite against a multisite install:
+
+```bash
+npx wp-env run tests-cli --env-cwd=wp-content/plugins/jobs-sync-for-zoho-recruit   vendor/bin/phpunit -c phpunit-multisite.xml.dist
+```
+
+The multisite tests skip themselves on a single site, so the ordinary run stays
+green either way.
+
 PHPUnit is pinned to `^9.6` because that is what the WordPress core test suite
 supports. PHPUnit 10 loads the bootstrap but cannot discover test classes whose
 file names follow the WordPress convention.
@@ -60,6 +69,9 @@ file names follow the WordPress convention.
 | `tests/phpunit/field-mapper-test.php` | Transforms, salary parsing, timezone handling, the derived location path, mapping sanitization |
 | `tests/phpunit/sync-logic-test.php` | Status mapping, the expiry decision, the publish filter, duplicate prevention, the deactivation threshold |
 | `tests/phpunit/rest-api-test.php` | Pagination, filters, sorting, the field allow-list, `per_page` capping, inactive-job enumeration, endpoint permissions |
+| `tests/phpunit/layouts-test.php` | Token substitution and conditionals, template and CSS sanitization, layout selection, the apply link |
+| `tests/phpunit/extensibility-test.php` | Custom taxonomies reaching REST, shortcodes and mapping; the SEO title and description filters |
+| `tests/phpunit/multisite-test.php` | Per-site activation, tables, settings, jobs and logging. Skipped on single site |
 
 `Field_Mapper` is the best unit-test surface in the plugin: it writes nothing to
 the database, so its tests are pure input/output.
@@ -67,6 +79,59 @@ the database, so its tests are pure input/output.
 > `WP_UnitTestCase` unregisters every meta key between tests, and `init` does
 > not fire again. A test that depends on registered meta has to replay
 > `Post_Type::register_meta()` in its `set_up()` — `rest-api-test.php` does.
+
+## The development harnesses
+
+Four scripts in `bin/` exercise things a unit test cannot reach. None of them
+ship in the release ZIP. All of them write real posts, so **development sites
+only**.
+
+| Script | What it proves |
+| --- | --- |
+| `smoke-test.php` | The write path, mapper, taxonomies, REST responses, templates, blocks, layouts and the apply link, against synthetic records |
+| `scale-test.php` | The whole sync stack at volume, with Zoho mocked at the HTTP layer |
+| `lifecycle-test.php` | Activation, upgrade, deactivation and both uninstall settings, running the real `uninstall.php` |
+| `reset-dev-site.php` | Puts a development site back after the other three |
+
+```bash
+npx wp-env run cli wp eval-file wp-content/plugins/jobs-sync-for-zoho-recruit/bin/smoke-test.php
+npx wp-env run cli wp eval-file wp-content/plugins/jobs-sync-for-zoho-recruit/bin/scale-test.php 2000
+npx wp-env run cli wp eval-file wp-content/plugins/jobs-sync-for-zoho-recruit/bin/lifecycle-test.php
+npx wp-env run cli wp eval-file wp-content/plugins/jobs-sync-for-zoho-recruit/bin/reset-dev-site.php
+```
+
+On Windows Git Bash, prefix those with `MSYS_NO_PATHCONV=1`.
+
+### The scale test
+
+`scale-test.php` mocks Zoho with `pre_http_request`, so everything above the
+socket runs for real: token handling, `Zoho_API` pagination, the batched sync
+with its checkpoints, the mapper, the writer, the deleted-records pass and the
+deactivation threshold.
+
+It is the closest thing to a live account the project has, and it is explicitly
+**not** a substitute for one: the field names, the picklist values and the error
+shapes come from Zoho's documentation, not from an account. What it proves is
+the machinery around them.
+
+It covers five scenarios that are hard to reach any other way:
+
+1. A full sync of N records over many pages, checking every record was created
+   and the token was fetched once rather than per request.
+2. A second full sync, checking nothing is duplicated.
+3. Zoho suddenly returning 40% of the jobs — the run must be marked `partial`
+   and deactivate nothing.
+4. A smaller disappearance under the threshold — those jobs must be deactivated
+   but kept, not deleted.
+5. A connection failure mid-run — the run must fail and deactivate nothing.
+
+It also reports how many API requests the sync cost, which is how the
+`batch_size` default was found to be quadrupling them.
+
+Because scenario 3 is a real full sync, it will deactivate any job already on
+the site that the fake account does not return. The script snapshots those jobs
+and restores their status afterwards, but run it on a site you do not mind
+disturbing.
 
 ## The live smoke test
 
@@ -186,21 +251,47 @@ Automation does not cover everything. Before a release, walk these.
 
 ## What has been verified
 
-As of version 1.0.0, on WordPress 7.1 with PHP 8.1 in wp-env:
+On WordPress 7.1 with PHP 8.1 in wp-env:
 
-- PHPCS: 0 errors, 0 warnings across 46 files.
-- PHPUnit: 47 tests, 84 assertions, all passing.
-- Smoke test: 37 checks, all passing.
+**Automated gates**
+
+- PHPCS: 0 errors, 0 warnings across 56 files.
+- PHPCompatibility: clean for PHP 8.1 and newer.
+- PHPUnit: 97 tests on single site (7 multisite tests skipping), 97 on
+  multisite.
+- Smoke test: 64 checks.
+- Lifecycle test: 26 checks.
+- Scale test: 26 checks at 2,000 records.
 - Plugin Check: nothing against any file that ships.
-- Every admin screen rendered — dashboard, all six settings tabs, field
+- ESLint and Stylelint clean; the committed block bundles are byte-identical to
+  a fresh `npm run build`.
+
+**Behaviour**
+
+- Every admin screen rendered — dashboard, all seven settings tabs, field
   mapping, sync logs, the job list table with its custom columns and filter.
-- The block renders in the editor and on the front end, with no console errors.
+- All three blocks register and render, in the editor and on the front end.
 - Archive and single pages render on both a block theme (Twenty Twenty-Five)
   and a classic theme (Twenty Twenty-One), with no PHP notices.
-- No-JavaScript filtering, keyword search matching a job code, and REST
-  filtering all confirmed against a live site.
+- Over HTTP against a live site: the archive, no-JavaScript filtering that
+  genuinely narrows results, keyword search, an unknown filter falling to the
+  empty state rather than showing everything, a single job page with its
+  JobPosting markup and apply button, the REST collection with its field
+  allow-list, `per_page` capping (400), anonymous sync rejection (401), the
+  job feed and the sitemap.
+- Multisite: per-site tables, settings, jobs and log entries, with none of them
+  leaking between sites.
+- Lifecycle: activation, re-activation, an upgrade that preserves settings,
+  deactivation, and both uninstall settings — including that a hand-made job
+  survives even when "delete jobs" is on.
+- At 2,000 records over ten pages: no duplicates, ~83 MB peak memory, the
+  access token fetched once for the whole run, the safety threshold refusing to
+  deactivate, and an interrupted run deactivating nothing.
 
-**Not yet verified:** anything requiring a real Zoho Recruit account. The OAuth
-exchange, pagination over a live dataset, `If-Modified-Since`, the `/deleted`
-endpoint and Zoho's error codes are all written to the published API but have
-not been run against it. Multisite has not been exercised either.
+**Still not verified**
+
+- **A real Zoho Recruit account.** The scale test mocks Zoho at the HTTP layer,
+  which exercises everything above the socket, but the field names, picklist
+  values and error shapes still come from the documentation rather than from an
+  account. This remains the single biggest gap.
+- Upgrading from a previously released version, since there is not one yet.

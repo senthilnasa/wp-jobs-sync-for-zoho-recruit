@@ -50,5 +50,14 @@
 		</properties>
 	</rule>
 
+	<!--
+		The development harnesses in bin/ are single-file CLI tools, not shipped
+		code, and one of them needs a small class next to its functions. That is
+		the only rule relaxed for them; everything else still applies.
+	-->
+	<rule ref="Universal.Files.SeparateFunctionsFromOO">
+		<exclude-pattern>/bin/*</exclude-pattern>
+	</rule>
+
 	<rule ref="PHPCompatibilityWP"/>
 </ruleset>

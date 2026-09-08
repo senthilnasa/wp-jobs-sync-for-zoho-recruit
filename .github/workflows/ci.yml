@@ -90,6 +90,9 @@ jobs:
       - name: Run PHPUnit
         run: vendor/bin/phpunit
 
+      - name: Run PHPUnit against multisite
+        run: vendor/bin/phpunit -c phpunit-multisite.xml.dist
+
   javascript:
     name: JavaScript and CSS
     runs-on: ubuntu-latest

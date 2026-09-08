@@ -293,7 +293,7 @@ $jszr_input = static function ( $key, $values, $type = 'text', $help = '', $attr
 									'batch_size',
 									$settings,
 									'number',
-									__( 'Lower this on small hosting plans so each background request stays well within its time limit.', 'jobs-sync-for-zoho-recruit' ),
+									__( 'Keep this equal to the records per API request above: a batch reads one page and writes this many records from it, so a smaller batch re-reads the same page and spends extra Zoho API credits. Lower it only if background requests are hitting your host time limit.', 'jobs-sync-for-zoho-recruit' ),
 									array(
 										'min' => 1,
 										'max' => 200,

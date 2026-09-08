@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-08T00:39:44+00:00\n"
+"POT-Creation-Date: 2026-09-08T03:53:30+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: jobs-sync-for-zoho-recruit\n"
@@ -17,7 +17,7 @@ msgstr ""
 #. Plugin Name of the plugin
 #: jobs-sync-for-zoho-recruit.php
 #: includes/class-privacy.php:52
-#: includes/class-site-health.php:288
+#: includes/class-site-health.php:308
 msgid "Jobs Sync for Zoho Recruit"
 msgstr ""
 
@@ -58,7 +58,7 @@ msgstr ""
 
 #: admin/views/dashboard.php:33
 #: admin/views/settings.php:214
-#: includes/class-site-health.php:295
+#: includes/class-site-health.php:315
 msgid "Connected"
 msgstr ""
 
@@ -68,7 +68,7 @@ msgstr ""
 
 #: admin/views/dashboard.php:40
 #: admin/views/settings.php:187
-#: includes/class-site-health.php:299
+#: includes/class-site-health.php:319
 msgid "Data center"
 msgstr ""
 
@@ -164,12 +164,12 @@ msgstr ""
 
 #: admin/views/dashboard.php:133
 #: admin/views/dashboard.php:144
-#: includes/class-site-health.php:314
+#: includes/class-site-health.php:334
 msgid "Never"
 msgstr ""
 
 #: admin/views/dashboard.php:139
-#: includes/class-site-health.php:311
+#: includes/class-site-health.php:331
 msgid "Last successful sync"
 msgstr ""
 
@@ -581,7 +581,7 @@ msgid "Records per background batch"
 msgstr ""
 
 #: admin/views/settings.php:296
-msgid "Lower this on small hosting plans so each background request stays well within its time limit."
+msgid "Keep this equal to the records per API request above: a batch reads one page and writes this many records from it, so a smaller batch re-reads the same page and spends extra Zoho API credits. Lower it only if background requests are hitting your host time limit."
 msgstr ""
 
 #: admin/views/settings.php:306
@@ -1642,12 +1642,12 @@ msgid "Untitled job"
 msgstr ""
 
 #: includes/class-field-mapper.php:672
-#: includes/class-site-health.php:296
+#: includes/class-site-health.php:316
 msgid "Yes"
 msgstr ""
 
 #: includes/class-field-mapper.php:673
-#: includes/class-site-health.php:296
+#: includes/class-site-health.php:316
 msgid "No"
 msgstr ""
 
@@ -2172,55 +2172,65 @@ msgstr ""
 msgid "The admin area is not served over HTTPS. Zoho requires an HTTPS redirect URI for production credentials."
 msgstr ""
 
+#. translators: 1: batch size, 2: records per request, 3: how many times the API is read per page.
+#: includes/class-site-health.php:246
+#, php-format
+msgid "Each background batch writes %1$d records but reads a page of %2$d, so every page is read about %3$d times and the sync costs that many times more Zoho API calls. Raise the background batch size to match, unless your host needs the shorter requests."
+msgstr ""
+
 #. translators: 1: URL slug, 2: conflicting post type name.
-#: includes/class-site-health.php:245
+#: includes/class-site-health.php:265
 #, php-format
 msgid "The job URL slug \"%1$s\" is also used by the \"%2$s\" post type, which will break one of the two."
 msgstr ""
 
 #. translators: %s: URL slug.
-#: includes/class-site-health.php:257
+#: includes/class-site-health.php:277
 #, php-format
 msgid "A page already exists at \"/%s\", which conflicts with the job URL slug."
 msgstr ""
 
-#: includes/class-site-health.php:264
+#: includes/class-site-health.php:284
 msgid "The Zoho Recruit environment looks correct"
 msgstr ""
 
-#: includes/class-site-health.php:266
+#: includes/class-site-health.php:286
 msgid "Encryption is available, the admin is served over HTTPS, and the job URL slug is free."
 msgstr ""
 
-#: includes/class-site-health.php:271
+#: includes/class-site-health.php:291
 msgid "The Zoho Recruit environment needs attention"
 msgstr ""
 
-#: includes/class-site-health.php:291
+#: includes/class-site-health.php:311
 msgid "Plugin version"
 msgstr ""
 
-#: includes/class-site-health.php:303
+#: includes/class-site-health.php:323
 msgid "Zoho module"
 msgstr ""
 
-#: includes/class-site-health.php:307
+#: includes/class-site-health.php:327
 msgid "Secret encryption"
 msgstr ""
 
-#: includes/class-site-health.php:308
+#: includes/class-site-health.php:328
 msgid "Available"
 msgstr ""
 
-#: includes/class-site-health.php:308
+#: includes/class-site-health.php:328
 msgid "Unavailable"
 msgstr ""
 
-#: includes/class-site-health.php:317
+#: includes/class-site-health.php:337
 msgid "Job counts"
 msgstr ""
 
-#: includes/class-sync-queue.php:445
+#: includes/class-sync-queue.php:213
+msgid "The sync stopped without finishing and was not resumed. It was closed automatically so later syncs can run."
+msgstr ""
+
+#: includes/class-sync-queue.php:511
 msgid "Cancelled by an administrator."
 msgstr ""
 
@@ -2250,17 +2260,17 @@ msgid "Could not acquire the sync lock."
 msgstr ""
 
 #. translators: 1: percentage of jobs, 2: configured threshold percentage, 3: number of jobs.
-#: includes/class-sync.php:784
+#: includes/class-sync.php:792
 #, php-format
 msgid "Deactivation was skipped: the sync would have deactivated %1$d%% of jobs (%3$d jobs), which is above the %2$d%% safety threshold. Check the Zoho connection and filters, then run a full sync again."
 msgstr ""
 
-#: includes/class-sync.php:1018
+#: includes/class-sync.php:1026
 #: includes/class-zoho-api.php:135
 msgid "Invalid Zoho record ID."
 msgstr ""
 
-#: includes/class-sync.php:1050
+#: includes/class-sync.php:1058
 msgid "That job no longer exists in Zoho Recruit."
 msgstr ""
 

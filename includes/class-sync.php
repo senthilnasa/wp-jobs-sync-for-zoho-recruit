@@ -309,7 +309,15 @@ class Sync {
 			Sync_Queue::update( $run_id, array( 'total' => (int) $info['count'] ) );
 		}
 
-		$batch_size = max( 1, (int) Settings::get( 'batch_size', 50 ) );
+		/*
+		 * A batch reads one API page and then writes up to batch_size records
+		 * from it, so a batch size below the page size makes the same page be
+		 * fetched again for each remaining chunk. At the defaults the two match
+		 * and each page costs one request; lowering the batch size shortens each
+		 * background request at the cost of extra reads against Zoho's daily
+		 * API credits.
+		 */
+		$batch_size = max( 1, (int) Settings::get( 'batch_size', 200 ) );
 		$processed  = 0;
 		$seen       = array();
 		$stats      = array(

@@ -181,31 +181,36 @@ anywhere, deliberately.
 ## 5. Verified vs. not verified
 
 **Verified in a live WordPress 7.1 / PHP 8.1 (wp-env)**
-- PHPCS: 0 errors, 0 warnings across 49 files.
-- PHPUnit: 57 tests, 102 assertions, all passing.
-- `bin/smoke-test.php`: 48 checks, all passing.
-- Plugin Check: nothing reported against any file that ships.
-- ESLint and Stylelint clean; `npm run build` produces all three shipped bundles.
-- Every admin screen rendered: dashboard, all six settings tabs, field mapping,
-  sync logs, and the job list table with its custom columns and status filter.
-- All three blocks register with the right script handles, and the two
-  single-job renderers were exercised through the smoke test: they render the
-  facts and the apply link inside the loop, and nothing outside it or for a
-  closed job.
-- Archive and single pages render under both Twenty Twenty-Five (block) and
-  Twenty Twenty-One (classic) with a clean `debug.log`.
-- No-JS filtering, keyword search matching a job code, REST filtering,
-  schema validation (400s), and inactive-job 404s all confirmed over HTTP.
-- The five listing screenshots are photographs of these real screens, seeded
-  with six demo jobs written through the plugin's own sync path.
+- PHPCS: 0 errors, 0 warnings across 56 files. PHPCompatibility clean for 8.1+.
+- PHPUnit: 97 tests single site, 97 multisite (`npm run test:php:multisite`).
+- `bin/smoke-test.php`: 64 checks. `bin/lifecycle-test.php`: 26 checks.
+  `bin/scale-test.php 2000`: 26 checks.
+- Plugin Check: nothing against any file that ships.
+- ESLint and Stylelint clean; committed block bundles are byte-identical to a
+  fresh `npm run build`.
+- Every admin screen, all three blocks, both theme types, and the whole
+  frontend verified over real HTTP: archive, no-JS filtering that genuinely
+  narrows, keyword search, unknown-filter empty state, single page with
+  JobPosting markup and apply button, REST allow-list, per_page 400, anonymous
+  sync 401, job feed, sitemap.
+- **Multisite now covered**: per-site tables, settings, jobs and logs, none
+  leaking between sites; per-site activation and deactivation.
+- **Lifecycle now covered**: activation, idempotent re-activation, an upgrade
+  that preserves settings, deactivation, and both uninstall settings including
+  that a hand-made job survives "delete jobs".
+- **Scale now covered**: 2,000 records over ten pages, no duplicates, ~83 MB
+  peak, one token fetch for the whole run, threshold refusing to deactivate,
+  and an interrupted run deactivating nothing.
 
 **Not verified — the remaining risk**
-- **Never talked to Zoho.** OAuth, pagination, `If-Modified-Since`, the
-  `/deleted` endpoint and every Zoho error code are written to the documented
-  API but untested against a live account. This is the single biggest gap.
-- Multisite has not been exercised at all.
-- Large-dataset behaviour (2,000+ jobs over many cron batches) is untested.
-- The upgrade path has no previous version to upgrade from yet.
+- **Never talked to Zoho.** `bin/scale-test.php` mocks Zoho at the HTTP layer,
+  so pagination, `more_records`, the `/deleted` endpoint, token refresh, the
+  batching and the safety rules are all genuinely exercised — but the field
+  names, picklist values and error shapes still come from the documentation,
+  not from an account. This is still the single biggest gap.
+- The upgrade path has no previously released version to upgrade from.
+- Throughput was measured at ~10 jobs/s, but that is Docker-on-Windows bind
+  mounts; it says little about a real host.
 
 ---
 

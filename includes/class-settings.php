@@ -101,7 +101,7 @@ class Settings {
 			'cron_sync_type'          => 'incremental',
 			'full_sync_interval_days' => 7,
 			'per_request'             => 200,
-			'batch_size'              => 50,
+			'batch_size'              => 200,
 			'request_timeout'         => 30,
 			'only_published'          => true,
 			'published_field'         => 'Publish_in_Career_Website',
