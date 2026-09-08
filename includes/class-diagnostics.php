@@ -147,6 +147,31 @@ class Diagnostics {
 				: ( $next ? 'next run ' . gmdate( 'Y-m-d H:i:s', $next ) . ' UTC' : 'no event scheduled' )
 		);
 
+		/*
+		 * "Only sync published jobs" quietly does nothing when the configured
+		 * flag field is not the one this Zoho account actually uses, because
+		 * a field missing from a record is treated as "no opinion" rather than
+		 * as unpublished. The symptom is jobs on the website that are not on
+		 * the career site, which is easy to blame on the sync.
+		 */
+		$flag = (string) Settings::get( 'published_field', '' );
+
+		if ( Settings::get( 'only_published', true ) && '' !== $flag && plugin()->metadata()->has_cached_fields() ) {
+			$known = array_keys( (array) plugin()->metadata()->get_fields() );
+
+			$checks[] = self::check(
+				'Publish flag field exists',
+				in_array( $flag, $known, true ),
+				in_array( $flag, $known, true )
+					? sprintf( '%s found in this account', $flag )
+					: sprintf(
+						'%s is not a field on this account, so "only sync published jobs" is having no effect and unpublished jobs are being synced. Pick the right field on the Field Mapping screen.',
+						$flag
+					),
+				'warning'
+			);
+		}
+
 		// An empty apply button is invisible on the frontend: the job renders,
 		// the candidate reads it, and there is simply nothing to click. Worth a
 		// line in the report rather than leaving it to be noticed.

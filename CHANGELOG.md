@@ -167,6 +167,9 @@ version onwards.
   is ignored by Zoho, so a de-duplicated WordPress slug cannot break it.
 - The diagnostic report counts active jobs with no application link, so an
   invisible apply button reports itself.
+- The diagnostic report also warns when the configured publish flag field is not
+  a field on the connected account, which silently disables "only sync published
+  jobs" and lets unpublished jobs onto the website.
 
 ### Fixed
 

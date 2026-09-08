@@ -82,6 +82,29 @@ have no application link.
 
 ---
 
+## The website lists more jobs than the career site
+
+If your Zoho career site shows six jobs and the website shows sixteen, the
+extra ten are records that exist in Zoho but are not published to the career
+site. They sync because **only sync published jobs** is not doing anything.
+
+That setting reads a flag field on the job opening, named under **Settings →
+Sync → Publish flag field**. A field that is not present on a record is treated
+as "no opinion" rather than as unpublished -- deliberately, so an account that
+does not use the flag at all still syncs -- which means a field name that does
+not match your account silently disables the whole filter.
+
+To fix it, open **Field Mapping**. The Zoho field list there is read from your
+own account, so it shows the real API name of the publish flag. Put that name in
+**Publish flag field** and run a full sync. **Run check** on the Sync Logs
+screen warns when the configured name is not a field on your account.
+
+This matters more once apply links are switched on: a job that is not published
+to the career site still gets a link, and a candidate following it lands on
+"this job posting is no longer available".
+
+---
+
 ## A job in WordPress no longer matches Zoho
 
 If the conflict setting is set to keep local edits, the sync deliberately leaves
