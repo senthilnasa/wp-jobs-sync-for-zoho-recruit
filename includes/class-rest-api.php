@@ -60,10 +60,8 @@ class REST_API {
 		add_action( 'untrashed_post', array( __CLASS__, 'flush_cache_for_post' ) );
 		add_action( 'update_option_' . Settings::OPTION, array( __CLASS__, 'flush_cache' ) );
 
-		// Widen keyword search to cover the job code.
-		add_filter( 'posts_join', array( __CLASS__, 'search_join' ), 10, 2 );
-		add_filter( 'posts_search', array( __CLASS__, 'search_where' ), 10, 2 );
-		add_filter( 'posts_groupby', array( __CLASS__, 'search_groupby' ), 10, 2 );
+		// Keyword search across title, summary, body and job code.
+		add_filter( 'posts_where', array( __CLASS__, 'search_where' ), 10, 2 );
 	}
 
 	/**
@@ -879,7 +877,11 @@ class REST_API {
 		$search = trim( (string) $params['search'] );
 
 		if ( '' !== $search ) {
-			$args['s']           = $search;
+			// Deliberately not $args['s']. Search plugins (SearchWP, Search &
+			// Filter, Relevanssi and friends) take over any query that sets
+			// `s`, and a plugin that has not indexed this post type answers
+			// with nothing at all. The listing builds its own clause instead,
+			// so job search keeps working whatever else is installed.
 			$args['jszr_search'] = $search;
 		}
 
@@ -903,68 +905,56 @@ class REST_API {
 	}
 
 	/**
-	 * Join the job code meta row for keyword search.
+	 * Match the search term against title, summary, body and job code.
 	 *
-	 * @param string    $join  JOIN clause.
+	 * Built as a single self-contained WHERE fragment rather than by widening
+	 * the core search clause. Nothing here depends on a JOIN added by another
+	 * filter, on core having produced a search clause, or on `s` surviving
+	 * whatever else the site has hooked, so the listing returns the same
+	 * results on a site running a search plugin as on one that is not.
+	 *
+	 * Every word has to match somewhere, which is what a visitor typing two
+	 * words expects.
+	 *
+	 * @param string    $where WHERE clause.
 	 * @param \WP_Query $query Query object.
 	 * @return string
 	 */
-	public static function search_join( $join, $query ) {
-		global $wpdb;
-
-		if ( '' === self::search_term( $query ) ) {
-			return $join;
-		}
-
-		return $join . " LEFT JOIN {$wpdb->postmeta} AS jszr_code ON ( {$wpdb->posts}.ID = jszr_code.post_id AND jszr_code.meta_key = '_jszr_job_code' ) ";
-	}
-
-	/**
-	 * Widen the core search clause with the job code.
-	 *
-	 * The core clause is reused verbatim rather than rebuilt, so title and
-	 * content matching keeps working exactly as WordPress intends.
-	 *
-	 * @param string    $search Search clause, including its leading AND.
-	 * @param \WP_Query $query  Query object.
-	 * @return string
-	 */
-	public static function search_where( $search, $query ) {
+	public static function search_where( $where, $query ) {
 		global $wpdb;
 
 		$term = self::search_term( $query );
 
-		if ( '' === $term || '' === trim( (string) $search ) ) {
-			return $search;
+		if ( '' === $term ) {
+			return $where;
 		}
 
-		$core = preg_replace( '/^\s*AND\s+/i', '', (string) $search );
+		$words = preg_split( '/\s+/', $term, -1, PREG_SPLIT_NO_EMPTY );
 
-		if ( ! is_string( $core ) || '' === trim( $core ) ) {
-			return $search;
+		if ( empty( $words ) ) {
+			return $where;
 		}
 
-		$like = '%' . $wpdb->esc_like( $term ) . '%';
+		// A pathological query string must not turn into a hundred LIKEs.
+		$words = array_slice( $words, 0, 8 );
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $core is core-generated SQL; the added condition is prepared.
-		return ' AND ( ' . $core . ' OR ' . $wpdb->prepare( 'jszr_code.meta_value LIKE %s', $like ) . ' ) ';
-	}
+		foreach ( $words as $word ) {
+			$like = '%' . $wpdb->esc_like( $word ) . '%';
 
-	/**
-	 * Group by post ID so the meta join cannot duplicate rows.
-	 *
-	 * @param string    $groupby GROUP BY clause.
-	 * @param \WP_Query $query   Query object.
-	 * @return string
-	 */
-	public static function search_groupby( $groupby, $query ) {
-		global $wpdb;
-
-		if ( '' === self::search_term( $query ) ) {
-			return $groupby;
+			$where .= $wpdb->prepare(
+				" AND ( {$wpdb->posts}.post_title LIKE %s"
+				. " OR {$wpdb->posts}.post_excerpt LIKE %s"
+				. " OR {$wpdb->posts}.post_content LIKE %s"
+				. " OR {$wpdb->posts}.ID IN ( SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = %s AND meta_value LIKE %s ) )",
+				$like,
+				$like,
+				$like,
+				'_jszr_job_code',
+				$like
+			);
 		}
 
-		return "{$wpdb->posts}.ID";
+		return $where;
 	}
 
 	// ----------------------------------------------------------------------

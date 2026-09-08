@@ -170,6 +170,70 @@ class Page_Cache {
 
 				return true;
 			},
+			'breeze'         => static function () {
+				// Breeze ships with Cloudways, where it also fronts Varnish. Its
+				// own flush clears both, so prefer it over poking Varnish here.
+				if ( class_exists( '\Breeze_PurgeCache' ) && method_exists( '\Breeze_PurgeCache', 'breeze_cache_flush' ) ) {
+					\Breeze_PurgeCache::breeze_cache_flush();
+
+					return true;
+				}
+
+				if ( has_action( 'breeze_clear_all_cache' ) ) {
+					// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Breeze's own documented purge hook.
+					do_action( 'breeze_clear_all_cache' );
+
+					return true;
+				}
+
+				return false;
+			},
+			'wp-fastest'     => static function () {
+				if ( ! function_exists( 'wpfc_clear_all_cache' ) ) {
+					return false;
+				}
+
+				wpfc_clear_all_cache( true );
+
+				return true;
+			},
+			'hummingbird'    => static function () {
+				if ( ! has_action( 'wphb_clear_page_cache' ) ) {
+					return false;
+				}
+
+				// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Hummingbird's own documented purge hook.
+				do_action( 'wphb_clear_page_cache' );
+
+				return true;
+			},
+			'comet-cache'    => static function () {
+				if ( ! class_exists( '\comet_cache' ) || ! method_exists( '\comet_cache', 'clear' ) ) {
+					return false;
+				}
+
+				\comet_cache::clear();
+
+				return true;
+			},
+			'wp-engine'      => static function () {
+				if ( ! class_exists( '\WpeCommon' ) || ! method_exists( '\WpeCommon', 'purge_varnish_cache' ) ) {
+					return false;
+				}
+
+				\WpeCommon::purge_varnish_cache();
+
+				return true;
+			},
+			'pantheon'       => static function () {
+				if ( ! function_exists( 'pantheon_clear_edge_all' ) ) {
+					return false;
+				}
+
+				pantheon_clear_edge_all();
+
+				return true;
+			},
 		);
 
 		/**
