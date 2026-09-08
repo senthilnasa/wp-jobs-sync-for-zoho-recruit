@@ -2,7 +2,12 @@
 
 [← Documentation index](../README.md#documentation)
 
-Three places to look, in order:
+Start with the check button: **Zoho Recruit Jobs → Sync Logs → Run check**. It
+tests everything the plugin depends on and tells you which part is broken,
+including a live call to Zoho when the site is connected. See
+[Run the check first](#run-the-check-first) below.
+
+After that, three places to look, in order:
 
 1. **Tools → Site Health → Status.** Four plugin tests run there, and they catch
    most misconfigurations without you reading a log.
@@ -11,6 +16,42 @@ Three places to look, in order:
    sync, job counts.
 
 From the command line, `wp jszr status` shows most of the same in one table.
+
+---
+
+## Run the check first
+
+**Zoho Recruit Jobs → Sync Logs → Run check** works through, in order:
+
+| Check | What a failure means |
+| --- | --- |
+| Secrets can be encrypted | No libsodium or OpenSSL, or the security salts are missing from `wp-config.php`. Credentials cannot be stored safely until this passes. |
+| Credentials entered | No Client ID and Secret yet. Add them on the Settings screen. |
+| Connected to Zoho | No refresh token. Run the connection flow. |
+| Security keys unchanged | The salts in `wp-config.php` changed after the tokens were stored, so they can no longer be decrypted. Reconnect. |
+| Automatic syncing not paused | The circuit breaker tripped after repeated authentication failures. Fix the cause, then reconnect or start a sync by hand. |
+| Database tables present | A table is missing. Deactivate and reactivate the plugin. |
+| Sync scheduled | No cron event. Re-saving the sync frequency reschedules it. |
+| WP-Cron available | `DISABLE_WP_CRON` is set, so a system cron must call `wp-cron.php`. |
+| Access token obtained | The refresh token is being refused. See the OAuth errors below. |
+| Job openings readable | The connection works but the module cannot be read — usually a scope or a permissions problem on the Zoho user. |
+| Field discovery | A warning, not a failure. Without `ZohoRecruit.settings.fields.READ` the mapping screen falls back to the standard field names and everything else keeps working. |
+
+**Download report (.txt)** saves the same thing as a text file, along with the
+environment, the settings, the field mapping, the last ten runs and the last
+sixty log entries. Everything in it passes through the same scrubber the logs
+use, so tokens, secrets and client IDs are removed and the notification address
+is left out — it is safe to send to whoever is helping you.
+
+---
+
+## A job in WordPress no longer matches Zoho
+
+If the conflict setting is set to keep local edits, the sync deliberately leaves
+edited fields alone. **Sync Now** on the dashboard overrides that once: it reads
+every job and rewrites all of them from Zoho, discarding those edits. Meta that
+the plugin does not map — anything another plugin or your theme added — is left
+untouched either way.
 
 ---
 

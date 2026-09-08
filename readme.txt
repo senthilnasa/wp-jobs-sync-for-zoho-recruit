@@ -117,6 +117,8 @@ Yes. Define `JSZR_CLIENT_ID`, `JSZR_CLIENT_SECRET` and `JSZR_DATA_CENTER` in `wp
 
 That depends on the conflict setting. The default, *Zoho updates mapped fields only*, refreshes the mapped fields and leaves everything else alone. Choose *Preserve fields edited in WordPress* to keep your manual edits: the plugin stores a hash of each field at sync time and skips any field whose value has changed since.
 
+The *Sync Now* button on the dashboard overrides that for one run: it reads every job and rewrites all of them from Zoho, including the fields you edited. Meta added by your theme or another plugin is left alone either way.
+
 = A job was deleted in Zoho. What happens on the website? =
 
 Whatever you choose: move to draft (the default), make private, move to trash, delete permanently, or do nothing. Deletions are detected through Zoho's deleted-records endpoint, and jobs you created by hand in WordPress are never touched.
@@ -142,6 +144,10 @@ Custom HTML uses simple tags rather than PHP: `{title}`, `{location}`, `{salary}
 = How do I customize the markup? =
 
 Copy any file from the plugin's `templates/` directory into `yourtheme/jobs-sync-for-zoho-recruit/` and edit it there. Block themes can use the bundled block templates or build their own layout in the Site Editor with the Job Details and Apply Button blocks.
+
+= Something is not working. Where do I start? =
+
+Zoho Recruit Jobs → Sync Logs → *Run check*. It works through the encryption support, the credentials, the connection, the security salts, the database tables, the schedule and WP-Cron, then makes a real call to Zoho when the site is connected, and shows you which part failed. *Download report (.txt)* saves the whole thing, plus the environment and recent log entries, as a text file. Tokens, secrets and client IDs are removed from it, so it is safe to send to whoever is helping you.
 
 = Does it work on multisite? =
 

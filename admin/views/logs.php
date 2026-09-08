@@ -10,6 +10,7 @@
  * @var int   $per_page Rows per page.
  * @var int   $run_id   Selected run ID, or 0.
  * @var array $entries  Log entries to show.
+ * @var array $report   The last diagnostic report, if one has been run.
  */
 
 namespace JobsSyncForZohoRecruit;
@@ -21,6 +22,82 @@ $jszr_pages  = (int) ceil( $total / max( 1, $per_page ) );
 ?>
 <div class="wrap jszr-wrap">
 	<h1><?php esc_html_e( 'Sync Logs', 'jobs-sync-for-zoho-recruit' ); ?></h1>
+
+	<h2><?php esc_html_e( 'Check everything', 'jobs-sync-for-zoho-recruit' ); ?></h2>
+
+	<p class="description">
+		<?php esc_html_e( 'Runs through the connection, the schedule, the database and a live call to Zoho, then writes the result here. Tokens, secrets and client IDs are removed, so the downloaded file is safe to send on.', 'jobs-sync-for-zoho-recruit' ); ?>
+	</p>
+
+	<p class="jszr-actions">
+		<a class="button button-primary"
+			href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=jszr_run_diagnostics' ), 'jszr_run_diagnostics' ) ); ?>">
+			<?php esc_html_e( 'Run check', 'jobs-sync-for-zoho-recruit' ); ?>
+		</a>
+
+		<?php if ( ! empty( $report ) ) : ?>
+			<a class="button"
+				href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=jszr_download_diagnostics' ), 'jszr_download_diagnostics' ) ); ?>">
+				<?php esc_html_e( 'Download report (.txt)', 'jobs-sync-for-zoho-recruit' ); ?>
+			</a>
+		<?php endif; ?>
+	</p>
+
+	<?php if ( ! empty( $report ) ) : ?>
+		<?php
+		$jszr_generated = isset( $report['generated_at'] ) ? strtotime( $report['generated_at'] . ' UTC' ) : false;
+		?>
+
+		<p class="description">
+			<?php
+			printf(
+				/* translators: %s: formatted date and time. */
+				esc_html__( 'Last checked %s.', 'jobs-sync-for-zoho-recruit' ),
+				esc_html( $jszr_generated ? wp_date( $jszr_format, $jszr_generated ) : (string) ( $report['generated_at'] ?? '' ) )
+			);
+			?>
+		</p>
+
+		<?php if ( ! empty( $report['checks'] ) ) : ?>
+			<table class="widefat striped jszr-diagnostics">
+				<thead>
+					<tr>
+						<th scope="col"><?php esc_html_e( 'Result', 'jobs-sync-for-zoho-recruit' ); ?></th>
+						<th scope="col"><?php esc_html_e( 'Check', 'jobs-sync-for-zoho-recruit' ); ?></th>
+						<th scope="col"><?php esc_html_e( 'Detail', 'jobs-sync-for-zoho-recruit' ); ?></th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php foreach ( $report['checks'] as $jszr_check ) : ?>
+						<?php
+						$jszr_labels = array(
+							'pass'    => __( 'Pass', 'jobs-sync-for-zoho-recruit' ),
+							'warning' => __( 'Warning', 'jobs-sync-for-zoho-recruit' ),
+							'fail'    => __( 'Problem', 'jobs-sync-for-zoho-recruit' ),
+						);
+
+						$jszr_status = (string) $jszr_check['status'];
+						$jszr_badge  = 'pass' === $jszr_status ? 'active' : ( 'warning' === $jszr_status ? 'expired' : 'failed' );
+						?>
+						<tr>
+							<td>
+								<span class="jszr-badge jszr-badge-<?php echo esc_attr( $jszr_badge ); ?>">
+									<?php echo esc_html( $jszr_labels[ $jszr_status ] ?? $jszr_status ); ?>
+								</span>
+							</td>
+							<td><?php echo esc_html( $jszr_check['label'] ); ?></td>
+							<td><?php echo esc_html( $jszr_check['detail'] ); ?></td>
+						</tr>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
+		<?php endif; ?>
+
+		<details class="jszr-diagnostics-full">
+			<summary><?php esc_html_e( 'Show the full report', 'jobs-sync-for-zoho-recruit' ); ?></summary>
+			<pre class="jszr-context"><?php echo esc_html( Diagnostics::to_text( $report ) ); ?></pre>
+		</details>
+	<?php endif; ?>
 
 	<table class="widefat striped">
 		<thead>

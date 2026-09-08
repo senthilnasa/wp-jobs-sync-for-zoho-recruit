@@ -126,6 +126,7 @@ class Sync {
 
 		$create_args = array(
 			'dry_run' => ! empty( $args['dry_run'] ),
+			'force'   => ! empty( $args['force'] ),
 			'trigger' => isset( $args['trigger'] ) ? $args['trigger'] : 'manual',
 		);
 
@@ -281,6 +282,7 @@ class Sync {
 		$page    = max( 1, (int) $run->page );
 		$offset  = max( 0, (int) $run->page_offset );
 		$dry_run = (bool) $run->dry_run;
+		$force   = ! empty( $run->force_overwrite );
 
 		$options = array();
 
@@ -343,7 +345,7 @@ class Sync {
 				$seen[] = $zoho_id;
 			}
 
-			$outcome = $this->process_record( $record, $run_id, $dry_run );
+			$outcome = $this->process_record( $record, $run_id, $dry_run, $force );
 
 			switch ( $outcome ) {
 				case 'created':

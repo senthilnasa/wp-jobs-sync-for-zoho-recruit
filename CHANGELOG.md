@@ -101,6 +101,19 @@ version onwards.
   re-read from the API.
 - Sync log with per-run statistics and error detail, retention limits, and
   scrubbing that keeps tokens and secrets out of every stored line.
+- A Sync Now button that reads every job from Zoho and rewrites all of them,
+  including fields edited in WordPress. The forced flag is stored on the run
+  itself rather than held in memory, so it survives the batches the sync is
+  broken into and shows up afterwards in the run's own record. Full Sync and
+  Incremental Sync are unchanged and still respect the conflict setting.
+- A "check everything" button on the Sync Logs screen. It walks the encryption
+  support, the credentials, the connection, the security salts, the circuit
+  breaker, the database tables, the schedule and WP-Cron, then, when the site is
+  connected, obtains an access token and reads the job openings module for real.
+  The result is shown as a pass/fail table with a full report underneath, and
+  can be downloaded as a plain text file to send to whoever is helping. Every
+  value in it goes through the log scrubber first, so tokens, secrets and client
+  IDs are removed and the notification address is left out entirely.
 - Site Health tests for the connection, scheduling, sync freshness, encryption
   availability, HTTPS and URL slug conflicts.
 - WP-CLI commands under `wp jszr`, including `--dry-run`.

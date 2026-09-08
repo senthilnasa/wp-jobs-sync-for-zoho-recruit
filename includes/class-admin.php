@@ -134,6 +134,8 @@ class Admin {
 		add_action( 'admin_post_jszr_regenerate_webhook', array( $this, 'handle_regenerate_webhook' ) );
 		add_action( 'admin_post_jszr_resync_job', array( $this, 'handle_resync_job' ) );
 		add_action( 'admin_post_jszr_reset_job', array( $this, 'handle_reset_job' ) );
+		add_action( 'admin_post_jszr_run_diagnostics', array( $this, 'handle_run_diagnostics' ) );
+		add_action( 'admin_post_jszr_download_diagnostics', array( $this, 'handle_download_diagnostics' ) );
 
 		// Job list table.
 		add_filter( 'manage_' . Post_Type::POST_TYPE . '_posts_columns', array( $this, 'list_columns' ) );
@@ -414,6 +416,7 @@ class Admin {
 				'paged'    => $paged,
 				'per_page' => $per_page,
 				'run_id'   => $run_id,
+				'report'   => Diagnostics::last(),
 				'entries'  => $run_id > 0
 					? Logger::get_entries(
 						array(
@@ -562,11 +565,20 @@ class Admin {
 
 		$type    = isset( $_POST['sync_type'] ) ? sanitize_key( wp_unslash( $_POST['sync_type'] ) ) : 'incremental'; // phpcs:ignore WordPress.Security.NonceVerification -- Nonce and capability verified by jszr_verify_admin_request() at the top of the handler.
 		$dry_run = ! empty( $_POST['dry_run'] ); // phpcs:ignore WordPress.Security.NonceVerification -- Nonce and capability verified by jszr_verify_admin_request() at the top of the handler.
+		$force   = ! empty( $_POST['force'] ); // phpcs:ignore WordPress.Security.NonceVerification -- Nonce and capability verified by jszr_verify_admin_request() at the top of the handler.
+
+		// "Sync now" rewrites every job from Zoho, so it is a full sync that
+		// also overrides the preserve-local-edits conflict mode.
+		if ( 'force' === $type ) {
+			$type  = 'full';
+			$force = true;
+		}
 
 		$result = $this->sync->start(
 			in_array( $type, array( 'full', 'incremental' ), true ) ? $type : 'incremental',
 			array(
 				'dry_run' => $dry_run,
+				'force'   => $force,
 				'trigger' => 'admin',
 			)
 		);
@@ -574,12 +586,15 @@ class Admin {
 		if ( is_wp_error( $result ) ) {
 			$this->notice( 'error', $result->get_error_message() );
 		} else {
-			$this->notice(
-				'success',
-				$dry_run
-					? __( 'Dry run started. No changes will be written.', 'jobs-sync-for-zoho-recruit' )
-					: __( 'Sync started. Progress is shown below.', 'jobs-sync-for-zoho-recruit' )
-			);
+			if ( $dry_run ) {
+				$message = __( 'Dry run started. No changes will be written.', 'jobs-sync-for-zoho-recruit' );
+			} elseif ( $force ) {
+				$message = __( 'Full resync started. Every job will be rewritten from Zoho, including any fields edited here.', 'jobs-sync-for-zoho-recruit' );
+			} else {
+				$message = __( 'Sync started. Progress is shown below.', 'jobs-sync-for-zoho-recruit' );
+			}
+
+			$this->notice( 'success', $message );
 		}
 
 		$this->redirect();
@@ -867,6 +882,63 @@ class Admin {
 		}
 
 		return (string) $contents;
+	}
+
+	/**
+	 * Build a diagnostic report and show it.
+	 *
+	 * @return void
+	 */
+	public function handle_run_diagnostics() {
+		jszr_verify_admin_request( 'jszr_run_diagnostics' );
+
+		$report = Diagnostics::run( true );
+
+		$failed = 0;
+
+		foreach ( (array) $report['checks'] as $check ) {
+			if ( 'fail' === $check['status'] ) {
+				++$failed;
+			}
+		}
+
+		$this->notice(
+			$failed > 0 ? 'error' : 'success',
+			$failed > 0
+				? sprintf(
+					/* translators: %d: number of failed checks. */
+					_n( 'The check finished with %d problem. The report is below.', 'The check finished with %d problems. The report is below.', $failed, 'jobs-sync-for-zoho-recruit' ),
+					$failed
+				)
+				: __( 'The check finished with no problems. The report is below.', 'jobs-sync-for-zoho-recruit' )
+		);
+
+		$this->redirect( self::LOGS_SLUG, array( 'checked' => 1 ) );
+	}
+
+	/**
+	 * Send the last diagnostic report as a text file.
+	 *
+	 * @return void
+	 */
+	public function handle_download_diagnostics() {
+		jszr_verify_admin_request( 'jszr_download_diagnostics' );
+
+		$report = Diagnostics::last();
+
+		if ( empty( $report ) ) {
+			$report = Diagnostics::run( false );
+		}
+
+		$body = Diagnostics::to_text( $report );
+
+		nocache_headers();
+		header( 'Content-Type: text/plain; charset=utf-8' );
+		header( 'Content-Disposition: attachment; filename=' . Diagnostics::filename() );
+		header( 'Content-Length: ' . strlen( $body ) );
+
+		echo $body; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain text download, already scrubbed of secrets by Diagnostics.
+		exit;
 	}
 
 	/**

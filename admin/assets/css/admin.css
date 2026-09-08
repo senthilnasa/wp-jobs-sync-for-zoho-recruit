@@ -217,3 +217,25 @@ textarea.code {
 	font-size: 13px;
 	line-height: 1.5;
 }
+
+/* Diagnostics ------------------------------------------------------------- */
+
+.jszr-diagnostics {
+	max-inline-size: 60rem;
+	margin-block-end: 16px;
+}
+
+.jszr-diagnostics td:first-child {
+	inline-size: 7rem;
+}
+
+.jszr-diagnostics-full summary {
+	cursor: pointer;
+	font-weight: 600;
+	margin-block: 10px;
+}
+
+.jszr-diagnostics-full .jszr-context {
+	max-block-size: 32rem;
+	max-inline-size: 60rem;
+}

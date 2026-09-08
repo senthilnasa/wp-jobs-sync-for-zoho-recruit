@@ -67,6 +67,7 @@ class Sync_Queue {
 			type varchar(20) NOT NULL DEFAULT 'full',
 			state varchar(20) NOT NULL DEFAULT 'pending',
 			dry_run tinyint(1) NOT NULL DEFAULT 0,
+			force_overwrite tinyint(1) NOT NULL DEFAULT 0,
 			trigger_source varchar(20) NOT NULL DEFAULT 'manual',
 			page int(11) NOT NULL DEFAULT 1,
 			page_offset int(11) NOT NULL DEFAULT 0,
@@ -98,7 +99,7 @@ class Sync_Queue {
 	 * Start a new run.
 	 *
 	 * @param string $type    full|incremental|webhook.
-	 * @param array  $args    Optional: dry_run, trigger, modified_since, per_page.
+	 * @param array  $args    Optional: dry_run, force, trigger, modified_since, per_page.
 	 * @return int Run ID, or 0 on failure.
 	 */
 	public static function create( $type, array $args = array() ) {
@@ -107,17 +108,18 @@ class Sync_Queue {
 		$now = current_time( 'mysql', true );
 
 		$data = array(
-			'type'           => in_array( $type, array( 'full', 'incremental', 'webhook', 'expiry' ), true ) ? $type : 'full',
-			'state'          => 'pending',
-			'dry_run'        => ! empty( $args['dry_run'] ) ? 1 : 0,
-			'trigger_source' => isset( $args['trigger'] ) ? substr( sanitize_key( (string) $args['trigger'] ), 0, 20 ) : 'manual',
-			'page'           => 1,
-			'page_offset'    => 0,
-			'per_page'       => isset( $args['per_page'] ) ? max( 1, min( 200, (int) $args['per_page'] ) ) : (int) Settings::get( 'per_request', 200 ),
-			'seen_ids'       => wp_json_encode( array() ),
-			'modified_since' => isset( $args['modified_since'] ) ? substr( sanitize_text_field( (string) $args['modified_since'] ), 0, 40 ) : '',
-			'started_at'     => $now,
-			'updated_at'     => $now,
+			'type'            => in_array( $type, array( 'full', 'incremental', 'webhook', 'expiry' ), true ) ? $type : 'full',
+			'state'           => 'pending',
+			'dry_run'         => ! empty( $args['dry_run'] ) ? 1 : 0,
+			'force_overwrite' => ! empty( $args['force'] ) ? 1 : 0,
+			'trigger_source'  => isset( $args['trigger'] ) ? substr( sanitize_key( (string) $args['trigger'] ), 0, 20 ) : 'manual',
+			'page'            => 1,
+			'page_offset'     => 0,
+			'per_page'        => isset( $args['per_page'] ) ? max( 1, min( 200, (int) $args['per_page'] ) ) : (int) Settings::get( 'per_request', 200 ),
+			'seen_ids'        => wp_json_encode( array() ),
+			'modified_since'  => isset( $args['modified_since'] ) ? substr( sanitize_text_field( (string) $args['modified_since'] ), 0, 40 ) : '',
+			'started_at'      => $now,
+			'updated_at'      => $now,
 		);
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table.
@@ -439,6 +441,7 @@ class Sync_Queue {
 			'type'        => (string) $run->type,
 			'state'       => (string) $run->state,
 			'dry_run'     => (bool) $run->dry_run,
+			'force'       => ! empty( $run->force_overwrite ),
 			'page'        => (int) $run->page,
 			'processed'   => (int) $run->processed,
 			'total'       => (int) $run->total,

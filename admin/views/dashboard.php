@@ -163,12 +163,22 @@ $jszr_active_run  = isset( $state['active'] ) ? $state['active'] : null;
 				<input type="hidden" name="action" value="jszr_start_sync" />
 
 				<p class="jszr-actions">
-					<button type="submit" name="sync_type" value="full" class="button button-primary" <?php disabled( ! $connection['connected'] ); ?>>
+					<button type="submit" name="sync_type" value="force"
+						class="button button-primary jszr-confirm"
+						data-jszr-confirm="<?php esc_attr_e( 'Rewrite every job from Zoho Recruit? Any field edited here will be replaced.', 'jobs-sync-for-zoho-recruit' ); ?>"
+						<?php disabled( ! $connection['connected'] ); ?>>
+						<?php esc_html_e( 'Sync Now', 'jobs-sync-for-zoho-recruit' ); ?>
+					</button>
+					<button type="submit" name="sync_type" value="full" class="button" <?php disabled( ! $connection['connected'] ); ?>>
 						<?php esc_html_e( 'Full Sync', 'jobs-sync-for-zoho-recruit' ); ?>
 					</button>
 					<button type="submit" name="sync_type" value="incremental" class="button" <?php disabled( ! $connection['connected'] ); ?>>
 						<?php esc_html_e( 'Incremental Sync', 'jobs-sync-for-zoho-recruit' ); ?>
 					</button>
+				</p>
+
+				<p class="description">
+					<?php esc_html_e( 'Sync Now reads every job from Zoho and rewrites all of them, including fields edited in WordPress. Full Sync does the same but leaves those edits alone when the conflict setting says to. Incremental Sync only fetches what changed since the last successful run.', 'jobs-sync-for-zoho-recruit' ); ?>
 				</p>
 
 				<p>

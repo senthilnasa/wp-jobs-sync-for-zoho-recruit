@@ -84,6 +84,7 @@ Three invariants the code is built around:
 | `Sync` | `start`, `run_now`, `process_batch`, `process_page`, `process_record`, `determine_status`, `is_unpublished`, `finalize`, `deactivate_missing`, `process_deleted_records`, `expire_due_jobs`, `sync_single` |
 | `Sync_Queue` | `{prefix}jszr_sync_runs` table, checkpointing, global lock with stale recovery, batch scheduling, cancel, prune |
 | `Logger` | `{prefix}jszr_sync_logs` table, levels, secret scrubbing, retention |
+| `Diagnostics` | `run()` gathers checks, environment, connection, settings, mapping, counts, schedule, last 10 runs and last 60 log lines; `to_text()` renders the download; everything passes through `Logger::scrub()` first |
 | `Notifications` | Failure, connection and threshold emails, throttled |
 | `Cron` | `jszr_scheduled_sync`, `jszr_check_expired`, `jszr_prune_logs`, custom `jszr_six_hours` schedule |
 | `Post_Type` | CPT + taxonomies + `register_post_meta`, slug stability, rewrite flush on slug change, sitemap toggle |
@@ -181,9 +182,9 @@ anywhere, deliberately.
 ## 5. Verified vs. not verified
 
 **Verified in a live WordPress 7.1 / PHP 8.1 (wp-env)**
-- PHPCS: 0 errors, 0 warnings across 56 files. PHPCompatibility clean for 8.1+.
-- PHPUnit: 97 tests single site, 97 multisite (`npm run test:php:multisite`).
-- `bin/smoke-test.php`: 64 checks. `bin/lifecycle-test.php`: 26 checks.
+- PHPCS: 0 errors, 0 warnings across 57 files. PHPCompatibility clean for 8.1+.
+- PHPUnit: 116 tests single site, 116 multisite (`npm run test:php:multisite`).
+- `bin/smoke-test.php`: 66 checks. `bin/lifecycle-test.php`: 26 checks.
   `bin/scale-test.php 2000`: 26 checks.
 - Plugin Check: nothing against any file that ships.
 - ESLint and Stylelint clean; committed block bundles are byte-identical to a
@@ -201,6 +202,11 @@ anywhere, deliberately.
 - **Scale now covered**: 2,000 records over ten pages, no duplicates, ~83 MB
   peak, one token fetch for the whole run, threshold refusing to deactivate,
   and an interrupted run deactivating nothing.
+- **Sync Now and the check button**: the diagnostics panel rendered, "Run check"
+  ran through `admin-post.php` with its nonce and wrote the report, the download
+  came back as `text/plain` with an attachment filename and no credentials in
+  the body, and the Sync Now button carries `sync_type=force` with its confirm
+  prompt.
 
 **Not verified — the remaining risk**
 - **Never talked to Zoho.** `bin/scale-test.php` mocks Zoho at the HTTP layer,
