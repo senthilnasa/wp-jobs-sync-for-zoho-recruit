@@ -239,3 +239,246 @@ textarea.code {
 	max-block-size: 32rem;
 	max-inline-size: 60rem;
 }
+
+/* Design system ---------------------------------------------------------- */
+
+/*
+ * The same vocabulary the frontend uses, tuned for wp-admin: WordPress already
+ * supplies the page chrome, so this only defines the pieces the plugin adds.
+ * Colours come from core's own admin palette variables where they exist, so
+ * the screens follow the administrator's chosen colour scheme.
+ */
+.jszr-wrap {
+	--jszr-a-accent: #2271b1;
+	--jszr-a-border: #dcdcde;
+	--jszr-a-surface: #fff;
+	--jszr-a-sunk: #f6f7f7;
+	--jszr-a-text: #1d2327;
+	--jszr-a-muted: #646970;
+	--jszr-a-ok: #00844a;
+	--jszr-a-warn: #996800;
+	--jszr-a-error: #d63638;
+	--jszr-a-radius: 6px;
+	--jszr-a-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.jszr-wrap,
+.jszr-wrap * {
+	box-sizing: border-box;
+}
+
+/* Long job titles, codes, Zoho IDs and URLs all pass through these screens. */
+.jszr-wrap :where(td, th, p, li, dd) {
+	overflow-wrap: break-word;
+}
+
+/*
+ * The job list. `anywhere` is confined to the two columns that hold unbroken
+ * machine strings; using it on the title column shreds a long job title into
+ * one character per line as soon as the table gets tight.
+ */
+.wp-list-table .column-jszr_code,
+.wp-list-table .column-jszr_source {
+	overflow-wrap: anywhere;
+}
+
+.wp-list-table .column-title {
+	min-width: 14rem;
+}
+
+.wp-list-table .column-jszr_status,
+.wp-list-table .column-jszr_synced {
+	white-space: nowrap;
+}
+
+/* Statistics tiles ------------------------------------------------------- */
+
+.jszr-stats {
+	display: grid;
+
+	/* Four across, explicitly: auto-fit left the fourth tile stranded on a
+	   second row at ordinary admin widths, which reads as a mistake. */
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 12px;
+	margin: 16px 0 24px;
+	padding: 0;
+	list-style: none;
+}
+
+.jszr-stat {
+	margin: 0;
+	min-width: 0;
+	border: 1px solid var(--jszr-a-border);
+	border-radius: var(--jszr-a-radius);
+	background: var(--jszr-a-surface);
+	box-shadow: var(--jszr-a-shadow);
+	border-top: 3px solid var(--jszr-a-muted);
+	transition: box-shadow 0.12s ease, transform 0.12s ease;
+}
+
+.jszr-stat:hover {
+	box-shadow: 0 3px 10px rgba(0, 0, 0, 0.09);
+	transform: translateY(-1px);
+}
+
+.jszr-stat a {
+	display: block;
+	padding: 16px 18px;
+	text-decoration: none;
+	color: inherit;
+}
+
+.jszr-stat a:focus-visible {
+	outline: 2px solid var(--jszr-a-accent);
+	outline-offset: -2px;
+}
+
+.jszr-stat__value {
+	display: block;
+	font-size: 2rem;
+	font-weight: 600;
+	line-height: 1.1;
+	color: var(--jszr-a-text);
+}
+
+.jszr-stat__label {
+	display: block;
+	margin-top: 4px;
+	font-size: 12px;
+	font-weight: 500;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+	color: var(--jszr-a-muted);
+}
+
+.jszr-stat--active {
+	border-top-color: var(--jszr-a-ok);
+}
+
+.jszr-stat--draft {
+	border-top-color: var(--jszr-a-muted);
+}
+
+.jszr-stat--expired {
+	border-top-color: var(--jszr-a-warn);
+}
+
+.jszr-stat--total {
+	border-top-color: var(--jszr-a-accent);
+}
+
+/* Tables ----------------------------------------------------------------- */
+
+/*
+ * A wide table scrolls inside its own box. The page itself must never scroll
+ * sideways, which is what happens if a table is left to size itself.
+ */
+.jszr-table-scroll {
+	max-width: 100%;
+	overflow-x: auto;
+	border-radius: var(--jszr-a-radius);
+}
+
+.jszr-recent-jobs {
+	min-width: 34rem;
+}
+
+.jszr-list-sub {
+	color: var(--jszr-a-muted);
+	font-size: 12px;
+}
+
+/* Empty states ----------------------------------------------------------- */
+
+.jszr-empty {
+	padding: 28px 20px;
+	border: 1px dashed var(--jszr-a-border);
+	border-radius: var(--jszr-a-radius);
+	background: var(--jszr-a-sunk);
+	text-align: center;
+}
+
+.jszr-empty p {
+	margin: 0 0 6px;
+	color: var(--jszr-a-muted);
+}
+
+.jszr-empty p:last-child {
+	margin-bottom: 0;
+}
+
+/* Editor sections -------------------------------------------------------- */
+
+.jszr-section {
+	margin: 0 0 18px;
+	padding: 0 0 16px;
+	border-bottom: 1px solid var(--jszr-a-border);
+}
+
+.jszr-section:last-child {
+	margin-bottom: 0;
+	padding-bottom: 0;
+	border-bottom: 0;
+}
+
+.jszr-section__title {
+	margin: 0 0 10px;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--jszr-a-muted);
+}
+
+/* Responsive ------------------------------------------------------------- */
+
+@media (max-width: 60rem) {
+
+	.jszr-stats {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (max-width: 782px) {
+
+	.jszr-wrap .jszr-cards {
+		grid-template-columns: 1fr;
+	}
+
+	.jszr-stat__value {
+		font-size: 1.6rem;
+	}
+
+	/*
+	 * The recent-jobs table becomes a stack of labelled rows rather than
+	 * something the administrator has to scroll sideways to read.
+	 */
+	.jszr-recent-jobs {
+		min-width: 0;
+	}
+
+	.jszr-recent-jobs thead {
+		display: none;
+	}
+
+	.jszr-recent-jobs tr {
+		display: block;
+		padding: 10px 0;
+		border-bottom: 1px solid var(--jszr-a-border);
+	}
+
+	.jszr-recent-jobs td {
+		display: flex;
+		justify-content: space-between;
+		gap: 12px;
+		padding: 4px 12px;
+		border: 0;
+	}
+
+	.jszr-recent-jobs td::before {
+		content: attr(data-label);
+		flex: none;
+		font-weight: 600;
+		color: var(--jszr-a-muted);
+	}
+}

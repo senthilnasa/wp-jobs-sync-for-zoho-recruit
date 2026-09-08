@@ -120,7 +120,48 @@ version onwards.
 - Privacy policy suggestion, multisite-aware activation and uninstall, and an
   uninstall routine that keeps jobs unless you ask for them to be removed.
 
+- A careers hero above the job archive, with the heading, eyebrow and lead all
+  filterable, and an escape hatch that removes it entirely.
+- A redesigned public listing: a design system of custom properties on
+  `.jszr-scope`, job cards carrying the job code and icon-led facts for
+  location, employment type, department and experience, a filter bar that holds
+  search, filters and sort together, and a two-column job page whose apply panel
+  stays in view while the description scrolls. Setting `--jszr-accent` restyles
+  the whole thing.
+- Four distinct listing states rather than two. A request in flight shows
+  skeleton cards, an empty result shows an empty state that says whether it is
+  empty because nothing is open or because a filter excluded everything, and a
+  failed request shows an error panel with a retry button instead of claiming
+  there are no jobs. The enhanced path swaps in server-rendered HTML, so the
+  markup cannot drift from the no-JavaScript path, which still works.
+- A redesigned admin: statistics tiles linking into pre-filtered job lists, a
+  recent-jobs table that becomes labelled rows rather than a sideways scroll on
+  a phone, a Source column, dropdown filters for department, location and
+  employment type, job-code search, and an edit-screen panel grouped into
+  synchronization, basic information and actions.
+
 ### Fixed
+
+- Job listings could be served indefinitely from a stale page cache. The purger
+  covered nine caching plugins but not Breeze, the one that ships with
+  Cloudways, so a site running it kept serving whatever the archive looked like
+  when the page was first cached -- including an empty one -- however many times
+  the sync ran afterwards. Breeze is covered now, along with WP Fastest Cache,
+  Hummingbird, Comet Cache, WP Engine and Pantheon.
+- Keyword search returned nothing on sites running a search plugin. The listing
+  asked for its keywords through `s`, which SearchWP, Search & Filter and
+  Relevanssi all take over, and a plugin that has not indexed the job post type
+  answers with nothing at all. The listing now matches title, summary, body and
+  job code in its own WHERE clause, so it no longer depends on `s`, on core
+  having built a search clause, or on a JOIN added by another filter.
+- The job archive rendered through two different code paths: it looped the main
+  query when nothing was filtered and handed over to the shared renderer once a
+  filter appeared. The plain archive therefore had no result count, no sort
+  control and a thinner empty state than the filtered one, and a bug in either
+  path was invisible from the other. Both now go through the shared renderer.
+- The job list in the admin registered ten columns before the title column had
+  anywhere to go. The rarely scanned ones now start hidden, and Screen Options
+  brings any of them back.
 
 - A sync run abandoned by a killed process no longer blocks every later sync.
   The lock already expired on its own, but the run row kept saying "running"

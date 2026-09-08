@@ -226,6 +226,31 @@ add_filter( 'jszr_structured_data', function ( $schema, $post ) {
 add_filter( 'jszr_seo_plugin_handles_schema', '__return_false' );
 ```
 
+### Careers hero
+
+```php
+apply_filters( 'jszr_hero_eyebrow', string $eyebrow );
+apply_filters( 'jszr_hero_title',   string $title );
+apply_filters( 'jszr_hero_lead',    string $lead );
+```
+
+The hero sits above the job archive. Return an empty string from
+`jszr_hero_title` to remove it altogether.
+
+```php
+// Say something of your own.
+add_filter( 'jszr_hero_title', function () {
+	return 'Come and build a university with us';
+} );
+
+add_filter( 'jszr_hero_lead', function () {
+	return 'We are hiring across research, teaching and operations.';
+} );
+
+// Or drop the hero and use the theme's own header instead.
+add_filter( 'jszr_hero_title', '__return_empty_string' );
+```
+
 ### Layouts and custom markup
 
 ```php

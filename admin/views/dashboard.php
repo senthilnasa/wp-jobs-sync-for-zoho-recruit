@@ -9,6 +9,7 @@
  * @var array                                  $counts     Job counts by status.
  * @var \JobsSyncForZohoRecruit\Zoho_Auth      $auth       OAuth handler.
  * @var array                                  $runs       Recent sync runs.
+ * @var \WP_Post[]                              $recent     Recently changed jobs.
  */
 
 namespace JobsSyncForZohoRecruit;
@@ -20,6 +21,51 @@ $jszr_active_run  = isset( $state['active'] ) ? $state['active'] : null;
 ?>
 <div class="wrap jszr-wrap">
 	<h1><?php esc_html_e( 'Zoho Recruit Jobs', 'jobs-sync-for-zoho-recruit' ); ?></h1>
+
+	<?php
+	/*
+	 * The four numbers someone opening this screen actually wants: how many
+	 * roles are live, how many are waiting, how many have lapsed, and how big
+	 * the whole set is. Each tile links into the job list already filtered.
+	 */
+	$jszr_tiles = array(
+		array(
+			'label' => __( 'Active jobs', 'jobs-sync-for-zoho-recruit' ),
+			'value' => isset( $counts['active'] ) ? (int) $counts['active'] : 0,
+			'tone'  => 'active',
+			'args'  => array( 'jszr_status' => 'active' ),
+		),
+		array(
+			'label' => __( 'Draft jobs', 'jobs-sync-for-zoho-recruit' ),
+			'value' => isset( $counts['draft'] ) ? (int) $counts['draft'] : 0,
+			'tone'  => 'draft',
+			'args'  => array( 'post_status' => 'draft' ),
+		),
+		array(
+			'label' => __( 'Expired jobs', 'jobs-sync-for-zoho-recruit' ),
+			'value' => isset( $counts['expired'] ) ? (int) $counts['expired'] : 0,
+			'tone'  => 'expired',
+			'args'  => array( 'jszr_status' => 'expired' ),
+		),
+		array(
+			'label' => __( 'Total jobs', 'jobs-sync-for-zoho-recruit' ),
+			'value' => isset( $counts['total'] ) ? (int) $counts['total'] : array_sum( array_map( 'intval', (array) $counts ) ),
+			'tone'  => 'total',
+			'args'  => array(),
+		),
+	);
+	?>
+
+	<ul class="jszr-stats">
+		<?php foreach ( $jszr_tiles as $jszr_tile ) : ?>
+			<li class="jszr-stat jszr-stat--<?php echo esc_attr( $jszr_tile['tone'] ); ?>">
+				<a href="<?php echo esc_url( add_query_arg( $jszr_tile['args'], admin_url( 'edit.php?post_type=' . Post_Type::POST_TYPE ) ) ); ?>">
+					<span class="jszr-stat__value"><?php echo esc_html( number_format_i18n( $jszr_tile['value'] ) ); ?></span>
+					<span class="jszr-stat__label"><?php echo esc_html( $jszr_tile['label'] ); ?></span>
+				</a>
+			</li>
+		<?php endforeach; ?>
+	</ul>
 
 	<div class="jszr-cards">
 		<div class="jszr-card">
@@ -253,4 +299,74 @@ $jszr_active_run  = isset( $state['active'] ) ? $state['active'] : null;
 			<?php esc_html_e( 'View full sync log', 'jobs-sync-for-zoho-recruit' ); ?>
 		</a>
 	</p>
+
+	<h2><?php esc_html_e( 'Recent jobs', 'jobs-sync-for-zoho-recruit' ); ?></h2>
+
+	<?php if ( empty( $recent ) ) : ?>
+		<div class="jszr-empty">
+			<p><strong><?php esc_html_e( 'No jobs yet', 'jobs-sync-for-zoho-recruit' ); ?></strong></p>
+			<p>
+				<?php esc_html_e( 'Once a sync has run, the job openings from Zoho Recruit appear here.', 'jobs-sync-for-zoho-recruit' ); ?>
+			</p>
+		</div>
+	<?php else : ?>
+		<div class="jszr-table-scroll">
+			<table class="widefat striped jszr-recent-jobs">
+				<thead>
+					<tr>
+						<th scope="col"><?php esc_html_e( 'Job title', 'jobs-sync-for-zoho-recruit' ); ?></th>
+						<th scope="col"><?php esc_html_e( 'Status', 'jobs-sync-for-zoho-recruit' ); ?></th>
+						<th scope="col"><?php esc_html_e( 'Location', 'jobs-sync-for-zoho-recruit' ); ?></th>
+						<th scope="col"><?php esc_html_e( 'Updated', 'jobs-sync-for-zoho-recruit' ); ?></th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php foreach ( $recent as $jszr_job ) : ?>
+						<?php
+						$jszr_status = Job::is_manual( $jszr_job->ID ) ? 'manual' : Job::get_status( $jszr_job->ID );
+						$jszr_terms  = get_the_terms( $jszr_job->ID, 'zoho_job_location' );
+						$jszr_where  = is_array( $jszr_terms ) ? implode( ', ', wp_list_pluck( $jszr_terms, 'name' ) ) : '';
+						$jszr_edited = get_post_modified_time( 'U', true, $jszr_job );
+						?>
+						<tr>
+							<td data-label="<?php esc_attr_e( 'Job title', 'jobs-sync-for-zoho-recruit' ); ?>">
+								<a href="<?php echo esc_url( (string) get_edit_post_link( $jszr_job->ID ) ); ?>">
+									<?php echo esc_html( get_the_title( $jszr_job->ID ) ); ?>
+								</a>
+							</td>
+							<td data-label="<?php esc_attr_e( 'Status', 'jobs-sync-for-zoho-recruit' ); ?>">
+								<span class="jszr-badge jszr-badge-<?php echo esc_attr( $jszr_status ); ?>">
+									<?php
+									echo esc_html(
+										'manual' === $jszr_status
+											? __( 'Manual', 'jobs-sync-for-zoho-recruit' )
+											: Admin::status_label( $jszr_status )
+									);
+									?>
+								</span>
+							</td>
+							<td data-label="<?php esc_attr_e( 'Location', 'jobs-sync-for-zoho-recruit' ); ?>">
+								<?php echo '' !== $jszr_where ? esc_html( $jszr_where ) : '&mdash;'; ?>
+							</td>
+							<td data-label="<?php esc_attr_e( 'Updated', 'jobs-sync-for-zoho-recruit' ); ?>">
+								<?php
+								printf(
+									/* translators: %s: human readable time difference. */
+									esc_html__( '%s ago', 'jobs-sync-for-zoho-recruit' ),
+									esc_html( human_time_diff( $jszr_edited, time() ) )
+								);
+								?>
+							</td>
+						</tr>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
+		</div>
+
+		<p>
+			<a href="<?php echo esc_url( admin_url( 'edit.php?post_type=' . Post_Type::POST_TYPE ) ); ?>">
+				<?php esc_html_e( 'View all jobs', 'jobs-sync-for-zoho-recruit' ); ?>
+			</a>
+		</p>
+	<?php endif; ?>
 </div>

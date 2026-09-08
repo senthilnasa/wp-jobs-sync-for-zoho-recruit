@@ -1,44 +1,364 @@
 /**
  * Frontend styles for Jobs Sync for Zoho Recruit.
  *
- * Deliberately minimal: colours and fonts are inherited from the theme so the
- * listing looks native wherever it is used. Every selector is prefixed.
+ * The design system lives in custom properties on .jszr-scope, so a site can
+ * restyle the whole listing by setting a handful of values in Settings →
+ * Display → Custom CSS without touching a selector:
+ *
+ *     .jszr-scope { --jszr-accent: #7a1f2b; --jszr-radius-lg: 4px; }
+ *
+ * Neutral colours are mixed from currentcolor rather than hard-coded, and
+ * never keyed off prefers-color-scheme. A theme is not obliged to follow the
+ * operating system preference, and keying off it painted white text and white
+ * borders onto light themes for anyone with dark mode enabled. currentcolor
+ * always matches the theme actually in front of the visitor.
  */
 
-.jszr-jobs {
-	--jszr-gap: 1.25rem;
-	--jszr-radius: 6px;
-	--jszr-columns: 3;
+/* Tokens ----------------------------------------------------------------- */
 
-	/*
-	 * Borders are derived from the inherited text colour rather than from the
-	 * visitor's operating system preference. A theme is not obliged to follow
-	 * prefers-color-scheme, so keying off it painted white borders and white
-	 * secondary text onto light themes for anyone with dark mode enabled.
-	 * currentcolor always matches the theme actually in front of the visitor.
-	 */
-	--jszr-border-color: rgba(128, 128, 128, 0.35);
+.jszr-scope {
+	--jszr-accent: #1d4ed8;
+	--jszr-accent-contrast: #fff;
+	--jszr-accent-soft: rgba(29, 78, 216, 0.08);
+
+	--jszr-space-1: 0.25rem;
+	--jszr-space-2: 0.5rem;
+	--jszr-space-3: 0.75rem;
+	--jszr-space-4: 1rem;
+	--jszr-space-5: 1.5rem;
+	--jszr-space-6: 2rem;
+	--jszr-space-7: 3rem;
+
+	--jszr-radius-sm: 4px;
+	--jszr-radius: 8px;
+	--jszr-radius-lg: 14px;
+	--jszr-radius-pill: 999px;
+
+	--jszr-text-xs: 0.75rem;
+	--jszr-text-sm: 0.8125rem;
+	--jszr-text-base: 1rem;
+	--jszr-text-lg: 1.125rem;
+	--jszr-text-xl: 1.375rem;
+	--jszr-text-display: clamp(1.9rem, 1.2rem + 2.6vw, 3.1rem);
+
+	/* Neutrals derived from the theme's own text colour. */
+	--jszr-border-color: rgba(128, 128, 128, 0.28);
 	--jszr-border: 1px solid var(--jszr-border-color);
+	--jszr-surface: rgba(128, 128, 128, 0.04);
+	--jszr-surface-strong: rgba(128, 128, 128, 0.08);
+	--jszr-muted: inherit;
+
+	--jszr-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.06);
+	--jszr-shadow-lifted: 0 6px 16px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+
+	--jszr-ok: #157347;
+	--jszr-warn: #a15c07;
+	--jszr-error: #b32d2e;
+
+	--jszr-gap: var(--jszr-space-5);
+	--jszr-columns: 3;
+	--jszr-measure: 68ch;
 }
 
 @supports (color: color-mix(in srgb, currentcolor 20%, transparent)) {
 
-	.jszr-jobs {
-		--jszr-border-color: color-mix(in srgb, currentcolor 24%, transparent);
+	.jszr-scope {
+		--jszr-border-color: color-mix(in srgb, currentcolor 20%, transparent);
+		--jszr-surface: color-mix(in srgb, currentcolor 3%, transparent);
+		--jszr-surface-strong: color-mix(in srgb, currentcolor 7%, transparent);
+		--jszr-accent-soft: color-mix(in srgb, var(--jszr-accent) 10%, transparent);
 	}
 }
 
+/*
+ * Nothing inside the listing may push the page sideways. Long job titles, job
+ * codes, URLs and pasted Zoho markup all end up here.
+ */
+.jszr-scope,
+.jszr-scope *,
+.jszr-scope *::before,
+.jszr-scope *::after {
+	box-sizing: border-box;
+	max-width: 100%;
+}
+
+.jszr-scope :where(p, h1, h2, h3, h4, li, td, th, dd, dt, a, span) {
+	overflow-wrap: anywhere;
+}
+
 /* Secondary text: the theme's colour, stepped back. */
+.jszr-muted,
 .jszr-jobs__count,
-.jszr-job-card__meta,
-.jszr-job-card__remote,
+.jszr-job-card__code,
+.jszr-facts__label,
 .jszr-job-card__closing,
-.jszr-no-results {
-	color: inherit;
+.jszr-state__body {
+	color: var(--jszr-muted);
 	opacity: 0.72;
 }
 
-.jszr-jobs__list {
+/* Focus: never removed, always visible on any background. */
+.jszr-scope :where(a, button, input, select, textarea, summary):focus-visible {
+	outline: 2px solid var(--jszr-accent);
+	outline-offset: 2px;
+	border-radius: var(--jszr-radius-sm);
+}
+
+/* Hero ------------------------------------------------------------------- */
+
+.jszr-hero {
+	position: relative;
+	padding: var(--jszr-space-7) var(--jszr-space-5);
+	margin-bottom: var(--jszr-space-6);
+	border: var(--jszr-border);
+	border-radius: var(--jszr-radius-lg);
+	background: var(--jszr-surface);
+	overflow: hidden;
+}
+
+/* A single restrained flourish, not a gradient wash. */
+.jszr-hero::after {
+	content: "";
+	position: absolute;
+	inset-block-start: -40%;
+	inset-inline-end: -10%;
+	inline-size: 28rem;
+	block-size: 28rem;
+	border-radius: 50%;
+	background: var(--jszr-accent-soft);
+	pointer-events: none;
+}
+
+.jszr-hero__inner {
+	position: relative;
+	z-index: 1;
+	max-width: var(--jszr-measure);
+}
+
+.jszr-hero__eyebrow {
+	margin: 0 0 var(--jszr-space-3);
+	font-size: var(--jszr-text-sm);
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--jszr-accent);
+}
+
+.jszr-hero__title {
+	margin: 0 0 var(--jszr-space-4);
+	font-size: var(--jszr-text-display);
+	line-height: 1.08;
+	letter-spacing: -0.02em;
+	text-wrap: balance;
+}
+
+.jszr-hero__lead {
+	margin: 0;
+	font-size: var(--jszr-text-lg);
+	line-height: 1.6;
+	opacity: 0.8;
+}
+
+.jszr-scope .jszr-hero__stats {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--jszr-space-5);
+	margin: var(--jszr-space-5) 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+.jszr-scope .jszr-hero__stat {
+	margin: 0;
+}
+
+.jszr-hero__stat-value {
+	display: block;
+	font-size: var(--jszr-text-xl);
+	font-weight: 700;
+	line-height: 1.2;
+}
+
+.jszr-hero__stat-label {
+	display: block;
+	font-size: var(--jszr-text-sm);
+	opacity: 0.72;
+}
+
+/* Filters ---------------------------------------------------------------- */
+
+.jszr-filters {
+	display: grid;
+	gap: var(--jszr-space-3);
+	margin-bottom: var(--jszr-space-5);
+	padding: var(--jszr-space-4);
+	border: var(--jszr-border);
+	border-radius: var(--jszr-radius);
+	background: var(--jszr-surface);
+}
+
+.jszr-filters__search {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: var(--jszr-space-1);
+	margin: 0;
+	min-width: 0;
+}
+
+.jszr-filters__row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: var(--jszr-space-3);
+}
+
+.jszr-filters__field {
+	display: flex;
+	flex-direction: column;
+	gap: var(--jszr-space-1);
+	margin: 0;
+
+	/* min-width:0 is what stops a long option label widening the whole row. */
+	min-width: 0;
+	flex: 1 1 11rem;
+}
+
+.jszr-filters__field label,
+.jszr-filters__search label {
+	font-size: var(--jszr-text-sm);
+	font-weight: 600;
+	letter-spacing: 0.01em;
+}
+
+.jszr-scope .jszr-filters__field select,
+.jszr-scope .jszr-filters__field input,
+.jszr-scope .jszr-filters__search input {
+	width: 100%;
+	max-width: 100%;
+	min-width: 0;
+	min-height: 2.75rem;
+	padding: var(--jszr-space-2) var(--jszr-space-3);
+	border: var(--jszr-border);
+	border-radius: var(--jszr-radius-sm);
+	background: transparent;
+	color: inherit;
+	font: inherit;
+	font-size: var(--jszr-text-base);
+}
+
+.jszr-scope .jszr-filters__search input {
+	padding-inline-start: 2.75rem;
+}
+
+.jszr-filters__search-icon {
+	position: absolute;
+	inset-block-end: 0.78rem;
+	inset-inline-start: var(--jszr-space-3);
+	inline-size: 1.15rem;
+	block-size: 1.15rem;
+	opacity: 0.5;
+	pointer-events: none;
+}
+
+.jszr-filters__actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--jszr-space-3);
+	margin: 0;
+}
+
+/* Buttons ---------------------------------------------------------------- */
+
+/*
+ * The colours carry !important, which is not a habit but is necessary here.
+ * Themes style buttons with selectors like
+ * `button:not(:hover):not(:active):not(.has-background)` -- specificity (0,3,1)
+ * -- which outranks any class chain a plugin can reasonably write, and a theme
+ * repainting the primary call to action is exactly the drift this design system
+ * exists to prevent. Only the colours are forced, and they are forced to
+ * variables, so setting --jszr-accent still restyles every button on the page.
+ */
+.jszr-scope .jszr-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--jszr-space-2);
+
+	/* 44px: a comfortable touch target. */
+	min-height: 2.75rem;
+	padding: var(--jszr-space-2) var(--jszr-space-5);
+	border: 1px solid transparent;
+	border-radius: var(--jszr-radius-sm);
+	background: var(--jszr-accent) !important;
+	color: var(--jszr-accent-contrast) !important;
+	font: inherit;
+	font-weight: 600;
+	line-height: 1.2;
+	text-decoration: none;
+	cursor: pointer;
+	transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
+}
+
+.jszr-scope .jszr-button:hover {
+	box-shadow: var(--jszr-shadow-lifted);
+	transform: translateY(-1px);
+	color: var(--jszr-accent-contrast) !important;
+}
+
+.jszr-scope .jszr-button--secondary {
+	background: transparent !important;
+	border-color: var(--jszr-border-color);
+	color: inherit !important;
+}
+
+.jszr-scope .jszr-button--secondary:hover {
+	background: var(--jszr-surface-strong) !important;
+	color: inherit !important;
+}
+
+.jszr-scope .jszr-button--ghost {
+	background: transparent !important;
+	border-color: transparent;
+	color: inherit !important;
+	padding-inline: var(--jszr-space-3);
+	text-decoration: underline;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	.jszr-scope .jszr-button,
+	.jszr-job-card {
+		transition: none;
+	}
+
+	.jszr-scope .jszr-button:hover,
+	.jszr-job-card:hover {
+		transform: none;
+	}
+}
+
+/* Listing ---------------------------------------------------------------- */
+
+.jszr-jobs__toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: var(--jszr-space-3);
+	margin-bottom: var(--jszr-space-4);
+}
+
+.jszr-jobs__count {
+	margin: 0;
+	font-size: var(--jszr-text-sm);
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+}
+
+.jszr-scope .jszr-jobs__list {
 	list-style: none;
 	margin: 0;
 	padding: 0;
@@ -46,300 +366,579 @@
 	gap: var(--jszr-gap);
 }
 
-.jszr-jobs--grid .jszr-jobs__list {
-	grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+.jszr-scope.jszr-jobs--grid .jszr-jobs__list {
+	grid-template-columns: repeat(auto-fill, minmax(min(19rem, 100%), 1fr));
 }
 
-.jszr-jobs__item {
+.jszr-scope .jszr-jobs__item {
 	margin: 0;
+	min-width: 0;
 }
 
-.jszr-jobs__count {
-	margin: 0 0 var(--jszr-gap);
-	font-size: 0.9em;
-}
+/* Job card --------------------------------------------------------------- */
 
 .jszr-job-card {
-	border: var(--jszr-border);
-	border-radius: var(--jszr-radius);
-	padding: 1.25rem;
-	height: 100%;
+	position: relative;
 	display: flex;
 	flex-direction: column;
-	gap: 0.5rem;
+	gap: var(--jszr-space-3);
+	height: 100%;
+	min-width: 0;
+	padding: var(--jszr-space-5);
+	border: var(--jszr-border);
+	border-radius: var(--jszr-radius);
+	background: var(--jszr-surface);
+	box-shadow: var(--jszr-shadow);
+	transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
+}
+
+.jszr-job-card:hover {
+	transform: translateY(-2px);
+	border-color: var(--jszr-accent);
+	box-shadow: var(--jszr-shadow-lifted);
+}
+
+/* The whole card is clickable, but the link stays the accessible name. */
+.jszr-job-card__title a::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
 }
 
 .jszr-job-card__title {
 	margin: 0;
-	font-size: 1.15em;
+	font-size: var(--jszr-text-lg);
+	font-weight: 700;
 	line-height: 1.3;
+	letter-spacing: -0.01em;
 }
 
-.jszr-job-card__title a {
+.jszr-scope .jszr-job-card__title a {
+	color: inherit;
 	text-decoration: none;
 }
 
-.jszr-job-card__title a:hover,
-.jszr-job-card__title a:focus {
-	text-decoration: underline;
+.jszr-scope .jszr-job-card__title a:hover {
+	color: var(--jszr-accent);
 }
 
-.jszr-job-card__meta,
-.jszr-job-card__remote,
-.jszr-job-card__closing {
+.jszr-job-card__code {
 	margin: 0;
-	font-size: 0.9em;
+	font-size: var(--jszr-text-xs);
+	font-weight: 600;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
 }
 
 .jszr-job-card__excerpt {
 	margin: 0;
+	font-size: var(--jszr-text-sm);
+	line-height: 1.6;
+	opacity: 0.82;
 }
 
 .jszr-job-card__footer {
-	margin: auto 0 0;
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
 	justify-content: space-between;
-	gap: 0.5rem;
-	padding-top: 0.5rem;
+	gap: var(--jszr-space-2);
+	margin: auto 0 0;
+	padding-top: var(--jszr-space-3);
+	border-top: var(--jszr-border);
 }
 
-.jszr-job-card__link {
-	font-weight: 600;
+.jszr-scope .jszr-job-card__link {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--jszr-space-1);
+	font-size: var(--jszr-text-sm);
+	font-weight: 700;
+	color: var(--jszr-accent);
+	text-decoration: none;
 }
 
-/* Filters ---------------------------------------------------------------- */
+.jszr-scope .jszr-job-card__link:hover {
+	text-decoration: underline;
+}
 
-.jszr-filters {
+.jszr-job-card__closing {
+	font-size: var(--jszr-text-xs);
+}
+
+/* Fact chips ------------------------------------------------------------- */
+
+.jszr-scope .jszr-facts {
 	display: flex;
 	flex-wrap: wrap;
-	align-items: flex-end;
-	gap: 0.75rem;
-	margin-bottom: var(--jszr-gap, 1.25rem);
+	gap: var(--jszr-space-2);
+	margin: 0;
+	padding: 0;
+	list-style: none;
 }
 
-.jszr-filters__field {
+.jszr-scope .jszr-facts__item {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--jszr-space-1);
+	max-width: 100%;
+	min-width: 0;
+	margin: 0;
+	padding: 0.25rem 0.6rem;
+	border: var(--jszr-border);
+	border-radius: var(--jszr-radius-pill);
+	background: var(--jszr-surface-strong);
+	font-size: var(--jszr-text-xs);
+	line-height: 1.5;
+}
+
+.jszr-facts__icon {
+	flex: none;
+	inline-size: 0.9rem;
+	block-size: 0.9rem;
+	opacity: 0.6;
+}
+
+.jszr-facts__text {
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+
+/* Badges ----------------------------------------------------------------- */
+
+.jszr-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--jszr-space-1);
+	padding: 0.15rem 0.55rem;
+	border: 1px solid currentcolor;
+	border-radius: var(--jszr-radius-pill);
+	font-size: var(--jszr-text-xs);
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	white-space: nowrap;
+}
+
+/* A dot as well as a colour, so status never depends on colour alone. */
+.jszr-badge::before {
+	content: "";
+	inline-size: 0.4rem;
+	block-size: 0.4rem;
+	border-radius: 50%;
+	background: currentcolor;
+}
+
+.jszr-badge--remote {
+	color: var(--jszr-ok);
+}
+
+.jszr-badge--closing {
+	color: var(--jszr-warn);
+}
+
+.jszr-badge--closed {
+	color: var(--jszr-error);
+}
+
+/* States: loading, empty, error ------------------------------------------ */
+
+.jszr-state {
 	display: flex;
 	flex-direction: column;
-	gap: 0.25rem;
-	margin: 0;
-	min-width: 12rem;
-	flex: 1 1 12rem;
-}
-
-.jszr-filters__field label {
-	font-size: 0.85em;
-	font-weight: 600;
-}
-
-.jszr-filters__field select,
-.jszr-filters__field input {
-	width: 100%;
-}
-
-.jszr-filters__actions {
-	display: flex;
 	align-items: center;
-	gap: 0.75rem;
+	gap: var(--jszr-space-3);
+	padding: var(--jszr-space-7) var(--jszr-space-5);
+	border: 1px dashed var(--jszr-border-color);
+	border-radius: var(--jszr-radius);
+	background: var(--jszr-surface);
+	text-align: center;
+}
+
+.jszr-state__icon {
+	inline-size: 2.5rem;
+	block-size: 2.5rem;
+	opacity: 0.45;
+}
+
+.jszr-state__title {
 	margin: 0;
+	font-size: var(--jszr-text-xl);
+	font-weight: 700;
+	line-height: 1.3;
+}
+
+.jszr-state__body {
+	margin: 0;
+	max-width: 46ch;
+	line-height: 1.6;
+}
+
+.jszr-state--error {
+	border-style: solid;
+	border-color: var(--jszr-error);
+}
+
+.jszr-state--error .jszr-state__icon {
+	color: var(--jszr-error);
+	opacity: 0.8;
+}
+
+/* Skeletons: shown only while a request is in flight. */
+.jszr-skeleton__card {
+	display: flex;
+	flex-direction: column;
+	gap: var(--jszr-space-3);
+	padding: var(--jszr-space-5);
+	border: var(--jszr-border);
+	border-radius: var(--jszr-radius);
+	background: var(--jszr-surface);
+}
+
+.jszr-skeleton__line {
+	block-size: 0.75rem;
+	border-radius: var(--jszr-radius-pill);
+	background: var(--jszr-surface-strong);
+	animation: jszr-pulse 1.4s ease-in-out infinite;
+}
+
+.jszr-skeleton__line--title {
+	block-size: 1.15rem;
+	inline-size: 70%;
+}
+
+.jszr-skeleton__line--short {
+	inline-size: 40%;
+}
+
+.jszr-skeleton__line--medium {
+	inline-size: 85%;
+}
+
+@keyframes jszr-pulse {
+
+	0%,
+	100% {
+		opacity: 1;
+	}
+
+	50% {
+		opacity: 0.45;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	.jszr-skeleton__line {
+		animation: none;
+	}
 }
 
 /* Pagination ------------------------------------------------------------- */
 
 .jszr-pagination {
-	margin-top: 1.5rem;
+	margin-top: var(--jszr-space-6);
 }
 
-.jszr-pagination__list {
+.jszr-scope .jszr-pagination__list {
 	list-style: none;
 	display: flex;
 	flex-wrap: wrap;
-	gap: 0.4rem;
+	gap: var(--jszr-space-1);
 	margin: 0;
 	padding: 0;
 }
 
-.jszr-pagination__item .page-numbers {
-	display: inline-block;
-	padding: 0.35rem 0.7rem;
-	border: 1px solid rgba(0, 0, 0, 0.15);
-	border-radius: 4px;
+.jszr-scope .jszr-pagination__item .page-numbers {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-inline-size: 2.5rem;
+	min-block-size: 2.5rem;
+	padding: 0 var(--jszr-space-3);
+	border: var(--jszr-border);
+	border-radius: var(--jszr-radius-sm);
 	text-decoration: none;
 }
 
-.jszr-pagination__item .page-numbers.current {
+.jszr-scope .jszr-pagination__item .page-numbers:hover {
+	background: var(--jszr-surface-strong);
+}
+
+.jszr-scope .jszr-pagination__item .page-numbers.current {
+	background: var(--jszr-accent);
+	border-color: var(--jszr-accent);
+	color: var(--jszr-accent-contrast);
 	font-weight: 700;
+}
+
+.jszr-scope .jszr-jobs__results[aria-busy="true"] .jszr-jobs__list,
+.jszr-scope .jszr-jobs__results[aria-busy="true"] .jszr-pagination {
+	display: none;
 }
 
 /* Single job ------------------------------------------------------------- */
 
-.jszr-job-meta {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 1rem 2rem;
-	margin: 1rem 0 1.5rem;
+.jszr-scope .jszr-job__back {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--jszr-space-1);
+	margin-bottom: var(--jszr-space-4);
+	font-size: var(--jszr-text-sm);
+	font-weight: 600;
+	text-decoration: none;
+	color: inherit;
+	opacity: 0.75;
 }
 
-.jszr-job-meta__item {
-	margin: 0;
+.jszr-scope .jszr-job__back:hover {
+	opacity: 1;
+	color: var(--jszr-accent);
 }
 
-.jszr-job-meta__label {
-	margin: 0;
-	font-size: 0.8em;
+.jszr-job__header {
+	padding-bottom: var(--jszr-space-5);
+	margin-bottom: var(--jszr-space-5);
+	border-bottom: var(--jszr-border);
+}
+
+.jszr-job__title {
+	margin: 0 0 var(--jszr-space-2);
+	font-size: clamp(1.7rem, 1.2rem + 1.8vw, 2.5rem);
+	line-height: 1.15;
+	letter-spacing: -0.02em;
+	text-wrap: balance;
+}
+
+.jszr-job__code {
+	margin: 0 0 var(--jszr-space-4);
+	font-size: var(--jszr-text-sm);
+	font-weight: 600;
+	letter-spacing: 0.05em;
 	text-transform: uppercase;
-	letter-spacing: 0.03em;
 	opacity: 0.7;
 }
 
-.jszr-job-meta__value {
+.jszr-job__layout {
+	display: grid;
+	gap: var(--jszr-space-6);
+	align-items: start;
+}
+
+@media (min-width: 60rem) {
+
+	.jszr-job__layout {
+		grid-template-columns: minmax(0, 1fr) 19rem;
+	}
+
+	.jszr-job__aside {
+		position: sticky;
+		top: var(--jszr-space-5);
+	}
+}
+
+.jszr-job__body {
+	min-width: 0;
+	max-width: var(--jszr-measure);
+	line-height: 1.7;
+}
+
+.jszr-job__body :where(h2, h3, h4) {
+	margin-top: var(--jszr-space-6);
+	margin-bottom: var(--jszr-space-3);
+	line-height: 1.3;
+}
+
+.jszr-job__body :where(ul, ol) {
+	padding-inline-start: 1.25rem;
+}
+
+.jszr-job__body li + li {
+	margin-top: var(--jszr-space-2);
+}
+
+/* Zoho descriptions arrive with tables and pasted images in them. */
+.jszr-job__body :where(img, video, iframe) {
+	max-width: 100%;
+	height: auto;
+}
+
+.jszr-job__body table {
+	display: block;
+	max-width: 100%;
+	overflow-x: auto;
+}
+
+.jszr-job__body pre {
+	max-width: 100%;
+	overflow-x: auto;
+}
+
+/* Apply panel ------------------------------------------------------------ */
+
+.jszr-job__panel {
+	padding: var(--jszr-space-5);
+	border: var(--jszr-border);
+	border-radius: var(--jszr-radius);
+	background: var(--jszr-surface);
+}
+
+.jszr-job__panel-title {
+	margin: 0 0 var(--jszr-space-4);
+	font-size: var(--jszr-text-base);
+	font-weight: 700;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+	opacity: 0.75;
+}
+
+.jszr-scope .jszr-apply-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--jszr-space-2);
+	width: 100%;
+	min-height: 3rem;
+	padding: var(--jszr-space-3) var(--jszr-space-5);
+	border: 1px solid transparent;
+	border-radius: var(--jszr-radius-sm);
+	background: var(--jszr-accent) !important;
+	color: var(--jszr-accent-contrast) !important;
+	font-weight: 700;
+	text-align: center;
+	text-decoration: none;
+	transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.jszr-scope .jszr-apply-button:hover {
+	transform: translateY(-1px);
+	box-shadow: var(--jszr-shadow-lifted);
+	color: var(--jszr-accent-contrast) !important;
+}
+
+.jszr-apply-note {
+	margin: var(--jszr-space-3) 0 0;
+	font-size: var(--jszr-text-xs);
+	line-height: 1.5;
+	opacity: 0.7;
+}
+
+/* Facts list on the single job. */
+.jszr-scope .jszr-job-meta {
+	display: grid;
+	gap: var(--jszr-space-4);
+	margin: 0;
+}
+
+.jszr-scope .jszr-job-meta__item {
+	margin: 0;
+	min-width: 0;
+}
+
+.jszr-scope .jszr-job-meta__label {
+	margin: 0 0 var(--jszr-space-1);
+	font-size: var(--jszr-text-xs);
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	opacity: 0.6;
+}
+
+.jszr-scope .jszr-job-meta__value {
 	margin: 0;
 	font-weight: 600;
+	overflow-wrap: anywhere;
 }
 
 .jszr-job__closed {
-	border-inline-start: 4px solid #b32d2e;
+	display: flex;
+	gap: var(--jszr-space-3);
+	border-inline-start: 4px solid var(--jszr-error);
 	background: rgba(179, 45, 46, 0.06);
-	padding: 0.85rem 1rem;
-	margin: 0 0 1.5rem;
+	border-radius: var(--jszr-radius-sm);
+	padding: var(--jszr-space-4);
+	margin: 0 0 var(--jszr-space-5);
 }
 
 .jszr-job__closed p {
-	margin: 0 0 0.5rem;
+	margin: 0 0 var(--jszr-space-2);
 }
 
 .jszr-job__closed p:last-child {
 	margin-bottom: 0;
 }
 
-.jszr-apply-button {
-	display: inline-block;
-	padding: 0.7rem 1.4rem;
-	border: 2px solid currentcolor;
-	border-radius: var(--jszr-radius, 6px);
-	background: transparent;
-	color: inherit;
-	text-decoration: none;
-	font-weight: 600;
+/* Archive scaffolding ---------------------------------------------------- */
+
+.jszr-archive {
+	max-width: 76rem;
+	margin-inline: auto;
+	padding: var(--jszr-space-6) var(--jszr-space-4);
 }
 
-.jszr-apply-button:focus-visible,
-.jszr-filters__submit:focus-visible,
-.jszr-job-card__title a:focus-visible {
-	outline: 2px solid currentcolor;
-	outline-offset: 2px;
+.jszr-archive__description {
+	max-width: var(--jszr-measure);
+	margin-bottom: var(--jszr-space-5);
+	opacity: 0.8;
 }
 
-/* Layout presets ---------------------------------------------------------- */
-
-.jszr-tag {
-	display: inline-block;
-	padding: 0.15em 0.6em;
-	margin-inline-end: 0.35em;
-	border: 1px solid currentcolor;
-	border-radius: 999px;
-	font-size: 0.8em;
-	line-height: 1.6;
-	opacity: 0.85;
+/* Screen-reader-only text, in case the theme provides none. */
+.jszr-scope .screen-reader-text {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
 }
 
-.jszr-job-card__badges {
-	margin: 0;
-}
+/* Responsive ------------------------------------------------------------- */
 
-.jszr-job-card__media img {
-	display: block;
-	inline-size: 100%;
-	block-size: auto;
-	border-radius: calc(var(--jszr-radius) - 2px);
-}
+/* Tablet: two columns, which is what fits without squeezing the fact chips. */
+@media (max-width: 64rem) {
 
-/* Compact: one line per job, with the facts subdued. */
-.jszr-job-card--compact {
-	gap: 0.25rem;
-	padding: 0.9rem 1rem;
-}
-
-.jszr-job-card--compact .jszr-job-card__title {
-	font-size: 1.05em;
-}
-
-.jszr-job-card--compact .jszr-job-card__footer {
-	padding-block-start: 0;
-}
-
-/*
- * Columns: aligned columns on wide screens, stacked on narrow ones. This is a
- * grid over list markup rather than a real table, because a job listing is a
- * list of things and screen readers should hear it that way.
- */
-.jszr-jobs--layout-table .jszr-jobs__list {
-	gap: 0;
-}
-
-.jszr-job-card--table {
-	display: grid;
-	gap: 0.25rem 1rem;
-	padding: 0.85rem 1rem;
-	border-radius: 0;
-	border-block-end: none;
-}
-
-.jszr-jobs--layout-table .jszr-jobs__item:last-child .jszr-job-card--table {
-	border-block-end: var(--jszr-border);
-}
-
-.jszr-job-card__col {
-	min-inline-size: 0;
-}
-
-@media (min-width: 48em) {
-
-	.jszr-job-card--table {
-		grid-template-columns: 3fr 2fr 2fr 1.5fr auto;
-		align-items: center;
-	}
-
-	.jszr-job-card--table .jszr-job-card__col:not(.jszr-job-card__title) {
-		font-size: 0.92em;
-		opacity: 0.72;
-	}
-
-	.jszr-job-card__col--action {
-		text-align: end;
+	.jszr-scope.jszr-jobs--grid .jszr-jobs__list {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 }
 
-/* Filters: stacked variant for narrow columns and sidebars. */
-.jszr-filters--stacked {
-	flex-direction: column;
-	align-items: stretch;
-}
+/* Small tablet and below: one column, and the filters stop sharing a row. */
+@media (max-width: 40rem) {
 
-.jszr-filters--stacked .jszr-filters__field {
-	flex: 1 1 auto;
-	min-inline-size: 0;
-}
+	.jszr-hero {
+		padding: var(--jszr-space-6) var(--jszr-space-4);
+	}
 
-.jszr-job-meta--inline {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 0.35rem;
-	margin: 0.75rem 0 1.5rem;
-}
+	.jszr-hero::after {
+		display: none;
+	}
 
-/* Block style variation --------------------------------------------------- */
+	.jszr-scope.jszr-jobs--grid .jszr-jobs__list {
+		grid-template-columns: 1fr;
+	}
 
-.is-style-bordered.wp-block-jobs-sync-for-zoho-recruit-jobs {
-	border: 1px solid rgba(0, 0, 0, 0.12);
-	border-radius: 8px;
-	padding: 1.25rem;
-}
+	.jszr-filters__row {
+		flex-direction: column;
+		align-items: stretch;
+	}
 
-@media (prefers-color-scheme: dark) {
+	.jszr-filters__field {
+		flex: 1 1 auto;
+	}
 
-	.is-style-bordered.wp-block-jobs-sync-for-zoho-recruit-jobs {
-		border-color: rgba(255, 255, 255, 0.18);
+	.jszr-scope .jszr-filters__actions .jszr-button {
+		flex: 1 1 auto;
+	}
+
+	.jszr-archive {
+		padding: var(--jszr-space-5) var(--jszr-space-3);
+	}
+
+	.jszr-job-card {
+		padding: var(--jszr-space-4);
 	}
 }

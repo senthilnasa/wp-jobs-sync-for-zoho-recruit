@@ -154,6 +154,23 @@ anywhere, deliberately.
   `get_header()`, which a block theme has no answer for.
 - **`jszr_verify_admin_request()` is a global function, not a method,** so PHPCS
   and Plugin Check can both see the nonce check at the call site.
+- **A page cache will hide a working sync.** A live site showed an empty
+  archive for weeks while the data, the query and the individual job pages were
+  all correct: Breeze had cached the archive when it was empty and nothing
+  invalidated it. The tell was that filtered URLs worked and the plain archive
+  did not, because query strings bypassed the cache. When a listing looks wrong,
+  compare a request that carries a query string with one that does not before
+  reading any query code.
+- **Never put the listing's keywords in `s`.** Search plugins take over any
+  query that sets it, and one that has not indexed `zoho_job` returns nothing.
+  The listing builds its own WHERE clause instead. `Admin::search_job_code()`
+  still widens core's clause, because the admin list is core's own search and
+  there is no hijacker to work around there.
+- **Themes outrank a single class.** Twenty Twenty-One styles buttons with
+  `button:not(:hover):not(:active):not(.has-background)`, specificity (0,3,1).
+  Frontend components are scoped under `.jszr-scope`, and the accent colours
+  carry `!important` -- pointed at variables, so `--jszr-accent` still restyles
+  everything.
 - **What ships is the `files` allow-list in `package.json`,** consumed by
   `wp-scripts plugin-zip`. There is no `.distignore` any more — one source of
   truth, and a new dev file cannot reach a release by accident.
@@ -202,6 +219,14 @@ anywhere, deliberately.
 - **Scale now covered**: 2,000 records over ten pages, no duplicates, ~83 MB
   peak, one token fetch for the whole run, threshold refusing to deactivate,
   and an interrupted run deactivating nothing.
+- **The redesign**: hero, filter bar, cards, empty state and error state
+  rendered and measured in a browser on both a classic theme (Twenty
+  Twenty-One, which is what the live site's hello-elementor is) and a block
+  theme (Twenty Twenty-Five). No horizontal overflow at 1440, 1024, 900, 768 or
+  375 with a 100-character job title and a 40-character job code present; three
+  columns on desktop, two on tablet, one on mobile. The error state was proven
+  by replacing `window.fetch` with a rejection and watching the retry panel take
+  focus.
 - **Sync Now and the check button**: the diagnostics panel rendered, "Run check"
   ran through `admin-post.php` with its nonce and wrote the report, the download
   came back as `text/plain` with an attachment filename and no credentials in

@@ -21,7 +21,7 @@
 
 defined( 'ABSPATH' ) || exit;
 ?>
-<div class="jszr-jobs jszr-jobs--<?php echo esc_attr( $style ); ?> jszr-jobs--layout-<?php echo esc_attr( isset( $layout ) ? $layout : 'default' ); ?>"
+<div class="jszr-jobs jszr-scope jszr-jobs--<?php echo esc_attr( $style ); ?> jszr-jobs--layout-<?php echo esc_attr( isset( $layout ) ? $layout : 'default' ); ?>"
 	<?php echo 'grid' === $style ? 'style="--jszr-columns:' . esc_attr( (string) $columns ) . '"' : ''; ?>>
 
 	<?php if ( $show_filters || $show_search || ! empty( $show_sort ) ) : ?>
@@ -41,17 +41,40 @@ defined( 'ABSPATH' ) || exit;
 	<div class="jszr-jobs__results" role="region" aria-live="polite"
 		aria-label="<?php esc_attr_e( 'Job results', 'jobs-sync-for-zoho-recruit' ); ?>">
 
-		<p class="jszr-jobs__count">
-			<?php
-			printf(
-				esc_html(
-					/* translators: %s: number of jobs. */
-					_n( '%s job found', '%s jobs found', (int) $query->found_posts, 'jobs-sync-for-zoho-recruit' )
-				),
-				esc_html( number_format_i18n( (int) $query->found_posts ) )
-			);
-			?>
-		</p>
+		<div class="jszr-jobs__toolbar">
+			<p class="jszr-jobs__count">
+				<?php
+				printf(
+					esc_html(
+						/* translators: %s: number of jobs. */
+						_n( '%s job found', '%s jobs found', (int) $query->found_posts, 'jobs-sync-for-zoho-recruit' )
+					),
+					esc_html( number_format_i18n( (int) $query->found_posts ) )
+				);
+				?>
+			</p>
+		</div>
+
+		<?php
+		/*
+		 * Skeletons for the enhanced path. Hidden until the script swaps them
+		 * in, so a visitor without JavaScript never sees an empty placeholder.
+		 */
+		?>
+		<div class="jszr-skeleton" hidden aria-hidden="true">
+			<ul class="jszr-jobs__list">
+				<?php for ( $jszr_i = 0; $jszr_i < 6; $jszr_i++ ) : ?>
+					<li class="jszr-jobs__item">
+						<div class="jszr-skeleton__card">
+							<div class="jszr-skeleton__line jszr-skeleton__line--title"></div>
+							<div class="jszr-skeleton__line jszr-skeleton__line--short"></div>
+							<div class="jszr-skeleton__line jszr-skeleton__line--medium"></div>
+							<div class="jszr-skeleton__line jszr-skeleton__line--short"></div>
+						</div>
+					</li>
+				<?php endfor; ?>
+			</ul>
+		</div>
 
 		<?php if ( $query->have_posts() ) : ?>
 			<ul class="jszr-jobs__list">

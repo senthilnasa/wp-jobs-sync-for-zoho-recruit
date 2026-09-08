@@ -104,14 +104,16 @@ $jszr_current_sort = sprintf(
 	?>
 
 	<?php if ( ! empty( $show_search ) ) : ?>
-		<p class="jszr-filters__field jszr-filters__field--search">
+		<p class="jszr-filters__search">
 			<label for="jszr-search"><?php esc_html_e( 'Search jobs', 'jobs-sync-for-zoho-recruit' ); ?></label>
+			<?php jszr_icon( 'search', 'jszr-filters__search-icon' ); ?>
 			<input type="search" id="jszr-search" name="jszr_search"
 				value="<?php echo esc_attr( (string) ( $params['search'] ?? '' ) ); ?>"
 				placeholder="<?php echo esc_attr( $jszr_placeholder ); ?>" />
 		</p>
 	<?php endif; ?>
 
+	<div class="jszr-filters__row">
 	<?php if ( ! empty( $show_filters ) ) : ?>
 		<?php foreach ( $jszr_chosen as $jszr_param ) : ?>
 			<?php
@@ -159,7 +161,8 @@ $jszr_current_sort = sprintf(
 	<?php endif; ?>
 
 	<p class="jszr-filters__actions">
-		<button type="submit" class="jszr-filters__submit"><?php echo esc_html( $jszr_button ); ?></button>
-		<a class="jszr-filters__reset" href="<?php echo esc_url( $jszr_action ); ?>"><?php esc_html_e( 'Reset', 'jobs-sync-for-zoho-recruit' ); ?></a>
+		<button type="submit" class="jszr-button jszr-filters__submit"><?php echo esc_html( $jszr_button ); ?></button>
+		<a class="jszr-button jszr-button--ghost jszr-filters__reset" href="<?php echo esc_url( $jszr_action ); ?>"><?php esc_html_e( 'Reset', 'jobs-sync-for-zoho-recruit' ); ?></a>
 	</p>
+	</div>
 </form>

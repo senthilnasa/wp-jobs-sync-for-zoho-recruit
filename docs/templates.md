@@ -174,13 +174,19 @@ When a classic theme is active and provides no `archive-zoho_job.php` or
 | Template | Renders |
 | --- | --- |
 | `archive.php` | The archive and taxonomy archives |
+| `hero.php` | The careers hero above the archive |
 | `single.php` | One job |
 | `listing.php` | The listing wrapper — count, list or grid, pagination |
 | `card.php` | One job in a listing |
 | `filters.php` | The filter and search form |
 | `pagination.php` | Pagination links |
-| `no-results.php` | The empty state |
+| `no-results.php` | The empty state: nothing matched |
+| `error.php` | The error state: the listing could not be loaded |
 | `job-meta.php` | The meta table on a single job |
+
+`no-results.php` and `error.php` are deliberately separate. "There are no jobs"
+and "we could not find out whether there are any jobs" are different things, and
+showing the first when the second is true costs applications.
 
 ### Overriding one
 

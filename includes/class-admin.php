@@ -143,6 +143,8 @@ class Admin {
 		add_filter( 'manage_edit-' . Post_Type::POST_TYPE . '_sortable_columns', array( $this, 'sortable_columns' ) );
 		add_action( 'restrict_manage_posts', array( $this, 'status_filter_dropdown' ) );
 		add_action( 'pre_get_posts', array( $this, 'filter_admin_query' ) );
+		add_filter( 'posts_search', array( $this, 'search_job_code' ), 10, 2 );
+		add_filter( 'default_hidden_columns', array( $this, 'default_hidden_columns' ), 10, 2 );
 		add_filter( 'post_row_actions', array( $this, 'row_actions' ), 10, 2 );
 
 		// Job edit screen.
@@ -331,8 +333,32 @@ class Admin {
 				'counts'     => Job::counts(),
 				'auth'       => $this->auth,
 				'runs'       => Sync_Queue::get_recent( 5 ),
+				'recent'     => $this->recent_jobs(),
 			)
 		);
+	}
+
+	/**
+	 * The jobs changed most recently, for the dashboard table.
+	 *
+	 * @param int $limit How many to return.
+	 * @return \WP_Post[]
+	 */
+	private function recent_jobs( $limit = 8 ) {
+		$query = new \WP_Query(
+			array(
+				'post_type'              => Post_Type::POST_TYPE,
+				'post_status'            => array( 'publish', 'draft', 'pending', 'private' ),
+				'posts_per_page'         => (int) $limit,
+				'orderby'                => 'modified',
+				'order'                  => 'DESC',
+				'no_found_rows'          => true,
+				'ignore_sticky_posts'    => true,
+				'update_post_term_cache' => true,
+			)
+		);
+
+		return $query->posts;
 	}
 
 	/**
@@ -1078,6 +1104,7 @@ class Admin {
 			if ( 'title' === $key ) {
 				$new['jszr_status']  = __( 'Job Status', 'jobs-sync-for-zoho-recruit' );
 				$new['jszr_code']    = __( 'Job Code', 'jobs-sync-for-zoho-recruit' );
+				$new['jszr_source']  = __( 'Source', 'jobs-sync-for-zoho-recruit' );
 				$new['jszr_closing'] = __( 'Closing Date', 'jobs-sync-for-zoho-recruit' );
 				$new['jszr_synced']  = __( 'Last Sync', 'jobs-sync-for-zoho-recruit' );
 			}
@@ -1111,7 +1138,24 @@ class Admin {
 				break;
 
 			case 'jszr_code':
-				echo esc_html( (string) get_post_meta( $post_id, '_jszr_job_code', true ) );
+				$code = (string) get_post_meta( $post_id, '_jszr_job_code', true );
+
+				echo '' !== $code ? '<code>' . esc_html( $code ) . '</code>' : '&mdash;';
+				break;
+
+			case 'jszr_source':
+				if ( Job::is_manual( $post_id ) ) {
+					echo esc_html__( 'Added here', 'jobs-sync-for-zoho-recruit' );
+					break;
+				}
+
+				$zoho_id = (string) get_post_meta( $post_id, Job::META_ZOHO_ID, true );
+
+				echo esc_html__( 'Zoho Recruit', 'jobs-sync-for-zoho-recruit' );
+
+				if ( '' !== $zoho_id ) {
+					echo '<br /><span class="jszr-list-sub">' . esc_html( $zoho_id ) . '</span>';
+				}
 				break;
 
 			case 'jszr_closing':
@@ -1148,6 +1192,35 @@ class Admin {
 				);
 				break;
 		}
+	}
+
+	/**
+	 * Columns that start hidden on the job list.
+	 *
+	 * Five taxonomies and five plugin columns is more than fits before the
+	 * title column collapses to one character per line. Nothing is removed --
+	 * every column is still registered and still sortable -- but the ones an
+	 * administrator rarely scans start switched off, and Screen Options brings
+	 * any of them back.
+	 *
+	 * @param string[]   $hidden Columns hidden by default.
+	 * @param \WP_Screen $screen Current screen.
+	 * @return string[]
+	 */
+	public function default_hidden_columns( $hidden, $screen ) {
+		if ( ! $screen instanceof \WP_Screen || 'edit-' . Post_Type::POST_TYPE !== $screen->id ) {
+			return $hidden;
+		}
+
+		return array_merge(
+			(array) $hidden,
+			array(
+				'taxonomy-zoho_job_category',
+				'taxonomy-zoho_job_experience',
+				'jszr_closing',
+				'date',
+			)
+		);
 	}
 
 	/**
@@ -1218,6 +1291,104 @@ class Admin {
 		}
 
 		echo '</select>';
+
+		// Department and location are how a recruiter actually narrows a list,
+		// so they get dropdowns rather than only clickable column links.
+		foreach ( array( 'zoho_job_department', 'zoho_job_location', 'zoho_job_employment_type' ) as $taxonomy ) {
+			$object = get_taxonomy( $taxonomy );
+
+			if ( ! $object ) {
+				continue;
+			}
+
+			$terms = get_terms(
+				array(
+					'taxonomy'   => $taxonomy,
+					'hide_empty' => true,
+				)
+			);
+
+			if ( is_wp_error( $terms ) || empty( $terms ) ) {
+				continue;
+			}
+
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only list filter.
+			$selected = isset( $_GET[ $taxonomy ] ) ? sanitize_title( wp_unslash( $_GET[ $taxonomy ] ) ) : '';
+
+			printf(
+				'<label class="screen-reader-text" for="%1$s">%2$s</label>',
+				esc_attr( $taxonomy ),
+				esc_html( $object->labels->filter_by_item ?? $object->labels->name )
+			);
+
+			printf( '<select name="%1$s" id="%1$s">', esc_attr( $taxonomy ) );
+
+			printf(
+				'<option value="">%s</option>',
+				esc_html(
+					sprintf(
+						/* translators: %s: taxonomy name, for example Department. */
+						__( 'All %s', 'jobs-sync-for-zoho-recruit' ),
+						strtolower( $object->labels->name )
+					)
+				)
+			);
+
+			foreach ( $terms as $term ) {
+				printf(
+					'<option value="%1$s"%2$s>%3$s</option>',
+					esc_attr( $term->slug ),
+					selected( $selected, $term->slug, false ),
+					esc_html( $term->name )
+				);
+			}
+
+			echo '</select>';
+		}
+	}
+
+	/**
+	 * Let an administrator search the job list by job code.
+	 *
+	 * The admin list is core's own search, so this widens the clause core built
+	 * rather than replacing it. The extra condition is a subquery rather than a
+	 * JOIN, so it cannot collide with a join added somewhere else.
+	 *
+	 * @param string    $search Search clause, including its leading AND.
+	 * @param \WP_Query $query  Query object.
+	 * @return string
+	 */
+	public function search_job_code( $search, $query ) {
+		global $wpdb;
+
+		if ( ! is_admin() || ! $query->is_main_query() ) {
+			return $search;
+		}
+
+		if ( Post_Type::POST_TYPE !== $query->get( 'post_type' ) ) {
+			return $search;
+		}
+
+		$term = trim( (string) $query->get( 's' ) );
+
+		if ( '' === $term || '' === trim( (string) $search ) ) {
+			return $search;
+		}
+
+		$core = preg_replace( '/^\s*AND\s+/i', '', (string) $search );
+
+		if ( ! is_string( $core ) || '' === trim( $core ) ) {
+			return $search;
+		}
+
+		$like = '%' . $wpdb->esc_like( $term ) . '%';
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $core is core-generated SQL; the added condition is prepared.
+		return ' AND ( ' . $core . ' OR ' . $wpdb->prepare(
+			"{$wpdb->posts}.ID IN ( SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = %s AND meta_value LIKE %s )",
+			'_jszr_job_code',
+			$like
+		) . ' ) ';
 	}
 
 	/**

@@ -375,6 +375,19 @@ class Templates {
 		wp_enqueue_style( 'jszr-jobs' );
 		wp_enqueue_script( 'jszr-jobs' );
 
+		// Strings for the states the script has to render itself, because a
+		// failed request cannot come back through a PHP template.
+		wp_localize_script(
+			'jszr-jobs',
+			'jszrJobsL10n',
+			array(
+				'errorTitle' => __( 'Unable to load jobs', 'jobs-sync-for-zoho-recruit' ),
+				'errorBody'  => __( 'We could not load the current job openings. Please try again.', 'jobs-sync-for-zoho-recruit' ),
+				'retry'      => __( 'Retry', 'jobs-sync-for-zoho-recruit' ),
+				'loading'    => __( 'Loading jobs', 'jobs-sync-for-zoho-recruit' ),
+			)
+		);
+
 		// Administrator CSS rides along with the plugin stylesheet, so it loads
 		// only on pages that actually show jobs and always after the defaults.
 		$custom_css = Layouts::custom_css();
