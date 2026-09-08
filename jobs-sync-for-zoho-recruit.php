@@ -28,7 +28,7 @@ const VERSION = '1.0.0';
 /**
  * Data/schema version. Bump only when stored data structures change.
  */
-const DB_VERSION = '1';
+const DB_VERSION = '2';
 
 define( __NAMESPACE__ . '\PLUGIN_FILE', __FILE__ );
 define( __NAMESPACE__ . '\PLUGIN_DIR', plugin_dir_path( __FILE__ ) );

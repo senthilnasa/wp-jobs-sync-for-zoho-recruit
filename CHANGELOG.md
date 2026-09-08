@@ -123,6 +123,18 @@ version onwards.
   two are configured that way on purpose.
 - `uninstall.php` guards its function declarations, so including it twice in one
   process cannot fatal on a redeclaration.
+- Data migrations run on `init` rather than `plugins_loaded`. The upgrade
+  routine flushes rewrite rules, and `$wp_rewrite` does not exist that early, so
+  registering the post type there was a fatal error. The bug had been latent
+  since the routine was written — nothing had ever bumped the data version, so
+  the path never ran. The first bump would have white-screened every site on
+  upgrade. A test now asserts the hook.
+- The job openings OAuth scope is `ZohoRecruit.modules.jobopening.READ`, with
+  the module name singular. Zoho's documentation writes the plural in its
+  worked examples and the singular in its scope-name table on the same page;
+  only the singular is accepted, and the plural fails every connection attempt
+  with "Invalid OAuth Scope / Scope does not exist", naming neither the scope
+  nor the reason. A stored plural value is corrected on upgrade.
 - The requested OAuth permissions are editable on the Connection screen. Zoho
   refuses an authorization request when any single scope is unrecognised for
   that account, and its error does not say which one, so a hard-coded list left

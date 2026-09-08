@@ -113,6 +113,77 @@ class JSZR_Extensibility_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Migrations must not run before init.
+	 *
+	 * Upgrader::run() flushes rewrite rules, and $wp_rewrite does not exist on
+	 * plugins_loaded. Running it there fataled the whole site the first time a
+	 * data version bump actually triggered the upgrade path.
+	 */
+	public function test_upgrade_runs_on_init_not_plugins_loaded() {
+		$plugin = \JobsSyncForZohoRecruit\plugin();
+
+		$this->assertNotFalse(
+			has_action( 'init', array( $plugin, 'maybe_upgrade' ) ),
+			'migrations are hooked to init'
+		);
+
+		$this->assertFalse(
+			has_action( 'plugins_loaded', array( $plugin, 'maybe_upgrade' ) ),
+			'and never to plugins_loaded, where registering a post type is fatal'
+		);
+	}
+
+	/**
+	 * The job openings scope uses Zoho's singular module name.
+	 *
+	 * Zoho's documentation shows the plural in its examples and the singular in
+	 * its scope-name table. Only the singular is accepted, so this is pinned.
+	 */
+	public function test_job_opening_scope_is_singular() {
+		$this->assertSame(
+			'ZohoRecruit.modules.jobopening.READ',
+			\JobsSyncForZohoRecruit\Zoho_Auth::required_scope()
+		);
+
+		$this->assertNotContains(
+			'ZohoRecruit.modules.jobopenings.READ',
+			\JobsSyncForZohoRecruit\Zoho_Auth::default_scopes(),
+			'the plural form Zoho rejects must not come back'
+		);
+	}
+
+	/**
+	 * An upgrade rewrites a stored plural scope, which would never connect.
+	 */
+	public function test_upgrade_corrects_a_stored_plural_scope() {
+		Settings::update(
+			array( 'oauth_scopes' => 'ZohoRecruit.modules.jobopenings.READ,ZohoRecruit.settings.fields.READ' )
+		);
+
+		\JobsSyncForZohoRecruit\Upgrader::run( '1' );
+
+		Settings::flush_cache();
+
+		$this->assertSame(
+			'ZohoRecruit.modules.jobopening.READ,ZohoRecruit.settings.fields.READ',
+			Settings::get( 'oauth_scopes' )
+		);
+	}
+
+	/**
+	 * A site that never customised its scopes is left alone by that upgrade.
+	 */
+	public function test_upgrade_leaves_an_unset_scope_alone() {
+		Settings::update( array( 'oauth_scopes' => '' ) );
+
+		\JobsSyncForZohoRecruit\Upgrader::run( '1' );
+
+		Settings::flush_cache();
+
+		$this->assertSame( '', Settings::get( 'oauth_scopes' ) );
+	}
+
+	/**
 	 * The default scope list starts with the one scope that is required.
 	 */
 	public function test_default_scopes_include_the_required_one() {
@@ -129,11 +200,11 @@ class JSZR_Extensibility_Test extends WP_UnitTestCase {
 	 * changeable without editing code.
 	 */
 	public function test_scopes_can_be_narrowed_from_settings() {
-		Settings::update( array( 'oauth_scopes' => 'ZohoRecruit.modules.jobopenings.READ' ) );
+		Settings::update( array( 'oauth_scopes' => 'ZohoRecruit.modules.jobopening.READ' ) );
 
 		$scopes = \JobsSyncForZohoRecruit\plugin()->auth()->scopes();
 
-		$this->assertSame( array( 'ZohoRecruit.modules.jobopenings.READ' ), $scopes );
+		$this->assertSame( array( 'ZohoRecruit.modules.jobopening.READ' ), $scopes );
 	}
 
 	/**
@@ -153,11 +224,11 @@ class JSZR_Extensibility_Test extends WP_UnitTestCase {
 	 */
 	public function test_malformed_scopes_are_dropped() {
 		$parsed = \JobsSyncForZohoRecruit\Zoho_Auth::parse_scopes(
-			"ZohoRecruit.modules.jobopenings.READ\nnot a scope, <script>, ZohoRecruit.settings.ALL, ZohoRecruit.modules.jobopenings.READ"
+			"ZohoRecruit.modules.jobopening.READ\nnot a scope, <script>, ZohoRecruit.settings.ALL, ZohoRecruit.modules.jobopening.READ"
 		);
 
 		$this->assertSame(
-			array( 'ZohoRecruit.modules.jobopenings.READ', 'ZohoRecruit.settings.ALL' ),
+			array( 'ZohoRecruit.modules.jobopening.READ', 'ZohoRecruit.settings.ALL' ),
 			$parsed,
 			'malformed entries dropped and duplicates collapsed'
 		);
@@ -171,7 +242,7 @@ class JSZR_Extensibility_Test extends WP_UnitTestCase {
 
 		$auth->save_credentials( 'test.client.id', 'test-secret' );
 
-		Settings::update( array( 'oauth_scopes' => 'ZohoRecruit.modules.jobopenings.READ' ) );
+		Settings::update( array( 'oauth_scopes' => 'ZohoRecruit.modules.jobopening.READ' ) );
 
 		$url = $auth->authorization_url();
 
@@ -180,7 +251,7 @@ class JSZR_Extensibility_Test extends WP_UnitTestCase {
 		$query = array();
 		wp_parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
 
-		$this->assertSame( 'ZohoRecruit.modules.jobopenings.READ', $query['scope'] );
+		$this->assertSame( 'ZohoRecruit.modules.jobopening.READ', $query['scope'] );
 		$this->assertSame( 'code', $query['response_type'] );
 		$this->assertSame( 'offline', $query['access_type'] );
 		$this->assertNotEmpty( $query['state'], 'the CSRF state is always present' );

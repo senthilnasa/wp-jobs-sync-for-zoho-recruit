@@ -268,8 +268,16 @@ class Zoho_Auth {
 	 * @return string[]
 	 */
 	public static function default_scopes() {
+		/*
+		 * "jobopening" is singular. Zoho's own OAuth documentation contradicts
+		 * itself here: its worked examples write ZohoRecruit.modules.jobopenings
+		 * (plural), but the table of scope names on the same page lists
+		 * modules.jobopening, and that is the one the authorization server
+		 * accepts. The plural is rejected with "Invalid OAuth Scope / Scope does
+		 * not exist", which names neither the offending scope nor the reason.
+		 */
 		return array(
-			'ZohoRecruit.modules.jobopenings.READ',
+			'ZohoRecruit.modules.jobopening.READ',
 			'ZohoRecruit.settings.fields.READ',
 		);
 	}
@@ -280,7 +288,7 @@ class Zoho_Auth {
 	 * @return string
 	 */
 	public static function required_scope() {
-		return 'ZohoRecruit.modules.jobopenings.READ';
+		return 'ZohoRecruit.modules.jobopening.READ';
 	}
 
 	/**

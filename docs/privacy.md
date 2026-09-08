@@ -38,7 +38,7 @@ Two read-only scopes:
 
 | Scope | Data |
 | --- | --- |
-| `ZohoRecruit.modules.jobopenings.READ` | Job Opening records |
+| `ZohoRecruit.modules.jobopening.READ` | Job Opening records |
 | `ZohoRecruit.settings.fields.READ` | The names, labels and types of Job Opening fields |
 
 The plugin does not request, and cannot exercise, access to Candidates,

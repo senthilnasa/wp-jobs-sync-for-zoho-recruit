@@ -97,7 +97,7 @@ Zoho Recruit API documentation: https://www.zoho.com/recruit/developer-guide/api
 6. Open **Field Mapping**, click **Reload fields from Zoho**, and adjust the mapping if your account uses custom fields.
 7. Return to the dashboard and click **Full Sync**.
 
-The plugin requests the minimum scopes it needs: `ZohoRecruit.modules.jobopenings.READ` and `ZohoRecruit.settings.fields.READ`.
+The plugin requests the minimum scopes it needs: `ZohoRecruit.modules.jobopening.READ` and `ZohoRecruit.settings.fields.READ`.
 
 == Frequently Asked Questions ==
 

@@ -456,8 +456,30 @@ function jszr_run_smoke_test( array $cli_args ) {
 	$jszr_custom = \JobsSyncForZohoRecruit\Shortcode::render( array( 'per_page' => 5 ) );
 
 	$checks[] = jszr_smoke_check( false !== strpos( $jszr_custom, 'jszr-smoke' ), 'custom layout renders' );
-	$checks[] = jszr_smoke_check( false !== strpos( $jszr_custom, 'class="pay"' ), '{if:} keeps a block when the value is set' );
-	$checks[] = jszr_smoke_check( false !== strpos( $jszr_custom, 'Direct' ), '{ifnot:} keeps a block when the value is empty' );
+
+	/*
+	 * The conditionals are asserted against one known job rather than against
+	 * whatever the listing happens to contain. Reading them out of the rendered
+	 * list made the result depend on other jobs on the site: the check passed
+	 * only because a demo job happened to have no client, and broke the moment
+	 * that job was deleted.
+	 */
+	$checks[] = jszr_smoke_check(
+		'kept' === \JobsSyncForZohoRecruit\Template_Tags::render( '{if:client}kept{/if:client}', $first ),
+		'{if:} keeps a block when the value is set'
+	);
+	$checks[] = jszr_smoke_check(
+		'' === \JobsSyncForZohoRecruit\Template_Tags::render( '{ifnot:client}shown{/ifnot:client}', $first ),
+		'{ifnot:} drops a block when the value is set'
+	);
+	$checks[] = jszr_smoke_check(
+		'fallback' === \JobsSyncForZohoRecruit\Template_Tags::render( '{ifnot:source_url}fallback{/ifnot:source_url}', $first ),
+		'{ifnot:} keeps a block when the value is empty'
+	);
+	$checks[] = jszr_smoke_check(
+		'' === \JobsSyncForZohoRecruit\Template_Tags::render( '{if:source_url}shown{/if:source_url}', $first ),
+		'{if:} drops a block when the value is empty'
+	);
 
 	\JobsSyncForZohoRecruit\Settings::update(
 		array(

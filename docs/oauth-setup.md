@@ -89,7 +89,7 @@ The plugin asks for exactly two, both read-only:
 
 | Scope | Why |
 | --- | --- |
-| `ZohoRecruit.modules.jobopenings.READ` | Read job openings — the records it syncs |
+| `ZohoRecruit.modules.jobopening.READ` | Read job openings — the records it syncs |
 | `ZohoRecruit.settings.fields.READ` | Read the Job Opening field list, so the mapping screen can offer your real fields |
 
 It never requests write access, and it never requests access to candidates,

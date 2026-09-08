@@ -94,7 +94,14 @@ class Plugin {
 			CLI::register( $this );
 		}
 
-		add_action( 'plugins_loaded', array( $this, 'maybe_upgrade' ), 20 );
+		/*
+		 * Migrations run on init, not plugins_loaded. They touch the post type
+		 * and the rewrite rules, and $wp_rewrite does not exist until init --
+		 * registering a post type before then is a fatal error. Priority 20 puts
+		 * this after Post_Type::register() at priority 5, and after the point
+		 * where translations may safely be loaded.
+		 */
+		add_action( 'init', array( $this, 'maybe_upgrade' ), 20 );
 		add_action( 'wp_initialize_site', array( __CLASS__, 'on_new_site' ), 100 );
 	}
 

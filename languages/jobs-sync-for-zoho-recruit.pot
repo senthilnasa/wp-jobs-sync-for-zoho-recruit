@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-08T05:05:09+00:00\n"
+"POT-Creation-Date: 2026-09-08T05:17:58+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: jobs-sync-for-zoho-recruit\n"
@@ -1464,7 +1464,7 @@ msgid "Revoke the Zoho Recruit token and delete it from this site?"
 msgstr ""
 
 #: includes/class-cli.php:348
-#: includes/class-zoho-auth.php:704
+#: includes/class-zoho-auth.php:712
 msgid "Disconnected from Zoho Recruit."
 msgstr ""
 
@@ -2505,108 +2505,108 @@ msgstr ""
 msgid "Credentials cannot be stored securely: this site has no usable encryption extension or security salts."
 msgstr ""
 
-#: includes/class-zoho-auth.php:324
+#: includes/class-zoho-auth.php:332
 msgid "Enter your Zoho Client ID and Client Secret before connecting."
 msgstr ""
 
-#: includes/class-zoho-auth.php:359
+#: includes/class-zoho-auth.php:367
 msgid "You do not have permission to connect Zoho Recruit."
 msgstr ""
 
-#: includes/class-zoho-auth.php:384
+#: includes/class-zoho-auth.php:392
 msgid "You do not have permission to complete this connection."
 msgstr ""
 
-#: includes/class-zoho-auth.php:394
-#: includes/class-zoho-auth.php:401
+#: includes/class-zoho-auth.php:402
+#: includes/class-zoho-auth.php:409
 msgid "The connection request could not be verified. Please start the connection again."
 msgstr ""
 
 #. translators: %s: error code returned by Zoho.
-#: includes/class-zoho-auth.php:415
+#: includes/class-zoho-auth.php:423
 #, php-format
 msgid "Zoho refused the connection: %s"
 msgstr ""
 
-#: includes/class-zoho-auth.php:425
+#: includes/class-zoho-auth.php:433
 msgid "Zoho did not return an authorization code."
 msgstr ""
 
-#: includes/class-zoho-auth.php:436
+#: includes/class-zoho-auth.php:444
 msgid "Connected to Zoho Recruit."
 msgstr ""
 
-#: includes/class-zoho-auth.php:463
+#: includes/class-zoho-auth.php:471
 msgid "Zoho did not return a refresh token. Remove this site from your Zoho connected apps and try connecting again."
 msgstr ""
 
-#: includes/class-zoho-auth.php:537
+#: includes/class-zoho-auth.php:545
 msgid "Automatic Zoho requests are paused after repeated authentication failures. Reconnect Zoho Recruit to resume."
 msgstr ""
 
-#: includes/class-zoho-auth.php:544
-#: includes/class-zoho-auth.php:595
+#: includes/class-zoho-auth.php:552
+#: includes/class-zoho-auth.php:603
 msgid "This site is not connected to Zoho Recruit."
 msgstr ""
 
-#: includes/class-zoho-auth.php:551
+#: includes/class-zoho-auth.php:559
 msgid "Stored Zoho credentials can no longer be decrypted because the site security keys changed. Please reconnect Zoho Recruit."
 msgstr ""
 
-#: includes/class-zoho-auth.php:618
+#: includes/class-zoho-auth.php:626
 msgid "Zoho did not return a new access token."
 msgstr ""
 
-#: includes/class-zoho-auth.php:697
+#: includes/class-zoho-auth.php:705
 msgid "You do not have permission to disconnect Zoho Recruit."
 msgstr ""
 
 #. translators: %s: transport error message.
-#: includes/class-zoho-auth.php:831
+#: includes/class-zoho-auth.php:839
 #, php-format
 msgid "Could not reach Zoho: %s"
 msgstr ""
 
-#: includes/class-zoho-auth.php:846
+#: includes/class-zoho-auth.php:854
 msgid "Zoho returned an unreadable response to the token request."
 msgstr ""
 
 #. translators: %d: HTTP status code.
-#: includes/class-zoho-auth.php:863
+#: includes/class-zoho-auth.php:871
 #, php-format
 msgid "Zoho returned HTTP %d for the token request."
 msgstr ""
 
-#: includes/class-zoho-auth.php:880
+#: includes/class-zoho-auth.php:888
 msgid "The Client ID or Client Secret is incorrect for this data center."
 msgstr ""
 
-#: includes/class-zoho-auth.php:881
+#: includes/class-zoho-auth.php:889
 msgid "The authorization code was already used or has expired. Please connect again."
 msgstr ""
 
-#: includes/class-zoho-auth.php:882
+#: includes/class-zoho-auth.php:890
 msgid "Zoho rejected the grant. The refresh token may have been revoked; please reconnect."
 msgstr ""
 
-#: includes/class-zoho-auth.php:883
+#: includes/class-zoho-auth.php:891
 msgid "The redirect URI does not match the one registered in the Zoho API console."
 msgstr ""
 
-#: includes/class-zoho-auth.php:884
+#: includes/class-zoho-auth.php:892
 msgid "Access was denied in the Zoho consent screen."
 msgstr ""
 
-#: includes/class-zoho-auth.php:885
+#: includes/class-zoho-auth.php:893
 msgid "Zoho did not recognise one of the requested permissions, and its error does not say which one. Edit the Permissions field below, remove the field discovery scope, and connect again — syncing jobs does not need it."
 msgstr ""
 
-#: includes/class-zoho-auth.php:886
+#: includes/class-zoho-auth.php:894
 msgid "The stored token is no longer valid. Please reconnect."
 msgstr ""
 
 #. translators: %s: raw error code from Zoho.
-#: includes/class-zoho-auth.php:897
+#: includes/class-zoho-auth.php:905
 #, php-format
 msgid "Zoho reported \"%s\"."
 msgstr ""
