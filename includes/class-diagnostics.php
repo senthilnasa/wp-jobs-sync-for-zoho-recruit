@@ -155,8 +155,9 @@ class Diagnostics {
 		 * miserable thing to debug from the outside, so it is checked here
 		 * against the field list read from the account itself.
 		 */
-		if ( plugin()->metadata()->has_cached_fields() ) {
-			$known = array_keys( (array) plugin()->metadata()->get_fields() );
+		$known = self::known_zoho_fields();
+
+		if ( ! empty( $known ) ) {
 
 			$missing = array();
 
@@ -176,7 +177,7 @@ class Diagnostics {
 				empty( $missing )
 					? 'every mapped field exists on this account'
 					: sprintf(
-						'not a field on this account: %s. Anything mapped from these stays empty on every job. Pick the right field on the Field Mapping screen.',
+						'not seen on this account: %s. Anything mapped from these stays empty on every job. Pick the right field on the Field Mapping screen.',
 						implode( ', ', $missing )
 					),
 				'warning'
@@ -260,16 +261,79 @@ class Diagnostics {
 
 		$fields = $api->get_fields();
 
+		$detail = sprintf( '%d field(s) readable', count( (array) $fields ) );
+
+		if ( is_wp_error( $fields ) ) {
+			$detail = $fields->get_error_message();
+
+			/*
+			 * "Reconnect to grant the requested permissions" is unhelpful when
+			 * the permission was never in the request. If the fields scope is
+			 * not in the configured list, reconnecting will fail the same way,
+			 * so say what actually has to change.
+			 */
+			$fields_scope = 'ZohoRecruit.settings.fields.READ';
+
+			if ( ! in_array( $fields_scope, $auth->scopes(), true ) ) {
+				$detail = sprintf(
+					'%s is not in the requested scopes, so reconnecting alone will not fix it. Add it under Settings > Connection > OAuth scopes, then disconnect and reconnect.',
+					$fields_scope
+				);
+			}
+
+			$detail .= ' (optional: the mapping screen falls back to standard field names)';
+		}
+
 		$checks[] = self::check(
 			'Field discovery',
 			! is_wp_error( $fields ),
-			is_wp_error( $fields )
-				? $fields->get_error_message() . ' (optional: the mapping screen falls back to standard field names)'
-				: sprintf( '%d field(s) readable', count( (array) $fields ) ),
+			$detail,
 			is_wp_error( $fields ) ? 'warning' : 'pass'
 		);
 
 		return $checks;
+	}
+
+	/**
+	 * Every Zoho field name this site has actually seen.
+	 *
+	 * Two sources, because neither alone is complete. The field metadata lists
+	 * what is on the module layout, and the last synced record shows what the
+	 * records API really returns -- which is not the same set. Posting_Title,
+	 * for one, comes back on every record while being absent from the layout
+	 * list, so checking against the layout alone would report a mapping that
+	 * demonstrably works as broken.
+	 *
+	 * Neither call touches the network.
+	 *
+	 * @return string[] Empty when this site has never seen either.
+	 */
+	private static function known_zoho_fields() {
+		$known = array_keys( plugin()->metadata()->cached_fields() );
+
+		$recent = get_posts(
+			array(
+				'post_type'        => Post_Type::POST_TYPE,
+				'post_status'      => 'any',
+				'posts_per_page'   => 1,
+				'orderby'          => 'modified',
+				'order'            => 'DESC',
+				'fields'           => 'ids',
+				'suppress_filters' => true,
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Diagnostic, one row.
+				'meta_key'         => Job::META_RAW,
+			)
+		);
+
+		if ( ! empty( $recent ) ) {
+			$raw = json_decode( (string) get_post_meta( (int) $recent[0], Job::META_RAW, true ), true );
+
+			if ( is_array( $raw ) ) {
+				$known = array_merge( $known, array_keys( $raw ) );
+			}
+		}
+
+		return array_values( array_unique( $known ) );
 	}
 
 	/**

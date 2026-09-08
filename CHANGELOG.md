@@ -167,12 +167,19 @@ version onwards.
   is ignored by Zoho, so a de-duplicated WordPress slug cannot break it.
 - The diagnostic report counts active jobs with no application link, so an
   invisible apply button reports itself.
-- The diagnostic report checks the whole field mapping against the field list
-  read from the connected account and names anything that is not there. Every
+- The diagnostic report checks the whole field mapping against the Zoho field
+  names this site has actually seen -- both the module layout and the last
+  synced record, because the two differ and Posting_Title is on records without
+  being on the layout -- and names anything that appears in neither. Every
   Zoho account renames fields, and a mapping pointing at one that does not exist
   fails silently: the sync succeeds and one value is quietly empty on every job
   forever. The configured publish flag field is checked the same way, since a
   wrong name there silently disables "only sync published jobs".
+
+- The field discovery warning says what to change. "Reconnect to grant the
+  requested permissions" is no help when the permission was never requested, so
+  when `ZohoRecruit.settings.fields.READ` is missing from the configured scopes
+  the report now says to add it before reconnecting.
 
 ### Fixed
 

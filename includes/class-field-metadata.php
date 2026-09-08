@@ -134,6 +134,21 @@ class Field_Metadata {
 	}
 
 	/**
+	 * The stored field list, without touching the network.
+	 *
+	 * get_fields() will call Zoho when its freshness transient has expired,
+	 * which is wrong for a caller that only wants to know what is already
+	 * known -- a diagnostic report asked not to probe, for instance.
+	 *
+	 * @return array
+	 */
+	public function cached_fields() {
+		$cached = get_option( self::OPTION_CACHE, array() );
+
+		return is_array( $cached ) ? $cached : array();
+	}
+
+	/**
 	 * Whether a live field list has ever been stored.
 	 *
 	 * @return bool

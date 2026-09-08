@@ -82,6 +82,35 @@ have no application link.
 
 ---
 
+## Field discovery fails with a 401
+
+The mapping screen falls back to standard field names, and **Run check** reports
+`Field discovery` as a warning. Syncing still works: this scope is only needed
+to read the list of fields your account has.
+
+The cause is almost always the scope list rather than the connection. If
+**Settings → Connection → OAuth scopes** has been narrowed to just
+`ZohoRecruit.modules.jobopening.READ` -- which is a reasonable thing to have
+tried while fighting Zoho's "Invalid OAuth Scope" error -- then reconnecting
+grants exactly that and nothing else, and `/settings/fields` keeps returning
+401 no matter how many times you reconnect.
+
+Set the scopes to both:
+
+```
+ZohoRecruit.modules.jobopening.READ
+ZohoRecruit.settings.fields.READ
+```
+
+then **disconnect and reconnect**. Changing the setting alone does nothing: the
+scopes are fixed at the moment the connection is granted.
+
+It is worth fixing even though it is optional, because without it the mapping
+screen cannot show your account's real field names and **Run check** cannot tell
+you when a mapping points at a field you do not have.
+
+---
+
 ## A field is empty on every job
 
 Department blank everywhere, or salary, or the closing date. The sync reports

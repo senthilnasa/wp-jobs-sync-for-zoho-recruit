@@ -154,6 +154,52 @@ class JSZR_Mapping_Check_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A field the layout does not list but records do carry must not be
+	 * reported.
+	 *
+	 * Posting_Title is the real case: it is absent from the field metadata on
+	 * at least one live account, and present on every record that account
+	 * returns, so the titles sync perfectly. Reporting it would send someone
+	 * to fix a mapping that works.
+	 */
+	public function test_a_field_seen_only_on_records_is_not_reported() {
+		$this->cache_fields( array( 'Job_Description' ) );
+
+		$job = self::factory()->post->create(
+			array(
+				'post_type'   => \JobsSyncForZohoRecruit\Post_Type::POST_TYPE,
+				'post_status' => 'publish',
+			)
+		);
+
+		update_post_meta(
+			$job,
+			\JobsSyncForZohoRecruit\Job::META_RAW,
+			wp_slash( (string) wp_json_encode( array( 'Posting_Title' => 'Content Writer' ) ) )
+		);
+
+		Field_Mapper::save_mapping(
+			array(
+				array(
+					'zoho_field' => 'Posting_Title',
+					'target'     => 'post_title',
+					'transform'  => 'text',
+				),
+				array(
+					'zoho_field' => 'Department_Name',
+					'target'     => 'meta:_zoho_recruit_industry',
+					'transform'  => 'text',
+				),
+			)
+		);
+
+		$check = $this->find_check( Diagnostics::run( false ), 'Mapped fields exist in Zoho' );
+
+		$this->assertStringNotContainsString( 'Posting_Title', $check['detail'] );
+		$this->assertStringContainsString( 'Department_Name', $check['detail'] );
+	}
+
+	/**
 	 * Without a live field list, nothing is claimed. The bundled fallback list
 	 * is not evidence about a particular account.
 	 */
