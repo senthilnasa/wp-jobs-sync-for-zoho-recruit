@@ -321,6 +321,32 @@ graph with `jszr_structured_data`.
 
 ## The apply button
 
+Applications are completed **on Zoho Recruit, not on this site**. The button is
+an ordinary link out; the plugin does not embed Zoho's form in an iframe and
+does not accept applications itself. That is why it can say no candidate data
+ever touches WordPress.
+
+Three reasons the link is not an embed:
+
+- Zoho may refuse to be framed at all, depending on the `X-Frame-Options` and
+  `frame-ancestors` headers on your careers pages, and a blocked iframe renders
+  blank with nothing the visitor can act on.
+- Browser restrictions on third-party cookies can drop the session mid-
+  application, losing a part-filled form and an uploaded CV.
+- An embedded form loads Zoho's cookies while the visitor is on your domain,
+  which changes the consent picture described in [Privacy](privacy.md).
+
+**Settings → Frontend → Apply link opens** chooses a new tab (the default, which
+keeps your listing open behind it) or the same tab. New-tab links get
+`rel="noopener nofollow"` and a screen-reader note; same-tab links get neither,
+because announcing a new tab that does not open is worse than saying nothing.
+
+Every route to the button — the `[zoho_job_apply]` shortcode, the Apply Button
+block, the `{apply_button}` template token and the single job template — is
+built by `Templates::apply_link()`, so they cannot drift apart. `jszr_apply_link(
+$post_id, $args )` is the global helper if you need it in a theme.
+
+
 The URL comes from the mapped application URL field. If a record has none, the
 plugin falls back to the template in **Settings → Frontend → Apply URL
 template**, which understands `{zoho_id}`, `{job_code}` and `{slug}`:

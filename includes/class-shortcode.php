@@ -225,30 +225,21 @@ class Shortcode {
 			return '';
 		}
 
-		$url = Job::get_apply_url( $post_id );
+		$markup = Templates::apply_link(
+			$post_id,
+			array(
+				'label' => (string) $atts['label'],
+				'class' => (string) $atts['class'],
+			)
+		);
 
-		if ( '' === $url ) {
+		if ( '' === $markup ) {
 			return '';
 		}
 
 		Templates::enqueue_assets();
 
-		$label = '' !== $atts['label']
-			? $atts['label']
-			: (string) Settings::get( 'apply_label', '' );
-
-		if ( '' === $label ) {
-			$label = __( 'Apply Now', 'jobs-sync-for-zoho-recruit' );
-		}
-
-		$classes = trim( 'jszr-apply-button ' . sanitize_html_class( (string) $atts['class'] ) );
-
-		return sprintf(
-			'<a class="%1$s" href="%2$s" target="_blank" rel="noopener nofollow">%3$s</a>',
-			esc_attr( $classes ),
-			esc_url( $url ),
-			esc_html( $label )
-		);
+		return $markup;
 	}
 
 	/**

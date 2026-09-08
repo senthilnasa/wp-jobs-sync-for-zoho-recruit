@@ -379,6 +379,55 @@ class JSZR_Layouts_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The apply link opens a new tab by default, and says so.
+	 */
+	public function test_apply_link_opens_a_new_tab_by_default() {
+		$post_id = $this->make_job( array( '_zoho_recruit_application_url' => 'https://example.com/apply' ) );
+
+		$markup = \JobsSyncForZohoRecruit\Templates::apply_link( $post_id );
+
+		$this->assertStringContainsString( 'target="_blank"', $markup );
+		$this->assertStringContainsString( 'rel="noopener nofollow"', $markup );
+		$this->assertStringContainsString( 'opens in a new tab', $markup );
+	}
+
+	/**
+	 * Same-tab mode drops the target, and the note that would then be a lie.
+	 */
+	public function test_apply_link_can_open_in_the_same_tab() {
+		Settings::update( array( 'apply_target' => 'same_tab' ) );
+
+		$post_id = $this->make_job( array( '_zoho_recruit_application_url' => 'https://example.com/apply' ) );
+
+		$markup = \JobsSyncForZohoRecruit\Templates::apply_link( $post_id );
+
+		$this->assertStringNotContainsString( 'target=', $markup );
+		$this->assertStringContainsString( 'rel="nofollow"', $markup );
+		$this->assertStringNotContainsString( 'opens in a new tab', $markup );
+	}
+
+	/**
+	 * A job with no application URL produces no button at all.
+	 */
+	public function test_apply_link_is_empty_without_a_url() {
+		$this->assertSame( '', \JobsSyncForZohoRecruit\Templates::apply_link( $this->make_job() ) );
+	}
+
+	/**
+	 * The {apply_button} token and the shortcode agree, because both come from
+	 * the same builder.
+	 */
+	public function test_apply_token_matches_the_shortcode() {
+		$post_id = $this->make_job( array( '_zoho_recruit_application_url' => 'https://example.com/apply' ) );
+
+		$token = Template_Tags::render( '{apply_button}', $post_id );
+		$short = \JobsSyncForZohoRecruit\Shortcode::render_apply( array( 'id' => $post_id ) );
+
+		$this->assertSame( $token, $short );
+		$this->assertStringContainsString( 'https://example.com/apply', $token );
+	}
+
+	/**
 	 * The preview renders without a job, so a fresh install can still use it.
 	 */
 	public function test_preview_works_with_no_jobs() {

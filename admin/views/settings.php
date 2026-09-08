@@ -716,6 +716,22 @@ $jszr_input = static function ( $key, $values, $type = 'text', $help = '', $attr
 							</td>
 						</tr>
 						<tr>
+							<th scope="row"><label for="jszr-apply_target"><?php esc_html_e( 'Apply link opens', 'jobs-sync-for-zoho-recruit' ); ?></label></th>
+							<td>
+								<?php
+								$jszr_select(
+									'apply_target',
+									$settings,
+									array(
+										'new_tab'  => __( 'In a new tab', 'jobs-sync-for-zoho-recruit' ),
+										'same_tab' => __( 'In the same tab', 'jobs-sync-for-zoho-recruit' ),
+									),
+									__( 'Applications are completed on Zoho Recruit, not on this site. A new tab keeps your listing open behind it.', 'jobs-sync-for-zoho-recruit' )
+								);
+								?>
+							</td>
+						</tr>
+						<tr>
 							<th scope="row"><label for="jszr-apply_url_template"><?php esc_html_e( 'Fallback application URL', 'jobs-sync-for-zoho-recruit' ); ?></label></th>
 							<td>
 								<?php

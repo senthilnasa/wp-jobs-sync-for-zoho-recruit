@@ -119,6 +119,19 @@ if ( ! function_exists( 'jszr_get_apply_url' ) ) {
 	}
 }
 
+if ( ! function_exists( 'jszr_apply_link' ) ) {
+	/**
+	 * Build the Apply link markup for a job.
+	 *
+	 * @param int   $post_id Job post ID.
+	 * @param array $args    Optional: label, class.
+	 * @return string Empty string when the job has no application URL.
+	 */
+	function jszr_apply_link( $post_id, array $args = array() ) {
+		return \JobsSyncForZohoRecruit\Templates::apply_link( (int) $post_id, $args );
+	}
+}
+
 if ( ! function_exists( 'jszr_is_job_active' ) ) {
 	/**
 	 * Whether a job is currently open for applications.

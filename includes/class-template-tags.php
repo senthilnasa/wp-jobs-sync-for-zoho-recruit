@@ -212,18 +212,11 @@ class Template_Tags {
 			esc_html( $title )
 		);
 
-		$values['apply_button'] = '';
-
-		if ( '' !== $apply_url && Job::is_active( $post_id ) ) {
-			$label = (string) Settings::get( 'apply_label', '' );
-
-			$values['apply_button'] = sprintf(
-				'<a class="jszr-apply-button" href="%1$s" target="_blank" rel="noopener nofollow">%2$s<span class="screen-reader-text"> %3$s</span></a>',
-				esc_url( $apply_url ),
-				esc_html( '' !== $label ? $label : __( 'Apply Now', 'jobs-sync-for-zoho-recruit' ) ),
-				esc_html__( '(opens in a new tab)', 'jobs-sync-for-zoho-recruit' )
-			);
-		}
+		// Empty for a closed job: a layout that prints {apply_button} should not
+		// offer a dead button once applications have stopped.
+		$values['apply_button'] = Job::is_active( $post_id )
+			? Templates::apply_link( $post_id )
+			: '';
 
 		/**
 		 * Filter the token values available to a layout template.

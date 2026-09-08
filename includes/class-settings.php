@@ -163,6 +163,7 @@ class Settings {
 			'default_style'           => 'list',
 			'expired_behavior'        => 'notice',
 			'apply_label'             => '',
+			'apply_target'            => 'new_tab',
 			'apply_url_template'      => '',
 			'apply_utm'               => '',
 
@@ -400,6 +401,7 @@ class Settings {
 			'listing_layout'   => array( 'default', 'card', 'compact', 'table', 'custom' ),
 			'job_info_layout'  => array( 'default', 'inline', 'custom' ),
 			'filters_layout'   => array( 'inline', 'stacked' ),
+			'apply_target'     => array( 'new_tab', 'same_tab' ),
 		);
 
 		foreach ( $enums as $key => $allowed ) {

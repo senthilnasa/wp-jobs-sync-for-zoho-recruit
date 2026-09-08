@@ -82,6 +82,12 @@ version onwards.
   they are substituted, and unrecognised tokens are dropped rather than printed.
   Custom CSS is stripped of markup, `@import`, `expression()` and script URLs on
   save and again on output.
+- A setting for whether the Apply link opens in a new tab or the same tab.
+  Applications are completed on Zoho Recruit, not on this site: the plugin links
+  out rather than embedding Zoho's form, which is what lets it say no candidate
+  data touches WordPress. Every route to that button now runs through one
+  builder, so the shortcode, the block, the {apply_button} token and the single
+  job template cannot drift apart.
 - A sort control for visitors (newest, oldest, title, closing soonest), off by
   default, sharing the same GET form and the same validation as the REST
   endpoint so it keeps working with JavaScript disabled.

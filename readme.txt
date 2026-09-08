@@ -129,6 +129,10 @@ Only for scheduled syncing. If `DISABLE_WP_CRON` is set, point a system cron job
 
 Yes, on the Frontend settings tab. Rewrite rules are flushed automatically when the slug changes. Existing job slugs stay stable even when the job title changes in Zoho, so published links keep working.
 
+= Where do candidates actually apply? =
+
+On Zoho Recruit. The Apply button is a link out to the application URL from your Zoho record (or a fallback URL you configure) - the plugin does not embed Zoho's form in an iframe and does not accept applications itself. That is what lets it say no candidate data ever touches WordPress. You can choose whether the link opens in a new tab or the same tab.
+
 = Can I change how the jobs look without editing theme files? =
 
 Yes. **Settings -> Display** has layouts for the listing (Default, Card, Compact, Columns) and for the job details block (Default, Inline), a custom HTML option for both, a custom CSS box, and controls for which search, filter and sort options visitors see.

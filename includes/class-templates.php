@@ -266,6 +266,71 @@ class Templates {
 	// ----------------------------------------------------------------------
 
 	/**
+	 * Build the Apply link for a job.
+	 *
+	 * The single place this markup is produced. The shortcode, the block, the
+	 * {apply_button} template token and the single job template all come here,
+	 * so the target, the rel attributes and the accessible note cannot drift
+	 * apart between them.
+	 *
+	 * @param int   $post_id Job post ID.
+	 * @param array $args    Optional: label, class.
+	 * @return string Empty when the job has no application URL.
+	 */
+	public static function apply_link( $post_id, array $args = array() ) {
+		$post_id = (int) $post_id;
+		$url     = Job::get_apply_url( $post_id );
+
+		if ( '' === $url ) {
+			return '';
+		}
+
+		$label = isset( $args['label'] ) ? trim( (string) $args['label'] ) : '';
+
+		if ( '' === $label ) {
+			$label = (string) Settings::get( 'apply_label', '' );
+		}
+
+		if ( '' === $label ) {
+			$label = __( 'Apply Now', 'jobs-sync-for-zoho-recruit' );
+		}
+
+		$classes = 'jszr-apply-button';
+
+		if ( ! empty( $args['class'] ) ) {
+			$classes .= ' ' . sanitize_html_class( (string) $args['class'] );
+		}
+
+		// A new tab keeps the visitor's place in the listing, which is why it is
+		// the default. Some sites would rather not spawn tabs, so it is a choice.
+		$new_tab = 'same_tab' !== Settings::get( 'apply_target', 'new_tab' );
+
+		$attributes = sprintf(
+			'class="%1$s" href="%2$s" rel="%3$s"',
+			esc_attr( $classes ),
+			esc_url( $url ),
+			esc_attr( $new_tab ? 'noopener nofollow' : 'nofollow' )
+		);
+
+		if ( $new_tab ) {
+			$attributes .= ' target="_blank"';
+		}
+
+		// Announced only when it is true, because telling a screen reader about
+		// a new tab that does not open is worse than saying nothing.
+		$note = $new_tab
+			? '<span class="screen-reader-text"> ' . esc_html__( '(opens in a new tab)', 'jobs-sync-for-zoho-recruit' ) . '</span>'
+			: '';
+
+		return sprintf(
+			'<a %1$s>%2$s%3$s</a>',
+			$attributes,
+			esc_html( $label ),
+			$note
+		);
+	}
+
+	/**
 	 * Register (but do not enqueue) frontend assets.
 	 *
 	 * @return void
