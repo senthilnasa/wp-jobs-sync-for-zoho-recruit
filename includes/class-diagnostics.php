@@ -147,6 +147,23 @@ class Diagnostics {
 				: ( $next ? 'next run ' . gmdate( 'Y-m-d H:i:s', $next ) . ' UTC' : 'no event scheduled' )
 		);
 
+		// An empty apply button is invisible on the frontend: the job renders,
+		// the candidate reads it, and there is simply nothing to click. Worth a
+		// line in the report rather than leaving it to be noticed.
+		$missing = self::jobs_without_apply_url();
+
+		$checks[] = self::check(
+			'Apply links present',
+			0 === $missing,
+			0 === $missing
+				? 'every active job has an application link'
+				: sprintf(
+					'%d active job(s) have no application link, so no apply button is shown. Zoho does not send one: set the career site address on the Frontend settings screen.',
+					$missing
+				),
+			'warning'
+		);
+
 		$checks[] = self::check(
 			'WP-Cron available',
 			! Cron::is_wp_cron_disabled(),
@@ -194,6 +211,41 @@ class Diagnostics {
 		);
 
 		return $checks;
+	}
+
+	/**
+	 * How many active jobs would render without an apply button.
+	 *
+	 * @return int
+	 */
+	private static function jobs_without_apply_url() {
+		$query = new \WP_Query(
+			array(
+				'post_type'              => Post_Type::POST_TYPE,
+				'post_status'            => 'publish',
+				'posts_per_page'         => 50,
+				'no_found_rows'          => true,
+				'update_post_term_cache' => false,
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Diagnostic, capped at 50 rows.
+				'meta_query'             => array(
+					array(
+						'key'     => Job::META_STATUS,
+						'value'   => Job::active_statuses(),
+						'compare' => 'IN',
+					),
+				),
+			)
+		);
+
+		$missing = 0;
+
+		foreach ( $query->posts as $post ) {
+			if ( '' === Job::get_apply_url( $post->ID ) ) {
+				++$missing;
+			}
+		}
+
+		return $missing;
 	}
 
 	/**

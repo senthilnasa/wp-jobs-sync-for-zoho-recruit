@@ -858,6 +858,10 @@ class Job {
 			}
 		}
 
+		if ( '' === $url ) {
+			$url = self::career_site_url( $post_id );
+		}
+
 		$url = esc_url_raw( $url );
 
 		if ( '' !== $url ) {
@@ -880,6 +884,49 @@ class Job {
 		 * @param int    $post_id Post ID.
 		 */
 		return (string) apply_filters( 'jszr_apply_url', $url, $post_id );
+	}
+
+	/**
+	 * Build the career-site application URL for a job.
+	 *
+	 * The Job Openings API does not return a link to the public posting. There
+	 * is no field for it: `Website` on a job opening is the client's own site,
+	 * and is usually empty, so a site that maps it gets no apply button at all.
+	 * The career site does have a stable address, though, and it is built from
+	 * the record ID the sync already stores:
+	 *
+	 *     https://<your-org>.zohorecruit.com/jobs/Careers/<record id>/<title>
+	 *
+	 * The title segment is decoration -- Zoho serves the same posting with the
+	 * wrong one or with none at all -- so it is included only to keep the link
+	 * readable when a candidate shares it, and never relied on.
+	 *
+	 * @param int $post_id Post ID.
+	 * @return string Empty when no career site is configured or the job is not from Zoho.
+	 */
+	public static function career_site_url( $post_id ) {
+		$base = trim( (string) Settings::get( 'career_site_url', '' ) );
+
+		if ( '' === $base ) {
+			return '';
+		}
+
+		$zoho_id = (string) get_post_meta( (int) $post_id, self::META_ZOHO_ID, true );
+
+		// A job added by hand has no Zoho record to link to.
+		if ( '' === $zoho_id ) {
+			return '';
+		}
+
+		$url = rtrim( $base, '/' ) . '/jobs/Careers/' . rawurlencode( $zoho_id );
+
+		$title = sanitize_title( get_the_title( (int) $post_id ) );
+
+		if ( '' !== $title ) {
+			$url .= '/' . $title;
+		}
+
+		return $url;
 	}
 
 	/**

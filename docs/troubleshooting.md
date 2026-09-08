@@ -45,6 +45,43 @@ is left out — it is safe to send to whoever is helping you.
 
 ---
 
+## No apply button appears on any job
+
+Zoho Recruit's Job Openings API does not send a link to the public job posting.
+There is no field for it. `Website` on a job opening is the client's own site,
+it is normally empty, and the plugin's default mapping points the application
+URL at it -- so on most accounts every job syncs with an empty application URL
+and the apply button has nothing to link to and is not rendered.
+
+The career site does have a stable address, built from the record ID the sync
+already stores:
+
+```
+https://<your-org>.zohorecruit.com/jobs/Careers/<record id>/<job title>
+```
+
+Set **Settings → Frontend → Zoho career site address** to the home page of your
+career site -- for example `https://yourcompany.zohorecruit.com` -- and the
+plugin builds that link for every synced job. Indian accounts usually end in
+`.zohorecruit.in`. If you do not know the address, open Zoho Recruit and go to
+Setup → Career Site; it is also whatever you already link to from your site.
+
+The title on the end of the URL is decoration. Zoho serves the posting from the
+record ID and ignores the rest of the path, so it does not matter that
+WordPress may have de-duplicated a slug to `content-writer-3`.
+
+Two things override the career site address, in this order, if you need
+something else:
+
+1. an application URL that arrived from Zoho on the record itself
+2. **Fallback application URL**, which takes `{zoho_id}`, `{job_code}`,
+   `{slug}` and `{id}` placeholders
+
+**Run check** on the Sync Logs screen reports how many active jobs currently
+have no application link.
+
+---
+
 ## A job in WordPress no longer matches Zoho
 
 If the conflict setting is set to keep local edits, the sync deliberately leaves

@@ -788,6 +788,31 @@ $jszr_input = static function ( $key, $values, $type = 'text', $help = '', $attr
 							</td>
 						</tr>
 						<tr>
+							<th scope="row"><label for="jszr-career_site_url"><?php esc_html_e( 'Zoho career site address', 'jobs-sync-for-zoho-recruit' ); ?></label></th>
+							<td>
+								<?php
+								$jszr_input(
+									'career_site_url',
+									$settings,
+									'url',
+									__( 'The home page of your Zoho Recruit career site, for example https://yourcompany.zohorecruit.com. Zoho does not send a link to the public job posting, so the apply button is built from this address and the Zoho record ID of each job. Leave empty if you set a fallback application URL below instead.', 'jobs-sync-for-zoho-recruit' )
+								);
+								?>
+
+								<?php if ( '' !== (string) $settings['career_site_url'] ) : ?>
+									<p class="description">
+										<?php
+										printf(
+											/* translators: %s: example generated apply URL. */
+											esc_html__( 'Apply links will look like %s', 'jobs-sync-for-zoho-recruit' ),
+											'<code>' . esc_html( rtrim( (string) $settings['career_site_url'], '/' ) . '/jobs/Careers/610716000003764097/content-writer' ) . '</code>'
+										);
+										?>
+									</p>
+								<?php endif; ?>
+							</td>
+						</tr>
+						<tr>
 							<th scope="row"><label for="jszr-apply_url_template"><?php esc_html_e( 'Fallback application URL', 'jobs-sync-for-zoho-recruit' ); ?></label></th>
 							<td>
 								<?php

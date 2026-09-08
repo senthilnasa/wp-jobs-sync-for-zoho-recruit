@@ -158,6 +158,16 @@ version onwards.
   frontend can search, filter and page without a navigation. Added to the
   existing REST namespace rather than as a second admin-ajax layer.
 
+- A **Zoho career site address** setting. Zoho's Job Openings API sends no link
+  to the public job posting -- there is no field for it -- so on most accounts
+  every job synced with an empty application URL and no apply button was ever
+  rendered. Given the address of your career site the plugin now builds the
+  link from the record ID the sync already stores. The record ID is what
+  resolves the posting; the job title on the end of the URL is decoration and
+  is ignored by Zoho, so a de-duplicated WordPress slug cannot break it.
+- The diagnostic report counts active jobs with no application link, so an
+  invisible apply button reports itself.
+
 ### Fixed
 
 - The PHPUnit workflow failed on a fresh runner with `svn: command not found`.

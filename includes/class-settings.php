@@ -175,6 +175,7 @@ class Settings {
 			'apply_label'                   => '',
 			'apply_target'                  => 'new_tab',
 			'apply_url_template'            => '',
+			'career_site_url'               => '',
 			'apply_utm'                     => '',
 
 			// Display: layouts, filters and custom CSS.
@@ -454,7 +455,7 @@ class Settings {
 			}
 		}
 
-		foreach ( array( 'org_logo', 'org_url' ) as $key ) {
+		foreach ( array( 'org_logo', 'org_url', 'career_site_url' ) as $key ) {
 			if ( isset( $input[ $key ] ) ) {
 				$out[ $key ] = esc_url_raw( (string) $input[ $key ] );
 			}
