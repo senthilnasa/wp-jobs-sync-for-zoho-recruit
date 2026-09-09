@@ -163,8 +163,16 @@ version onwards.
   every job synced with an empty application URL and no apply button was ever
   rendered. Given the address of your career site the plugin now builds the
   link from the record ID the sync already stores. The record ID is what
-  resolves the posting; the job title on the end of the URL is decoration and
-  is ignored by Zoho, so a de-duplicated WordPress slug cannot break it.
+  resolves the posting; anything after it is decoration and is ignored by Zoho,
+  so a de-duplicated WordPress slug cannot break it.
+- A **Job posting path** setting alongside it, so the shape of that link is
+  configuration rather than a constant. It defaults to
+  `/jobs/Careers/{zoho_id}/` and accepts `{zoho_id}`, `{job_code}`, `{slug}`,
+  `{title}` and `{id}`. Career sites run on custom domains as often as on
+  zohorecruit.com, and an account that arranges its postings differently should
+  not need a code change to link to them. The value is treated as a path: a
+  scheme or a `//host` prefix is stripped rather than followed, so it cannot
+  redirect candidates to another site.
 - The diagnostic report counts active jobs with no application link, so an
   invisible apply button reports itself.
 - The diagnostic report checks the whole field mapping against the Zoho field

@@ -844,17 +844,7 @@ class Job {
 			$template = (string) Settings::get( 'apply_url_template', '' );
 
 			if ( '' !== $template ) {
-				$post = get_post( $post_id );
-
-				$url = strtr(
-					$template,
-					array(
-						'{zoho_id}'  => rawurlencode( (string) get_post_meta( $post_id, self::META_ZOHO_ID, true ) ),
-						'{job_code}' => rawurlencode( (string) get_post_meta( $post_id, '_jszr_job_code', true ) ),
-						'{slug}'     => $post instanceof \WP_Post ? rawurlencode( $post->post_name ) : '',
-						'{id}'       => (string) $post_id,
-					)
-				);
+				$url = self::fill_url_tokens( $template, $post_id );
 			}
 		}
 
@@ -887,6 +877,34 @@ class Job {
 	}
 
 	/**
+	 * Substitute the job's identifiers into a URL or path pattern.
+	 *
+	 * The same vocabulary serves the fallback application URL and the career
+	 * site path, so the settings screen can document one set of tokens rather
+	 * than two that drift apart. Every value is URL-encoded, because each one
+	 * lands in a path segment.
+	 *
+	 * @param string $pattern Pattern containing {tokens}.
+	 * @param int    $post_id Post ID.
+	 * @return string
+	 */
+	public static function fill_url_tokens( $pattern, $post_id ) {
+		$post_id = (int) $post_id;
+		$post    = get_post( $post_id );
+
+		return strtr(
+			(string) $pattern,
+			array(
+				'{zoho_id}'  => rawurlencode( (string) get_post_meta( $post_id, self::META_ZOHO_ID, true ) ),
+				'{job_code}' => rawurlencode( (string) get_post_meta( $post_id, '_jszr_job_code', true ) ),
+				'{slug}'     => $post instanceof \WP_Post ? rawurlencode( $post->post_name ) : '',
+				'{title}'    => rawurlencode( sanitize_title( get_the_title( $post_id ) ) ),
+				'{id}'       => (string) $post_id,
+			)
+		);
+	}
+
+	/**
 	 * Build the career-site application URL for a job.
 	 *
 	 * The Job Openings API does not return a link to the public posting. There
@@ -895,11 +913,11 @@ class Job {
 	 * The career site does have a stable address, though, and it is built from
 	 * the record ID the sync already stores:
 	 *
-	 *     https://<your-org>.zohorecruit.com/jobs/Careers/<record id>/<title>
+	 *     https://<career site>/jobs/Careers/<record id>/
 	 *
-	 * The title segment is decoration -- Zoho serves the same posting with the
-	 * wrong one or with none at all -- so it is included only to keep the link
-	 * readable when a candidate shares it, and never relied on.
+	 * The path is a setting rather than a constant. Career sites are served on
+	 * custom domains as often as on zohorecruit.com, and an account that arranges
+	 * its postings differently should not need a code change to link to them.
 	 *
 	 * @param int $post_id Post ID.
 	 * @return string Empty when no career site is configured or the job is not from Zoho.
@@ -918,15 +936,11 @@ class Job {
 			return '';
 		}
 
-		$url = rtrim( $base, '/' ) . '/jobs/Careers/' . rawurlencode( $zoho_id );
+		$path = Settings::sanitize_career_site_path(
+			(string) Settings::get( 'career_site_path', Settings::DEFAULT_CAREER_SITE_PATH )
+		);
 
-		$title = sanitize_title( get_the_title( (int) $post_id ) );
-
-		if ( '' !== $title ) {
-			$url .= '/' . $title;
-		}
-
-		return $url;
+		return rtrim( $base, '/' ) . self::fill_url_tokens( $path, $post_id );
 	}
 
 	/**

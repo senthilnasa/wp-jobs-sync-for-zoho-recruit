@@ -802,14 +802,52 @@ $jszr_input = static function ( $key, $values, $type = 'text', $help = '', $attr
 								<?php if ( '' !== (string) $settings['career_site_url'] ) : ?>
 									<p class="description">
 										<?php
+										$jszr_example_path = \JobsSyncForZohoRecruit\Settings::sanitize_career_site_path(
+											(string) $settings['career_site_path']
+										);
+
+										$jszr_example_url = rtrim( (string) $settings['career_site_url'], '/' ) . strtr(
+											$jszr_example_path,
+											array(
+												'{zoho_id}' => '610716000003764097',
+												'{job_code}' => 'ZR_1_JOB',
+												'{slug}'  => 'content-writer',
+												'{title}' => 'content-writer',
+												'{id}'    => '142',
+											)
+										);
+
 										printf(
 											/* translators: %s: example generated apply URL. */
 											esc_html__( 'Apply links will look like %s', 'jobs-sync-for-zoho-recruit' ),
-											'<code>' . esc_html( rtrim( (string) $settings['career_site_url'], '/' ) . '/jobs/Careers/610716000003764097/content-writer' ) . '</code>'
+											'<code>' . esc_html( $jszr_example_url ) . '</code>'
 										);
 										?>
 									</p>
 								<?php endif; ?>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><label for="jszr-career_site_path"><?php esc_html_e( 'Job posting path', 'jobs-sync-for-zoho-recruit' ); ?></label></th>
+							<td>
+								<?php
+								$jszr_input(
+									'career_site_path',
+									$settings,
+									'text',
+									__( 'Appended to the career site address to reach one posting. Placeholders: {zoho_id}, {job_code}, {slug}, {title}, {id}. Leave empty to restore the default.', 'jobs-sync-for-zoho-recruit' )
+								);
+								?>
+								<p class="description">
+									<?php
+									printf(
+										/* translators: 1: default path pattern, 2: alternative path pattern. */
+										esc_html__( 'The default is %1$s. Add a readable segment with %2$s if you prefer links a candidate can read.', 'jobs-sync-for-zoho-recruit' ),
+										'<code>' . esc_html( \JobsSyncForZohoRecruit\Settings::DEFAULT_CAREER_SITE_PATH ) . '</code>',
+										'<code>/jobs/Careers/{zoho_id}/{title}</code>'
+									);
+									?>
+								</p>
 							</td>
 						</tr>
 						<tr>

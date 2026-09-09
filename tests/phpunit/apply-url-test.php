@@ -78,12 +78,15 @@ class JSZR_Apply_Url_Test extends WP_UnitTestCase {
 
 	/**
 	 * The career site address is enough on its own.
+	 *
+	 * The default path is the record ID and nothing else, which is the shortest
+	 * thing Zoho will resolve.
 	 */
 	public function test_career_site_builds_a_link() {
-		$this->set_setting( 'career_site_url', 'https://krea-eknowledge.zohorecruit.com' );
+		$this->set_setting( 'career_site_url', 'https://careers.example.edu.in' );
 
 		$this->assertSame(
-			'https://krea-eknowledge.zohorecruit.com/jobs/Careers/' . self::ZOHO_ID . '/content-writer',
+			'https://careers.example.edu.in/jobs/Careers/' . self::ZOHO_ID . '/',
 			Job::get_apply_url( $this->job_id )
 		);
 	}
@@ -99,18 +102,84 @@ class JSZR_Apply_Url_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The title segment comes from the title, not the WordPress slug.
+	 * The path pattern is configurable, and {title} is readable.
 	 *
 	 * The post slug here is content-writer-3, because WordPress had to
 	 * de-duplicate it. Zoho serves the posting from the record ID and treats
 	 * the rest of the path as decoration -- verified against a live career site,
 	 * where the ID alone and a deliberately wrong title both returned the right
-	 * job -- so the readable title is used and the suffix is not carried over.
+	 * job -- so {title} gives the readable title without the numeric suffix.
 	 */
-	public function test_title_segment_is_readable() {
+	public function test_the_path_pattern_is_configurable() {
+		$this->set_setting( 'career_site_url', 'https://example.zohorecruit.com' );
+		$this->set_setting( 'career_site_path', '/jobs/Careers/{zoho_id}/{title}' );
+
+		$this->assertSame(
+			'https://example.zohorecruit.com/jobs/Careers/' . self::ZOHO_ID . '/content-writer',
+			Job::get_apply_url( $this->job_id )
+		);
+	}
+
+	/**
+	 * Every token the settings screen documents actually resolves.
+	 */
+	public function test_every_path_token_resolves() {
+		$this->set_setting( 'career_site_url', 'https://example.zohorecruit.com' );
+		$this->set_setting(
+			'career_site_path',
+			'/{zoho_id}/{job_code}/{slug}/{title}/{id}'
+		);
+
+		$this->assertSame(
+			'https://example.zohorecruit.com/' . self::ZOHO_ID
+				. '/ZR_1_JOB/content-writer-3/content-writer/' . $this->job_id,
+			Job::get_apply_url( $this->job_id )
+		);
+	}
+
+	/**
+	 * An empty pattern restores the default rather than breaking the button.
+	 */
+	public function test_an_empty_path_falls_back_to_the_default() {
+		$this->set_setting( 'career_site_url', 'https://example.zohorecruit.com' );
+		$this->set_setting( 'career_site_path', '   ' );
+
+		$this->assertStringEndsWith(
+			'/jobs/Careers/' . self::ZOHO_ID . '/',
+			Job::get_apply_url( $this->job_id )
+		);
+	}
+
+	/**
+	 * A pattern cannot be used to point the apply button at another host.
+	 *
+	 * The career site address is the administrator's; the path is only a path.
+	 * A scheme, an authority or a protocol-relative prefix is stripped rather
+	 * than honoured, so a mistake here cannot send candidates elsewhere.
+	 */
+	public function test_a_path_cannot_change_the_host() {
 		$this->set_setting( 'career_site_url', 'https://example.zohorecruit.com' );
 
-		$this->assertStringEndsWith( '/content-writer', Job::get_apply_url( $this->job_id ) );
+		foreach ( array(
+			'https://evil.example/jobs/{zoho_id}',
+			'//evil.example/jobs/{zoho_id}',
+			'../../evil/{zoho_id}',
+		) as $attempt ) {
+			$this->set_setting( 'career_site_path', $attempt );
+
+			$url = Job::get_apply_url( $this->job_id );
+
+			// The host is the property that matters. A stripped "//host" ends up
+			// as a harmless path segment, which is why this checks the parsed
+			// host rather than searching the string.
+			$this->assertSame(
+				'example.zohorecruit.com',
+				(string) wp_parse_url( $url, PHP_URL_HOST ),
+				$attempt
+			);
+
+			$this->assertStringStartsWith( 'https://example.zohorecruit.com/', $url, $attempt );
+		}
 	}
 
 	/**

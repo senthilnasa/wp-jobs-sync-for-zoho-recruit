@@ -148,6 +148,14 @@ anywhere, deliberately.
 - **`only_published` is on by default**, reading `Publish_in_Career_Website`.
   A job that has never been published is **skipped entirely**; one that loses the
   flag later is deactivated, not deleted.
+- **The apply link is built, not synced, and its shape is a setting.** Zoho's
+  Job Openings API sends no link to the public posting, so the button is built
+  from `career_site_url` plus the `career_site_path` pattern
+  (default `/jobs/Careers/{zoho_id}/`, tokens `{zoho_id}`, `{job_code}`,
+  `{slug}`, `{title}`, `{id}`). The path is sanitized as a path, never a URL —
+  a scheme or `//host` prefix is stripped, so it cannot redirect candidates
+  elsewhere. `Job::fill_url_tokens()` is the one substitution helper, shared
+  with the `apply_url_template` fallback so the two vocabularies cannot drift.
 - **Template overrides only count in `yourtheme/jobs-sync-for-zoho-recruit/`.**
   Matching a bare `archive.php` used to pick up the theme's own blog template.
 - **Block themes never load the classic PHP templates.** They call

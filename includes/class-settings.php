@@ -23,6 +23,17 @@ class Settings {
 	const OPTION = 'jszr_settings';
 
 	/**
+	 * Path appended to the career site address to reach one job posting.
+	 *
+	 * Zoho Recruit serves a posting at /jobs/Careers/<record id>/, optionally
+	 * with a readable title after the ID. The ID is what resolves the posting,
+	 * so that is all the default asks for; an account whose career site is
+	 * arranged differently can change the pattern rather than being stuck with
+	 * this one.
+	 */
+	const DEFAULT_CAREER_SITE_PATH = '/jobs/Careers/{zoho_id}/';
+
+	/**
 	 * Runtime cache of the merged settings array.
 	 *
 	 * @var array|null
@@ -176,6 +187,7 @@ class Settings {
 			'apply_target'                  => 'new_tab',
 			'apply_url_template'            => '',
 			'career_site_url'               => '',
+			'career_site_path'              => self::DEFAULT_CAREER_SITE_PATH,
 			'apply_utm'                     => '',
 
 			// Display: layouts, filters and custom CSS.
@@ -461,6 +473,10 @@ class Settings {
 			}
 		}
 
+		if ( isset( $input['career_site_path'] ) ) {
+			$out['career_site_path'] = self::sanitize_career_site_path( $input['career_site_path'] );
+		}
+
 		// Layout templates keep their markup, filtered through an allow-list, and
 		// their {tokens}, which are not HTML and must survive the filtering.
 		foreach ( array( 'card_template', 'job_info_template' ) as $key ) {
@@ -543,6 +559,45 @@ class Settings {
 		 * @param array $input Raw input.
 		 */
 		return (array) apply_filters( 'jszr_sanitize_settings', $out, $input );
+	}
+
+	/**
+	 * Sanitize the career-site job path pattern.
+	 *
+	 * This is a path appended to a URL the administrator already supplied, not a
+	 * URL of its own, so anything that would change the host is stripped: a
+	 * scheme, an authority, a protocol-relative prefix and parent-directory
+	 * traversal. An empty value restores the default rather than silently
+	 * disabling the apply button.
+	 *
+	 * @param string $path Raw pattern.
+	 * @return string
+	 */
+	public static function sanitize_career_site_path( $path ) {
+		$path = trim( wp_strip_all_tags( (string) $path ) );
+
+		if ( '' === $path ) {
+			return self::DEFAULT_CAREER_SITE_PATH;
+		}
+
+		// A whole URL pasted in here: keep only its path, query and fragment.
+		if ( preg_match( '#^[a-z][a-z0-9+.-]*://#i', $path ) ) {
+			$parts = wp_parse_url( $path );
+			$path  = ( $parts['path'] ?? '' )
+				. ( isset( $parts['query'] ) ? '?' . $parts['query'] : '' )
+				. ( isset( $parts['fragment'] ) ? '#' . $parts['fragment'] : '' );
+		}
+
+		// Protocol-relative "//host/path" would point at another site entirely.
+		$path = preg_replace( '#^/{2,}#', '/', $path );
+		$path = str_replace( array( '../', '..\\' ), '', (string) $path );
+		$path = str_replace( '\\', '/', $path );
+
+		if ( '' === $path ) {
+			return self::DEFAULT_CAREER_SITE_PATH;
+		}
+
+		return '/' . ltrim( $path, '/' );
 	}
 
 	/**

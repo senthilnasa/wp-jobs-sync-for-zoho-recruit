@@ -57,18 +57,43 @@ The career site does have a stable address, built from the record ID the sync
 already stores:
 
 ```
-https://<your-org>.zohorecruit.com/jobs/Careers/<record id>/<job title>
+https://<your career site>/jobs/Careers/<record id>/
 ```
 
 Set **Settings → Frontend → Zoho career site address** to the home page of your
-career site -- for example `https://yourcompany.zohorecruit.com` -- and the
-plugin builds that link for every synced job. Indian accounts usually end in
-`.zohorecruit.in`. If you do not know the address, open Zoho Recruit and go to
-Setup → Career Site; it is also whatever you already link to from your site.
+career site and the plugin builds that link for every synced job. It may be a
+`zohorecruit.com` subdomain, `.zohorecruit.in` on an Indian account, or your own
+domain -- `https://careers.example.edu.in` is just as valid. If you do not know
+the address, open Zoho Recruit and go to Setup → Career Site; it is also
+whatever you already link to from your own site.
 
-The title on the end of the URL is decoration. Zoho serves the posting from the
-record ID and ignores the rest of the path, so it does not matter that
-WordPress may have de-duplicated a slug to `content-writer-3`.
+### Changing the shape of the link
+
+**Job posting path** sets what comes after that address. The default is:
+
+```
+/jobs/Careers/{zoho_id}/
+```
+
+Five placeholders are available: `{zoho_id}`, `{job_code}`, `{slug}`, `{title}`
+and `{id}`. So a career site arranged differently is a settings change, not a
+code change.
+
+The record ID is the only part Zoho actually resolves the posting from, which is
+why the default asks for nothing else. Anything after it is decoration -- a live
+career site returns the same job for the right title, a deliberately wrong one
+and none at all. If you would rather candidates saw a readable link, use:
+
+```
+/jobs/Careers/{zoho_id}/{title}
+```
+
+`{title}` is derived from the job title, not the WordPress slug, so a job
+WordPress had to de-duplicate to `content-writer-3` still links as
+`content-writer`.
+
+The path is a path, not a URL. A scheme or a `//host` prefix is stripped rather
+than followed, so a mistake here cannot send candidates to another site.
 
 Two things override the career site address, in this order, if you need
 something else:
