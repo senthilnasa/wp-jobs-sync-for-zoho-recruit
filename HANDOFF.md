@@ -156,6 +156,10 @@ anywhere, deliberately.
   a scheme or `//host` prefix is stripped, so it cannot redirect candidates
   elsewhere. `Job::fill_url_tokens()` is the one substitution helper, shared
   with the `apply_url_template` fallback so the two vocabularies cannot drift.
+  Every candidate goes through `Job::usable_apply_url()` first, and a source
+  that is not a link is skipped rather than accepted -- `esc_url_raw()` is a
+  sanitizer, not a validator, and it will happily turn `ZR_17_JOB` into
+  `http://ZR_17_JOB`. A live site shipped that on every job for a week.
 - **Template overrides only count in `yourtheme/jobs-sync-for-zoho-recruit/`.**
   Matching a bare `archive.php` used to pick up the theme's own blog template.
 - **Block themes never load the classic PHP templates.** They call

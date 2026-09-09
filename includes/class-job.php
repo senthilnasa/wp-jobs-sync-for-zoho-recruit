@@ -837,22 +837,32 @@ class Job {
 	 * @return string
 	 */
 	public static function get_apply_url( $post_id ) {
-		$post_id = (int) $post_id;
-		$url     = (string) get_post_meta( $post_id, '_zoho_recruit_application_url', true );
+		$post_id  = (int) $post_id;
+		$template = (string) Settings::get( 'apply_url_template', '' );
 
-		if ( '' === $url ) {
-			$template = (string) Settings::get( 'apply_url_template', '' );
+		/*
+		 * Each source is tried in turn and the first *usable* one wins. A source
+		 * that yields something which is not a link is skipped rather than
+		 * accepted: a live site had every apply button pointing at
+		 * http://ZR_17_JOB, because a job code reached this function and
+		 * esc_url_raw() dressed the bare word up as a host. Falling through to
+		 * the career site is always better than rendering a button to nowhere.
+		 */
+		$candidates = array(
+			(string) get_post_meta( $post_id, '_zoho_recruit_application_url', true ),
+			'' !== $template ? self::fill_url_tokens( $template, $post_id ) : '',
+			self::career_site_url( $post_id ),
+		);
 
-			if ( '' !== $template ) {
-				$url = self::fill_url_tokens( $template, $post_id );
+		$url = '';
+
+		foreach ( $candidates as $candidate ) {
+			$url = self::usable_apply_url( $candidate );
+
+			if ( '' !== $url ) {
+				break;
 			}
 		}
-
-		if ( '' === $url ) {
-			$url = self::career_site_url( $post_id );
-		}
-
-		$url = esc_url_raw( $url );
 
 		if ( '' !== $url ) {
 			$utm = trim( (string) Settings::get( 'apply_utm', '' ) );
@@ -874,6 +884,43 @@ class Job {
 		 * @param int    $post_id Post ID.
 		 */
 		return (string) apply_filters( 'jszr_apply_url', $url, $post_id );
+	}
+
+	/**
+	 * Accept a candidate application URL, or reject it as unusable.
+	 *
+	 * esc_url_raw() is a sanitizer, not a validator: given the bare word
+	 * `ZR_17_JOB` it returns `http://ZR_17_JOB`, which looks like a link and
+	 * resolves to nothing. So the shape is checked before the sanitizer runs.
+	 * Absolute http(s) links and site-relative paths are both allowed; anything
+	 * else is treated as a misconfiguration and skipped.
+	 *
+	 * @param string $url Candidate URL.
+	 * @return string The sanitized URL, or an empty string when unusable.
+	 */
+	public static function usable_apply_url( $url ) {
+		$url = trim( (string) $url );
+
+		if ( '' === $url ) {
+			return '';
+		}
+
+		// A site-relative path is a legitimate apply target on the same site.
+		if ( 0 === strpos( $url, '/' ) && 0 !== strpos( $url, '//' ) ) {
+			return (string) esc_url_raw( $url );
+		}
+
+		if ( ! preg_match( '#^https?://#i', $url ) ) {
+			return '';
+		}
+
+		$host = (string) wp_parse_url( $url, PHP_URL_HOST );
+
+		if ( '' === $host ) {
+			return '';
+		}
+
+		return (string) esc_url_raw( $url );
 	}
 
 	/**

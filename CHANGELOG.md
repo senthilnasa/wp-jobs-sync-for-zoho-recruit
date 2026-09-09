@@ -165,6 +165,14 @@ version onwards.
   link from the record ID the sync already stores. The record ID is what
   resolves the posting; anything after it is decoration and is ignored by Zoho,
   so a de-duplicated WordPress slug cannot break it.
+- Each source for the apply link is now checked for being a link before it is
+  accepted, and a source that is not one is skipped rather than used. A live
+  site had every apply button pointing at `http://ZR_17_JOB`: a job code had
+  reached the resolver, and `esc_url_raw()` -- a sanitizer, not a validator --
+  turned the bare word into a host. Because the result was non-empty it counted
+  as a hit, so the career site link was never reached. Absolute http(s) links
+  and site-relative paths are accepted; anything else falls through to the next
+  source, and a job with nothing usable gets no button rather than a broken one.
 - A **Job posting path** setting alongside it, so the shape of that link is
   configuration rather than a constant. It defaults to
   `/jobs/Careers/{zoho_id}/` and accepts `{zoho_id}`, `{job_code}`, `{slug}`,

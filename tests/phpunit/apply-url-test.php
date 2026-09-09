@@ -183,6 +183,63 @@ class JSZR_Apply_Url_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A job code is not a URL, and must not be dressed up as one.
+	 *
+	 * A live site had every apply button pointing at http://ZR_17_JOB. The job
+	 * code had reached the resolver -- from the fallback template or from a
+	 * mapping row aimed at the application URL -- and esc_url_raw() turned the
+	 * bare word into a host. The career site link was never reached, because
+	 * the junk value was non-empty and so counted as a hit.
+	 */
+	public function test_a_bare_job_code_never_becomes_a_link() {
+		$this->set_setting( 'career_site_url', 'https://careers.example.edu.in' );
+		$this->set_setting( 'apply_url_template', '{job_code}' );
+
+		$url = Job::get_apply_url( $this->job_id );
+
+		$this->assertStringNotContainsString( 'ZR_1_JOB', $url );
+		$this->assertSame(
+			'https://careers.example.edu.in/jobs/Careers/' . self::ZOHO_ID . '/',
+			$url
+		);
+	}
+
+	/**
+	 * The same applies to a junk value that arrived from Zoho on the record.
+	 */
+	public function test_a_junk_stored_url_falls_through_to_the_career_site() {
+		$this->set_setting( 'career_site_url', 'https://careers.example.edu.in' );
+		update_post_meta( $this->job_id, '_zoho_recruit_application_url', 'ZR_1_JOB' );
+
+		$this->assertSame(
+			'https://careers.example.edu.in/jobs/Careers/' . self::ZOHO_ID . '/',
+			Job::get_apply_url( $this->job_id )
+		);
+	}
+
+	/**
+	 * With nothing usable anywhere there is no button, rather than a bad one.
+	 */
+	public function test_junk_with_no_career_site_yields_nothing() {
+		$this->set_setting( 'apply_url_template', '{job_code}' );
+
+		$this->assertSame( '', Job::get_apply_url( $this->job_id ) );
+	}
+
+	/**
+	 * What counts as usable, and what does not.
+	 */
+	public function test_usable_apply_url_accepts_only_real_links() {
+		foreach ( array( 'https://example.com/a', 'http://example.com', '/apply/here' ) as $good ) {
+			$this->assertNotSame( '', Job::usable_apply_url( $good ), $good );
+		}
+
+		foreach ( array( 'ZR_1_JOB', '', '   ', 'javascript:alert(1)', 'mailto:a@b.c', 'http://' ) as $bad ) {
+			$this->assertSame( '', Job::usable_apply_url( $bad ), $bad );
+		}
+	}
+
+	/**
 	 * A job added by hand has no Zoho record, so there is nothing to link to.
 	 */
 	public function test_manual_jobs_get_no_career_site_link() {

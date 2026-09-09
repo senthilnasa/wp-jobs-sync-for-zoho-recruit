@@ -95,6 +95,22 @@ WordPress had to de-duplicate to `content-writer-3` still links as
 The path is a path, not a URL. A scheme or a `//host` prefix is stripped rather
 than followed, so a mistake here cannot send candidates to another site.
 
+### The apply button links somewhere meaningless
+
+If every button points at something like `http://ZR_17_JOB`, a job code is
+reaching the apply link instead of a URL. Two places can do that:
+
+1. **Fallback application URL** set to a bare token such as `{job_code}`. It
+   takes a whole URL, not a fragment -- `https://careers.example.edu.in/{job_code}`,
+   not `{job_code}`. Empty it to fall back to the career site.
+2. A **field mapping** row pointing something like `Job_Opening_ID` at
+   *Meta: Application URL*. Remove the row; the job code belongs in
+   *Meta: Job code*.
+
+Newer versions skip a source that is not a link and fall through to the career
+site, so the button either works or is absent. **Run check** on the Sync Logs
+screen counts active jobs with no application link.
+
 Two things override the career site address, in this order, if you need
 something else:
 
