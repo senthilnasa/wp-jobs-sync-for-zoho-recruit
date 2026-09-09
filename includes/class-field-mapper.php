@@ -505,7 +505,7 @@ class Field_Mapper {
 				return sanitize_text_field( self::lookup_name( $value ) );
 
 			case 'url':
-				$url = esc_url_raw( trim( self::stringify( $value ) ) );
+				$url = self::to_url( $value );
 
 				return '' === $url ? null : $url;
 
@@ -691,6 +691,71 @@ class Field_Mapper {
 		$string = strtolower( trim( self::stringify( $value ) ) );
 
 		return in_array( $string, array( 'true', 'yes', 'y', '1', 'on', 'enabled' ), true );
+	}
+
+	/**
+	 * Normalise a value that is supposed to be a URL.
+	 *
+	 * Note that esc_url_raw() is a sanitizer, not a validator. Handed the code
+	 * `ZR_1_JOB` it returns `http://ZR_1_JOB`, which looks like a link, passes
+	 * every later check and resolves to nothing. A mapping row aimed at the
+	 * application URL therefore filled a live site with apply buttons pointing
+	 * at a host that does not exist. A value that is not a URL is dropped here
+	 * instead, so it never reaches the database.
+	 *
+	 * @param mixed $value Raw value.
+	 * @return string Empty string when the value is not a usable URL.
+	 */
+	public static function to_url( $value ) {
+		$url = trim( self::stringify( $value ) );
+
+		if ( '' === $url || ! preg_match( '#^https?://#i', $url ) ) {
+			return '';
+		}
+
+		if ( ! self::is_hostname( (string) wp_parse_url( $url, PHP_URL_HOST ) ) ) {
+			return '';
+		}
+
+		return (string) esc_url_raw( $url );
+	}
+
+	/**
+	 * Whether a host could plausibly resolve.
+	 *
+	 * A single label with no dot is what a mis-mapped field looks like once
+	 * esc_url_raw() has been at it; a real careers link is a dotted domain, an
+	 * IP address, or localhost on a development site. Underscores are never
+	 * valid in a hostname, and are the clearest sign of a Zoho field name that
+	 * has ended up where a URL was expected.
+	 *
+	 * @param string $host Host portion of a URL.
+	 * @return bool
+	 */
+	public static function is_hostname( $host ) {
+		$host = strtolower( trim( (string) $host ) );
+
+		if ( '' === $host ) {
+			return false;
+		}
+
+		if ( 'localhost' === $host ) {
+			return true;
+		}
+
+		// An IPv6 literal arrives bracketed from wp_parse_url().
+		if ( filter_var( trim( $host, '[]' ), FILTER_VALIDATE_IP ) ) {
+			return true;
+		}
+
+		if ( false !== strpos( $host, '_' ) ) {
+			return false;
+		}
+
+		return (bool) preg_match(
+			'/^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/',
+			$host
+		);
 	}
 
 	/**

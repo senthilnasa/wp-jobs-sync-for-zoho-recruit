@@ -5,6 +5,7 @@
  * @package JobsSyncForZohoRecruit
  */
 
+use JobsSyncForZohoRecruit\Field_Mapper;
 use JobsSyncForZohoRecruit\Job;
 use JobsSyncForZohoRecruit\Post_Type;
 use JobsSyncForZohoRecruit\Settings;
@@ -234,8 +235,65 @@ class JSZR_Apply_Url_Test extends WP_UnitTestCase {
 			$this->assertNotSame( '', Job::usable_apply_url( $good ), $good );
 		}
 
-		foreach ( array( 'ZR_1_JOB', '', '   ', 'javascript:alert(1)', 'mailto:a@b.c', 'http://' ) as $bad ) {
+		foreach ( array(
+			'ZR_1_JOB',
+			'',
+			'   ',
+			'javascript:alert(1)',
+			'mailto:a@b.c',
+			'http://',
+			// What esc_url_raw() makes of a job code. A site that synced before
+			// the mapper was fixed has exactly this in its post meta.
+			'http://ZR_1_JOB',
+			'https://ZR_17_JOB',
+			'http://single-label-host',
+		) as $bad ) {
 			$this->assertSame( '', Job::usable_apply_url( $bad ), $bad );
+		}
+	}
+
+	/**
+	 * A job code already stored as a URL is ignored, without a re-sync.
+	 *
+	 * This is the state a site is left in after syncing with a mapping row
+	 * pointing a Zoho field at the application URL: the value was sanitized on
+	 * the way in, so the database holds `http://ZR_1_JOB` rather than the bare
+	 * code, and it has a host as far as parse_url is concerned.
+	 */
+	public function test_a_stored_job_code_url_falls_through() {
+		$this->set_setting( 'career_site_url', 'https://careers.example.edu.in' );
+		update_post_meta( $this->job_id, '_zoho_recruit_application_url', 'http://ZR_1_JOB' );
+
+		$this->assertSame(
+			'https://careers.example.edu.in/jobs/Careers/' . self::ZOHO_ID . '/',
+			Job::get_apply_url( $this->job_id )
+		);
+	}
+
+	/**
+	 * The mapper drops a non-URL rather than storing a plausible-looking one.
+	 */
+	public function test_the_url_transform_rejects_a_job_code() {
+		$this->assertNull( Field_Mapper::transform( 'ZR_1_JOB', 'url' ) );
+		$this->assertNull( Field_Mapper::transform( 'careers.example.edu.in', 'url' ) );
+
+		$this->assertSame(
+			'https://careers.example.edu.in/apply',
+			Field_Mapper::transform( 'https://careers.example.edu.in/apply', 'url' )
+		);
+	}
+
+	/**
+	 * Hosts that should still work, including development ones.
+	 */
+	public function test_real_hosts_are_still_accepted() {
+		foreach ( array(
+			'https://careers.krea.edu.in/jobs/Careers/1/',
+			'http://example.com',
+			'http://localhost:8888/apply',
+			'http://127.0.0.1/apply',
+		) as $good ) {
+			$this->assertNotSame( '', Job::usable_apply_url( $good ), $good );
 		}
 	}
 

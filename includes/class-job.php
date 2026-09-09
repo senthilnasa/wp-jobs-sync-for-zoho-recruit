@@ -889,7 +889,7 @@ class Job {
 	/**
 	 * Accept a candidate application URL, or reject it as unusable.
 	 *
-	 * esc_url_raw() is a sanitizer, not a validator: given the bare word
+	 * Note that esc_url_raw() is a sanitizer, not a validator: given the word
 	 * `ZR_17_JOB` it returns `http://ZR_17_JOB`, which looks like a link and
 	 * resolves to nothing. So the shape is checked before the sanitizer runs.
 	 * Absolute http(s) links and site-relative paths are both allowed; anything
@@ -910,17 +910,13 @@ class Job {
 			return (string) esc_url_raw( $url );
 		}
 
-		if ( ! preg_match( '#^https?://#i', $url ) ) {
-			return '';
-		}
-
-		$host = (string) wp_parse_url( $url, PHP_URL_HOST );
-
-		if ( '' === $host ) {
-			return '';
-		}
-
-		return (string) esc_url_raw( $url );
+		/*
+		 * Field_Mapper::to_url() stops junk being stored, but sites that already
+		 * synced before that fix have `http://ZR_1_JOB` sitting in post meta.
+		 * Checking the host here as well means those heal on the next page load
+		 * rather than needing a re-sync.
+		 */
+		return Field_Mapper::to_url( $url );
 	}
 
 	/**
