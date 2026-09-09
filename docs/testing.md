@@ -71,6 +71,7 @@ file names follow the WordPress convention.
 | `tests/phpunit/rest-api-test.php` | Pagination, filters, sorting, the field allow-list, `per_page` capping, inactive-job enumeration, endpoint permissions |
 | `tests/phpunit/layouts-test.php` | Token substitution and conditionals, template and CSS sanitization, layout selection, the apply link |
 | `tests/phpunit/extensibility-test.php` | Custom taxonomies reaching REST, shortcodes and mapping; the SEO title and description filters |
+| `tests/phpunit/purge-test.php` | Deleting synchronized jobs and orphan terms, and leaving manual jobs alone |
 | `tests/phpunit/multisite-test.php` | Per-site activation, tables, settings, jobs and logging. Skipped on single site |
 
 `Field_Mapper` is the best unit-test surface in the plugin: it writes nothing to

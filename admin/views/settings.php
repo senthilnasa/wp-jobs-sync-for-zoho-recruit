@@ -1313,6 +1313,79 @@ $jszr_input = static function ( $key, $values, $type = 'text', $help = '', $attr
 				<input type="hidden" name="action" value="jszr_regenerate_webhook" />
 				<button type="submit" class="button"><?php esc_html_e( 'Generate a new webhook URL', 'jobs-sync-for-zoho-recruit' ); ?></button>
 			</form>
+
+			<hr />
+			<h2><?php esc_html_e( 'Start again', 'jobs-sync-for-zoho-recruit' ); ?></h2>
+
+			<?php $jszr_job_counts = Job::counts(); ?>
+
+			<p>
+				<?php
+				esc_html_e(
+					'Deletes the local copies so a full sync can rebuild them. Use this after a field mapping mistake: removing a mapping row stops the plugin writing that field, but it does not remove the values already written, so a wrong value can outlive the mapping that caused it.',
+					'jobs-sync-for-zoho-recruit'
+				);
+				?>
+			</p>
+			<p>
+				<strong><?php esc_html_e( 'Zoho Recruit keeps the originals.', 'jobs-sync-for-zoho-recruit' ); ?></strong>
+				<?php esc_html_e( 'Nothing here can be lost that a full sync will not bring back, and jobs you created by hand in WordPress are never touched. The Zoho connection and your settings are left alone.', 'jobs-sync-for-zoho-recruit' ); ?>
+			</p>
+
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>"
+				onsubmit="return window.confirm( '<?php echo esc_js( __( 'Delete the selected data? A full sync will rebuild the jobs from Zoho Recruit.', 'jobs-sync-for-zoho-recruit' ) ); ?>' );">
+				<?php wp_nonce_field( 'jszr_purge_data' ); ?>
+				<input type="hidden" name="action" value="jszr_purge_data" />
+
+				<fieldset>
+					<legend class="screen-reader-text"><?php esc_html_e( 'What to delete', 'jobs-sync-for-zoho-recruit' ); ?></legend>
+
+					<p>
+						<label>
+							<input type="checkbox" name="jszr_purge[jobs]" value="1" checked />
+							<?php
+							printf(
+								/* translators: %s: number of synchronized jobs. */
+								esc_html__( 'Synchronized jobs and their unused taxonomy terms (%s jobs)', 'jobs-sync-for-zoho-recruit' ),
+								esc_html( number_format_i18n( (int) ( $jszr_job_counts['total'] ?? 0 ) ) )
+							);
+							?>
+						</label>
+					</p>
+					<p>
+						<label>
+							<input type="checkbox" name="jszr_purge[logs]" value="1" checked />
+							<?php esc_html_e( 'Sync history and log entries', 'jobs-sync-for-zoho-recruit' ); ?>
+						</label>
+					</p>
+					<p>
+						<label>
+							<input type="checkbox" name="jszr_purge[mapping]" value="1" />
+							<?php esc_html_e( 'Field mapping (reset to the shipped defaults)', 'jobs-sync-for-zoho-recruit' ); ?>
+						</label>
+					</p>
+				</fieldset>
+
+				<p>
+					<label for="jszr-purge-confirm">
+						<?php
+						printf(
+							/* translators: %s: the word that must be typed to confirm. */
+							esc_html__( 'Type %s to confirm', 'jobs-sync-for-zoho-recruit' ),
+							'<code>DELETE</code>'
+						);
+						?>
+					</label><br />
+					<input type="text" id="jszr-purge-confirm" name="jszr_purge_confirm" class="regular-text"
+						autocomplete="off" placeholder="DELETE" required />
+				</p>
+
+				<p>
+					<button type="submit" class="button button-link-delete">
+						<?php esc_html_e( 'Delete and start again', 'jobs-sync-for-zoho-recruit' ); ?>
+					</button>
+				</p>
+			</form>
 		<?php endif; ?>
 
 	<?php endif; ?>

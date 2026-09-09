@@ -741,6 +741,130 @@ class Job {
 	}
 
 	/**
+	 * Delete every job that came from Zoho, and nothing else.
+	 *
+	 * The point of this is a clean slate: a mapping mistake writes meta that
+	 * un-mapping does not remove, and once a wrong value is on five hundred
+	 * posts the only honest fix is to throw the copies away and sync again.
+	 * Zoho is the source of truth, so nothing is lost that a full sync cannot
+	 * rebuild.
+	 *
+	 * Jobs added by hand have no Zoho record ID and are never touched, which is
+	 * the same rule the sync itself follows.
+	 *
+	 * @param bool $dry_run When true, count what would go without deleting it.
+	 * @return int Number of jobs deleted, or that would be.
+	 */
+	public static function purge_synced( $dry_run = false ) {
+		if ( $dry_run ) {
+			$query = new \WP_Query( self::synced_query_args( 1 ) );
+
+			return (int) $query->found_posts;
+		}
+
+		$deleted = 0;
+
+		// Paged rather than one big query: a large account has thousands of
+		// these, and wp_delete_post() is not cheap. Each pass re-queries from
+		// the start, because the previous pass removed what it found.
+		while ( true ) {
+			$ids = get_posts( self::synced_query_args( 100 ) );
+
+			if ( empty( $ids ) ) {
+				break;
+			}
+
+			$removed_this_pass = 0;
+
+			foreach ( $ids as $id ) {
+				$zoho_id = (string) get_post_meta( (int) $id, self::META_ZOHO_ID, true );
+
+				if ( wp_delete_post( (int) $id, true ) ) {
+					wp_cache_delete( 'jszr_job_' . $zoho_id, 'jszr' );
+					++$deleted;
+					++$removed_this_pass;
+				}
+			}
+
+			// Nothing went this time, so nothing will next time either. Stop
+			// rather than spinning on posts something else refuses to delete.
+			if ( 0 === $removed_this_pass ) {
+				break;
+			}
+		}
+
+		return $deleted;
+	}
+
+	/**
+	 * Query arguments matching every job that came from Zoho.
+	 *
+	 * @param int $limit Posts per page.
+	 * @return array
+	 */
+	private static function synced_query_args( $limit ) {
+		return array(
+			'post_type'        => Post_Type::POST_TYPE,
+			'post_status'      => 'any',
+			'posts_per_page'   => (int) $limit,
+			'fields'           => 'ids',
+			'no_found_rows'    => false,
+			'suppress_filters' => true,
+			'orderby'          => 'ID',
+			'order'            => 'ASC',
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- The Zoho ID is what distinguishes a synced job from a manual one.
+			'meta_query'       => array(
+				array(
+					'key'     => self::META_ZOHO_ID,
+					'value'   => '',
+					'compare' => '!=',
+				),
+			),
+		);
+	}
+
+	/**
+	 * Remove plugin taxonomy terms that no longer describe anything.
+	 *
+	 * Deleting the jobs leaves their departments and locations behind as empty
+	 * terms, which then clutter every filter dropdown.
+	 *
+	 * @return int Number of terms removed.
+	 */
+	public static function purge_orphan_terms() {
+		$removed = 0;
+
+		foreach ( array_keys( Post_Type::taxonomies() ) as $taxonomy ) {
+			if ( ! taxonomy_exists( $taxonomy ) ) {
+				continue;
+			}
+
+			$terms = get_terms(
+				array(
+					'taxonomy'   => $taxonomy,
+					'hide_empty' => false,
+					'fields'     => 'ids',
+				)
+			);
+
+			if ( is_wp_error( $terms ) ) {
+				continue;
+			}
+
+			foreach ( $terms as $term_id ) {
+				$term = get_term( (int) $term_id, $taxonomy );
+
+				if ( $term instanceof \WP_Term && 0 === (int) $term->count ) {
+					wp_delete_term( (int) $term_id, $taxonomy );
+					++$removed;
+				}
+			}
+		}
+
+		return $removed;
+	}
+
+	/**
 	 * Read one of the plugin's meta values.
 	 *
 	 * @param int    $post_id Post ID.

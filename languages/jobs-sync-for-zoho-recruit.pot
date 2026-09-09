@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-09T13:20:55+00:00\n"
+"POT-Creation-Date: 2026-09-09T13:26:54+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: jobs-sync-for-zoho-recruit\n"
@@ -63,7 +63,7 @@ msgstr ""
 
 #: admin/views/dashboard.php:72
 #: admin/views/settings.php:243
-#: includes/class-admin.php:373
+#: includes/class-admin.php:374
 msgid "Connection"
 msgstr ""
 
@@ -131,8 +131,8 @@ msgstr ""
 #: admin/views/dashboard.php:139
 #: admin/views/settings.php:501
 #: admin/views/settings.php:551
-#: includes/class-admin.php:1234
-#: includes/class-admin.php:1274
+#: includes/class-admin.php:1320
+#: includes/class-admin.php:1360
 msgid "Active"
 msgstr ""
 
@@ -140,31 +140,31 @@ msgstr ""
 #: admin/views/dashboard.php:269
 #: admin/views/logs.php:111
 #: admin/views/settings.php:504
-#: includes/class-admin.php:1236
-#: includes/class-admin.php:1276
+#: includes/class-admin.php:1322
+#: includes/class-admin.php:1362
 msgid "Expired"
 msgstr ""
 
 #: admin/views/dashboard.php:141
 #: admin/views/settings.php:502
 #: admin/views/settings.php:552
-#: includes/class-admin.php:1235
-#: includes/class-admin.php:1275
+#: includes/class-admin.php:1321
+#: includes/class-admin.php:1361
 msgid "Inactive"
 msgstr ""
 
 #: admin/views/dashboard.php:142
 #: admin/views/settings.php:503
-#: includes/class-admin.php:1237
-#: includes/class-admin.php:1277
+#: includes/class-admin.php:1323
+#: includes/class-admin.php:1363
 msgid "Closed"
 msgstr ""
 
 #: admin/views/dashboard.php:143
 #: admin/views/settings.php:505
 #: admin/views/settings.php:553
-#: includes/class-admin.php:1238
-#: includes/class-admin.php:1278
+#: includes/class-admin.php:1324
+#: includes/class-admin.php:1364
 msgid "Draft"
 msgstr ""
 
@@ -321,20 +321,20 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: admin/views/dashboard.php:342
-#: includes/class-admin.php:1127
+#: includes/class-admin.php:1213
 msgid "Manual"
 msgstr ""
 
 #. translators: %s: human readable time difference.
 #: admin/views/dashboard.php:355
-#: includes/class-admin.php:1188
+#: includes/class-admin.php:1274
 #, php-format
 msgid "%s ago"
 msgstr ""
 
 #: admin/views/logs.php:24
-#: includes/class-admin.php:200
 #: includes/class-admin.php:201
+#: includes/class-admin.php:202
 msgid "Sync Logs"
 msgstr ""
 
@@ -389,7 +389,7 @@ msgid "Show the full report"
 msgstr ""
 
 #: admin/views/logs.php:108
-#: includes/class-admin.php:264
+#: includes/class-admin.php:265
 msgid "Processed"
 msgstr ""
 
@@ -485,8 +485,8 @@ msgid "Remove"
 msgstr ""
 
 #: admin/views/mapping.php:102
-#: includes/class-admin.php:191
 #: includes/class-admin.php:192
+#: includes/class-admin.php:193
 msgid "Field Mapping"
 msgstr ""
 
@@ -543,12 +543,12 @@ msgstr ""
 
 #: admin/views/meta-box.php:48
 #: admin/views/meta-box.php:72
-#: includes/class-admin.php:1107
+#: includes/class-admin.php:1193
 msgid "Source"
 msgstr ""
 
 #: admin/views/meta-box.php:50
-#: includes/class-admin.php:1148
+#: includes/class-admin.php:1234
 msgid "Added here"
 msgstr ""
 
@@ -565,8 +565,8 @@ msgid "Linked to Zoho Recruit, not yet synced"
 msgstr ""
 
 #: admin/views/meta-box.php:73
-#: includes/class-admin.php:1154
-#: includes/class-admin.php:1505
+#: includes/class-admin.php:1240
+#: includes/class-admin.php:1591
 #: includes/class-site-health.php:70
 msgid "Zoho Recruit"
 msgstr ""
@@ -621,17 +621,17 @@ msgid "Closing date"
 msgstr ""
 
 #: admin/views/meta-box.php:138
-#: includes/class-admin.php:1456
+#: includes/class-admin.php:1542
 msgid "Resync from Zoho"
 msgstr ""
 
 #: admin/views/meta-box.php:146
-#: includes/class-admin.php:1465
+#: includes/class-admin.php:1551
 msgid "Discard the changes made to this job in WordPress and replace them with the values from Zoho Recruit?"
 msgstr ""
 
 #: admin/views/meta-box.php:147
-#: includes/class-admin.php:1466
+#: includes/class-admin.php:1552
 msgid "Reset to Zoho values"
 msgstr ""
 
@@ -928,7 +928,7 @@ msgid "Status for unmapped Zoho values"
 msgstr ""
 
 #: admin/views/settings.php:564
-#: includes/class-admin.php:375
+#: includes/class-admin.php:376
 msgid "Public API"
 msgstr ""
 
@@ -1419,245 +1419,321 @@ msgstr ""
 msgid "Generate a new webhook URL"
 msgstr ""
 
-#: includes/class-admin.php:173
-msgid "Zoho Recruit Dashboard"
+#: admin/views/settings.php:1318
+msgid "Start again"
+msgstr ""
+
+#: admin/views/settings.php:1324
+msgid "Deletes the local copies so a full sync can rebuild them. Use this after a field mapping mistake: removing a mapping row stops the plugin writing that field, but it does not remove the values already written, so a wrong value can outlive the mapping that caused it."
+msgstr ""
+
+#: admin/views/settings.php:1331
+msgid "Zoho Recruit keeps the originals."
+msgstr ""
+
+#: admin/views/settings.php:1332
+msgid "Nothing here can be lost that a full sync will not bring back, and jobs you created by hand in WordPress are never touched. The Zoho connection and your settings are left alone."
+msgstr ""
+
+#: admin/views/settings.php:1336
+msgid "Delete the selected data? A full sync will rebuild the jobs from Zoho Recruit."
+msgstr ""
+
+#: admin/views/settings.php:1341
+msgid "What to delete"
+msgstr ""
+
+#. translators: %s: number of synchronized jobs.
+#: admin/views/settings.php:1349
+#, php-format
+msgid "Synchronized jobs and their unused taxonomy terms (%s jobs)"
+msgstr ""
+
+#: admin/views/settings.php:1358
+msgid "Sync history and log entries"
+msgstr ""
+
+#: admin/views/settings.php:1364
+msgid "Field mapping (reset to the shipped defaults)"
+msgstr ""
+
+#. translators: %s: the word that must be typed to confirm.
+#: admin/views/settings.php:1374
+#, php-format
+msgid "Type %s to confirm"
+msgstr ""
+
+#: admin/views/settings.php:1385
+msgid "Delete and start again"
 msgstr ""
 
 #: includes/class-admin.php:174
+msgid "Zoho Recruit Dashboard"
+msgstr ""
+
+#: includes/class-admin.php:175
 msgid "Dashboard"
 msgstr ""
 
-#: includes/class-admin.php:182
 #: includes/class-admin.php:183
-#: includes/class-admin.php:286
+#: includes/class-admin.php:184
+#: includes/class-admin.php:287
 msgid "Settings"
 msgstr ""
 
-#: includes/class-admin.php:256
+#: includes/class-admin.php:257
 msgid "Testing the connection..."
 msgstr ""
 
-#: includes/class-admin.php:257
+#: includes/class-admin.php:258
 msgid "Connection successful."
 msgstr ""
 
-#: includes/class-admin.php:258
+#: includes/class-admin.php:259
 msgid "Sync in progress..."
 msgstr ""
 
-#: includes/class-admin.php:259
+#: includes/class-admin.php:260
 #: includes/class-cli.php:112
 msgid "Sync finished."
 msgstr ""
 
-#: includes/class-admin.php:260
+#: includes/class-admin.php:261
 msgid "The sync failed. See the sync log for details."
 msgstr ""
 
-#: includes/class-admin.php:261
+#: includes/class-admin.php:262
 msgid "Refreshing this job from Zoho..."
 msgstr ""
 
-#: includes/class-admin.php:262
-#: includes/class-admin.php:1077
+#: includes/class-admin.php:263
+#: includes/class-admin.php:1163
 msgid "Job refreshed from Zoho Recruit."
 msgstr ""
 
-#: includes/class-admin.php:263
+#: includes/class-admin.php:264
 msgid "Something went wrong. Please try again."
 msgstr ""
 
-#: includes/class-admin.php:265
+#: includes/class-admin.php:266
 msgid "Replace what you have written with this layout?"
 msgstr ""
 
-#: includes/class-admin.php:266
+#: includes/class-admin.php:267
 msgid "Page"
 msgstr ""
 
-#: includes/class-admin.php:374
+#: includes/class-admin.php:375
 msgid "Sync"
 msgstr ""
 
-#: includes/class-admin.php:376
+#: includes/class-admin.php:377
 msgid "Frontend"
 msgstr ""
 
-#: includes/class-admin.php:377
+#: includes/class-admin.php:378
 msgid "Display"
 msgstr ""
 
-#: includes/class-admin.php:378
+#: includes/class-admin.php:379
 msgid "Structured Data"
 msgstr ""
 
-#: includes/class-admin.php:379
+#: includes/class-admin.php:380
 msgid "Advanced"
 msgstr ""
 
-#: includes/class-admin.php:485
+#: includes/class-admin.php:486
 msgid "You do not have permission to access this page."
 msgstr ""
 
-#: includes/class-admin.php:522
+#: includes/class-admin.php:523
 msgid "Zoho Recruit syncing is paused after repeated authentication failures."
 msgstr ""
 
-#: includes/class-admin.php:524
-#: includes/class-admin.php:531
+#: includes/class-admin.php:525
+#: includes/class-admin.php:532
 msgid "Reconnect Zoho Recruit"
 msgstr ""
 
-#: includes/class-admin.php:529
+#: includes/class-admin.php:530
 msgid "The stored Zoho Recruit credentials can no longer be decrypted because this site's security keys changed."
 msgstr ""
 
-#: includes/class-admin.php:536
+#: includes/class-admin.php:537
 msgid "This site is not connected to Zoho Recruit yet, so no jobs can be synchronized."
 msgstr ""
 
-#: includes/class-admin.php:538
+#: includes/class-admin.php:539
 msgid "Connect now"
 msgstr ""
 
-#: includes/class-admin.php:545
+#: includes/class-admin.php:546
 msgid "WP-Cron is disabled on this site (DISABLE_WP_CRON). Scheduled syncing will only run if a system cron job calls wp-cron.php."
 msgstr ""
 
-#: includes/class-admin.php:616
+#: includes/class-admin.php:617
 msgid "Dry run started. No changes will be written."
 msgstr ""
 
-#: includes/class-admin.php:618
+#: includes/class-admin.php:619
 msgid "Full resync started. Every job will be rewritten from Zoho, including any fields edited here."
 msgstr ""
 
-#: includes/class-admin.php:620
+#: includes/class-admin.php:621
 msgid "Sync started. Progress is shown below."
 msgstr ""
 
-#: includes/class-admin.php:642
+#: includes/class-admin.php:643
 #: includes/class-cli.php:287
 msgid "The running sync was cancelled."
 msgstr ""
 
-#: includes/class-admin.php:643
+#: includes/class-admin.php:644
 #: includes/class-cli.php:292
 msgid "No sync was running."
 msgstr ""
 
 #. translators: 1: Zoho module name, 2: number of job openings.
-#: includes/class-admin.php:666
+#: includes/class-admin.php:667
 #, php-format
 msgid "Connection successful. Module \"%1$s\" reports %2$s job openings."
 msgstr ""
 
-#: includes/class-admin.php:710
+#: includes/class-admin.php:711
 msgid "Zoho credentials saved."
 msgstr ""
 
-#: includes/class-admin.php:745
+#: includes/class-admin.php:746
 msgid "Field mapping saved."
 msgstr ""
 
-#: includes/class-admin.php:759
+#: includes/class-admin.php:772
+msgid "Nothing was deleted. Type DELETE in the confirmation box to confirm."
+msgstr ""
+
+#. translators: 1: number of jobs, 2: number of taxonomy terms.
+#: includes/class-admin.php:800
+#, php-format
+msgid "%1$s jobs and %2$s unused terms deleted"
+msgstr ""
+
+#: includes/class-admin.php:807
+msgid "sync history cleared"
+msgstr ""
+
+#: includes/class-admin.php:813
+msgid "field mapping reset to defaults"
+msgstr ""
+
+#: includes/class-admin.php:817
+msgid "Nothing was deleted. Choose at least one thing to remove."
+msgstr ""
+
+#. translators: %s: list of what was removed.
+#: includes/class-admin.php:827
+#, php-format
+msgid "Done: %s. Run a full sync to rebuild from Zoho Recruit."
+msgstr ""
+
+#: includes/class-admin.php:845
 msgid "The default field mapping was restored."
 msgstr ""
 
-#: includes/class-admin.php:783
+#: includes/class-admin.php:869
 msgid "Field mapping imported."
 msgstr ""
 
-#: includes/class-admin.php:852
+#: includes/class-admin.php:938
 #: includes/class-field-mapper.php:936
 msgid "The uploaded file is not valid JSON."
 msgstr ""
 
-#: includes/class-admin.php:865
+#: includes/class-admin.php:951
 msgid "Settings imported. Credentials and tokens were not changed."
 msgstr ""
 
-#: includes/class-admin.php:882
+#: includes/class-admin.php:968
 msgid "Choose a JSON file to upload."
 msgstr ""
 
-#: includes/class-admin.php:889
+#: includes/class-admin.php:975
 msgid "The upload could not be read."
 msgstr ""
 
-#: includes/class-admin.php:896
+#: includes/class-admin.php:982
 msgid "The file is empty or larger than 1 MB."
 msgstr ""
 
-#: includes/class-admin.php:907
+#: includes/class-admin.php:993
 msgid "The uploaded file could not be read."
 msgstr ""
 
 #. translators: %d: number of failed checks.
-#: includes/class-admin.php:936
+#: includes/class-admin.php:1022
 #, php-format
 msgid "The check finished with %d problem. The report is below."
 msgid_plural "The check finished with %d problems. The report is below."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/class-admin.php:939
+#: includes/class-admin.php:1025
 msgid "The check finished with no problems. The report is below."
 msgstr ""
 
-#: includes/class-admin.php:981
+#: includes/class-admin.php:1067
 msgid "Sync logs cleared."
 msgstr ""
 
 #. translators: %s: number of fields.
-#: includes/class-admin.php:1002
+#: includes/class-admin.php:1088
 #, php-format
 msgid "Loaded %s fields from Zoho Recruit."
 msgstr ""
 
-#: includes/class-admin.php:1021
+#: includes/class-admin.php:1107
 msgid "A new webhook URL was generated. Update it in Zoho Recruit."
 msgstr ""
 
-#: includes/class-admin.php:1060
+#: includes/class-admin.php:1146
 msgid "You do not have permission to refresh this job."
 msgstr ""
 
-#: includes/class-admin.php:1066
+#: includes/class-admin.php:1152
 #: includes/class-rest-api.php:666
 msgid "This job was not imported from Zoho Recruit."
 msgstr ""
 
-#: includes/class-admin.php:1076
+#: includes/class-admin.php:1162
 msgid "Job reset to its Zoho Recruit values."
 msgstr ""
 
-#: includes/class-admin.php:1105
+#: includes/class-admin.php:1191
 msgid "Job Status"
 msgstr ""
 
-#: includes/class-admin.php:1106
+#: includes/class-admin.php:1192
 msgid "Job Code"
 msgstr ""
 
-#: includes/class-admin.php:1108
+#: includes/class-admin.php:1194
 msgid "Closing Date"
 msgstr ""
 
-#: includes/class-admin.php:1109
+#: includes/class-admin.php:1195
 msgid "Last Sync"
 msgstr ""
 
-#: includes/class-admin.php:1273
+#: includes/class-admin.php:1359
 msgid "All job statuses"
 msgstr ""
 
-#: includes/class-admin.php:1281
+#: includes/class-admin.php:1367
 msgid "Filter by job status"
 msgstr ""
 
 #. translators: %s: taxonomy name, for example Department.
-#: includes/class-admin.php:1331
+#: includes/class-admin.php:1417
 #, php-format
 msgid "All %s"
 msgstr ""

@@ -160,6 +160,12 @@ anywhere, deliberately.
   that is not a link is skipped rather than accepted -- `esc_url_raw()` is a
   sanitizer, not a validator, and it will happily turn `ZR_17_JOB` into
   `http://ZR_17_JOB`. A live site shipped that on every job for a week.
+- **Un-mapping a field does not unwrite it.** A mapping row stops applying from
+  the next sync; the meta it already wrote stays. That is how a live site ended
+  up with `http://ZR_1_JOB` on every job long after the row was removed.
+  `Settings → Advanced → Start again` (`Job::purge_synced()` /
+  `purge_orphan_terms()`) is the way back — it deletes only posts that carry a
+  Zoho record ID, so manual jobs survive, and it requires typing DELETE.
 - **Template overrides only count in `yourtheme/jobs-sync-for-zoho-recruit/`.**
   Matching a bare `archive.php` used to pick up the theme's own blog template.
 - **Block themes never load the classic PHP templates.** They call

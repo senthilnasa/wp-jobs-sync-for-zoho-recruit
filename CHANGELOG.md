@@ -165,6 +165,14 @@ version onwards.
   link from the record ID the sync already stores. The record ID is what
   resolves the posting; anything after it is decoration and is ignored by Zoho,
   so a de-duplicated WordPress slug cannot break it.
+- A **Start again** section on the Advanced settings tab, which deletes the
+  synchronized jobs, the sync history and the field mapping so a full sync can
+  rebuild them. Un-mapping a field stops the plugin writing it but does not
+  remove what it already wrote, so a mapping mistake can outlive the mapping by
+  hundreds of posts; this is the way back. Zoho keeps the originals, jobs added
+  by hand in WordPress are never touched, and the connection and settings are
+  left alone. Each part is chosen separately and the word DELETE has to be
+  typed.
 - Each source for the apply link is now checked for being a link before it is
   accepted, and a source that is not one is skipped rather than used. A live
   site had every apply button pointing at `http://ZR_17_JOB`: a job code had

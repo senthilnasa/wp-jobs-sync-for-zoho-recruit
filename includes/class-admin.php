@@ -130,6 +130,7 @@ class Admin {
 		add_action( 'admin_post_jszr_export_settings', array( $this, 'handle_export_settings' ) );
 		add_action( 'admin_post_jszr_import_settings', array( $this, 'handle_import_settings' ) );
 		add_action( 'admin_post_jszr_clear_logs', array( $this, 'handle_clear_logs' ) );
+		add_action( 'admin_post_jszr_purge_data', array( $this, 'handle_purge_data' ) );
 		add_action( 'admin_post_jszr_refresh_fields', array( $this, 'handle_refresh_fields' ) );
 		add_action( 'admin_post_jszr_regenerate_webhook', array( $this, 'handle_regenerate_webhook' ) );
 		add_action( 'admin_post_jszr_resync_job', array( $this, 'handle_resync_job' ) );
@@ -744,6 +745,91 @@ class Admin {
 
 		$this->notice( 'success', __( 'Field mapping saved.', 'jobs-sync-for-zoho-recruit' ) );
 		$this->redirect( self::MAPPING_SLUG );
+	}
+
+	/**
+	 * Delete synchronized data so the next sync can rebuild it.
+	 *
+	 * Un-mapping a field does not remove the meta it already wrote, so a
+	 * mapping mistake can outlive the mapping by hundreds of posts. This is the
+	 * way back: throw away the local copies and sync again. Zoho keeps the
+	 * originals, and jobs added by hand are never touched.
+	 *
+	 * @return void
+	 */
+	public function handle_purge_data() {
+		jszr_verify_admin_request( 'jszr_purge_data' );
+
+		// phpcs:ignore WordPress.Security.NonceVerification -- Nonce and capability verified by jszr_verify_admin_request() above.
+		$confirmation = isset( $_POST['jszr_purge_confirm'] )
+			// phpcs:ignore WordPress.Security.NonceVerification -- As above.
+			? strtoupper( trim( sanitize_text_field( wp_unslash( $_POST['jszr_purge_confirm'] ) ) ) )
+			: '';
+
+		if ( 'DELETE' !== $confirmation ) {
+			$this->notice(
+				'error',
+				__( 'Nothing was deleted. Type DELETE in the confirmation box to confirm.', 'jobs-sync-for-zoho-recruit' )
+			);
+
+			$this->redirect( self::SETTINGS_SLUG, array( 'tab' => 'advanced' ) );
+		}
+
+		// Only the keys are read, and each is passed through sanitize_key before
+		// it is compared, so the values never matter.
+		// phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Verified by jszr_verify_admin_request() above; keys are sanitized below.
+		$raw_purge = isset( $_POST['jszr_purge'] ) && is_array( $_POST['jszr_purge'] ) ? $_POST['jszr_purge'] : array();
+		$what      = array_map( 'sanitize_key', array_keys( $raw_purge ) );
+
+		$done = array();
+
+		if ( in_array( 'jobs', $what, true ) ) {
+			$jobs  = Job::purge_synced();
+			$terms = Job::purge_orphan_terms();
+
+			Logger::info(
+				'purge_jobs',
+				'Synchronized jobs were deleted from the settings screen.',
+				array(
+					'jobs'  => $jobs,
+					'terms' => $terms,
+				)
+			);
+
+			/* translators: 1: number of jobs, 2: number of taxonomy terms. */
+			$done[] = sprintf( __( '%1$s jobs and %2$s unused terms deleted', 'jobs-sync-for-zoho-recruit' ), number_format_i18n( $jobs ), number_format_i18n( $terms ) );
+		}
+
+		if ( in_array( 'logs', $what, true ) ) {
+			Logger::clear();
+			Sync_Queue::clear();
+
+			$done[] = __( 'sync history cleared', 'jobs-sync-for-zoho-recruit' );
+		}
+
+		if ( in_array( 'mapping', $what, true ) ) {
+			Field_Mapper::reset_mapping();
+
+			$done[] = __( 'field mapping reset to defaults', 'jobs-sync-for-zoho-recruit' );
+		}
+
+		if ( empty( $done ) ) {
+			$this->notice( 'error', __( 'Nothing was deleted. Choose at least one thing to remove.', 'jobs-sync-for-zoho-recruit' ) );
+			$this->redirect( self::SETTINGS_SLUG, array( 'tab' => 'advanced' ) );
+		}
+
+		$this->sync->invalidate_caches();
+
+		$this->notice(
+			'success',
+			sprintf(
+				/* translators: %s: list of what was removed. */
+				__( 'Done: %s. Run a full sync to rebuild from Zoho Recruit.', 'jobs-sync-for-zoho-recruit' ),
+				implode( ', ', $done )
+			)
+		);
+
+		$this->redirect( self::SETTINGS_SLUG, array( 'tab' => 'advanced' ) );
 	}
 
 	/**

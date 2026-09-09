@@ -111,6 +111,13 @@ Newer versions skip a source that is not a link and fall through to the career
 site, so the button either works or is absent. **Run check** on the Sync Logs
 screen counts active jobs with no application link.
 
+**Removing the mapping row does not remove what it already wrote.** The row
+stops the plugin writing that field from the next sync onward; the values
+already on existing jobs stay where they are. That is why a wrong value can
+outlive the mapping that caused it. Newer versions ignore a stored value that
+is not a link, so the button recovers on its own -- but to clear the meta
+itself, use **Settings → Advanced → Start again** and run a full sync.
+
 Two things override the career site address, in this order, if you need
 something else:
 
@@ -181,6 +188,28 @@ account with customised labels:
 The last one is worth knowing: there is no field on a job opening that holds a
 link to the public posting, so the apply button is built from the career site
 address instead. See [No apply button appears on any job](#no-apply-button-appears-on-any-job).
+
+---
+
+## Starting again from a clean copy
+
+**Settings → Advanced → Start again** deletes the local copies so a full sync
+can rebuild them. Use it after a mapping mistake, or whenever the local data has
+drifted far enough that fixing it in place is not worth it.
+
+| Option | What goes |
+| --- | --- |
+| Synchronized jobs | Every job with a Zoho record ID, and any taxonomy term left with nothing to describe |
+| Sync history | Run records and log entries |
+| Field mapping | Reset to the shipped defaults |
+
+Zoho Recruit keeps the originals, so nothing is lost that a full sync will not
+bring back. **Jobs you created by hand in WordPress are never touched** -- the
+rule is the same one the sync follows: no Zoho record ID, no deletion. The Zoho
+connection and your settings are left alone.
+
+Each part is chosen separately, and the word `DELETE` has to be typed before
+anything happens. Afterwards, run **Full Sync**.
 
 ---
 
