@@ -210,8 +210,11 @@
 
 		window
 			.fetch( url, {
+				// Ask for the page exactly as a navigation would. The server never
+				// reads an XMLHttpRequest marker, and sending one is what lets a
+				// firewall or proxy answer this request differently from a click.
 				credentials: 'same-origin',
-				headers: { 'X-Requested-With': 'XMLHttpRequest' },
+				headers: { Accept: 'text/html' },
 			} )
 			.then( function ( response ) {
 				if ( ! response.ok ) {
@@ -299,8 +302,11 @@
 
 		window
 			.fetch( url, {
+				// Ask for the page exactly as a navigation would. The server never
+				// reads an XMLHttpRequest marker, and sending one is what lets a
+				// firewall or proxy answer this request differently from a click.
 				credentials: 'same-origin',
-				headers: { 'X-Requested-With': 'XMLHttpRequest' },
+				headers: { Accept: 'text/html' },
 			} )
 			.then( function ( response ) {
 				if ( ! response.ok ) {
@@ -318,6 +324,32 @@
 
 				if ( push ) {
 					window.history.pushState( { jszr: true }, '', url );
+				}
+
+				// A page link sits at the bottom of the list, so after the swap
+				// the visitor is looking at the end of a list that just changed.
+				// Bring the start of the new results into view -- the listing,
+				// not the top of the page.
+				const results = root.querySelector( '.jszr-jobs__results' );
+
+				if ( results ) {
+					const top = results.getBoundingClientRect().top;
+
+					if ( top < 0 || top > window.innerHeight * 0.6 ) {
+						const reduce =
+							typeof window.matchMedia === 'function' &&
+							window.matchMedia(
+								'(prefers-reduced-motion: reduce)'
+							).matches;
+
+						// window.scrollTo rather than scrollIntoView: it behaves the
+						// same in every browser, and the offset leaves a little
+						// room above the listing.
+						window.scrollTo( {
+							top: Math.max( 0, top + window.pageYOffset - 16 ),
+							behavior: reduce ? 'auto' : 'smooth',
+						} );
+					}
 				}
 
 				const heading = root.querySelector( '.jszr-jobs__count' );

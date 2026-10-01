@@ -63,7 +63,13 @@ and behaves exactly as it did.
   point at a real server-rendered page, so the script now falls back to a plain
   navigation to that page instead of showing the panel, and logs the reason to
   the browser console. The panel remains only where navigating would reload
-  the current URL.
+  the current URL. The request itself no longer carries an `X-Requested-With`
+  header, which nothing on the server read and which is what lets a firewall
+  or proxy treat it differently from a click.
+- Choosing another page landed the visitor at the top of the page. Each listing
+  now has its own `id`, every pagination link carries it as a fragment, and the
+  in-place swap scrolls to the start of the listing, so page two opens on the
+  jobs whether the request was in place, a plain navigation or the fallback.
 
 ## [1.0.1] - 2026-09-18
 

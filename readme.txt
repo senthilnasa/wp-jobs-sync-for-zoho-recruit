@@ -185,7 +185,8 @@ No. Every write path resolves the job by its Zoho record ID through a single loo
 * Custom card and job-details HTML may now contain inline SVG icons, buttons and responsive images, and inline styles keep `list-style`, `inset` and `transition`. Scripts, event handlers and frames are still removed.
 * New `jszr_allowed_template_css` and `jszr_named_templates` filters.
 * Fixed: filtering a listing on a page whose URL already had a query string produced a URL with two question marks.
-* Fixed: moving between listing pages could show "Unable to load jobs" on sites where the in-place request is blocked or altered. The script now falls back to a normal page load and logs the reason to the browser console.
+* Fixed: moving between listing pages could show "Unable to load jobs" on sites where the in-place request is blocked or altered. The request now looks exactly like a normal page visit, and if it still fails the script falls back to a normal page load and logs the reason to the browser console.
+* Fixed: choosing another page landed at the top of the page. Page links now carry the listing's anchor and the in-place swap scrolls to the start of the listing.
 
 = 1.0.1 =
 * The Apply button now uses the Job Apply URL from Zoho Recruit. Zoho only returns it when a job is fetched by ID with `publish_URL=true`, so the sync fetches each active job without a stored link once more and keeps the link it finds. New "Apply link from Zoho" setting on the Frontend tab, on by default; the career site address remains the fallback.

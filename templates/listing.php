@@ -21,8 +21,19 @@
  */
 
 defined( 'ABSPATH' ) || exit;
+
+/*
+ * Each listing on a page gets its own id, so pagination links can carry a
+ * fragment that lands the visitor on the listing rather than at the top of the
+ * page -- the only sensible place to arrive after choosing "page 2", whether
+ * the request was a plain navigation or the script's fallback to one.
+ */
+$GLOBALS['jszr_listing_index'] = isset( $GLOBALS['jszr_listing_index'] ) ? (int) $GLOBALS['jszr_listing_index'] + 1 : 1;
+
+$jszr_listing_id = 'jszr-jobs-' . (int) $GLOBALS['jszr_listing_index'];
 ?>
-<div class="jszr-jobs jszr-scope jszr-jobs--<?php echo esc_attr( $style ); ?> jszr-jobs--layout-<?php echo esc_attr( isset( $layout ) ? $layout : 'default' ); ?>"
+<div id="<?php echo esc_attr( $jszr_listing_id ); ?>"
+	class="jszr-jobs jszr-scope jszr-jobs--<?php echo esc_attr( $style ); ?> jszr-jobs--layout-<?php echo esc_attr( isset( $layout ) ? $layout : 'default' ); ?>"
 	<?php echo 'grid' === $style ? 'style="--jszr-columns:' . esc_attr( (string) $columns ) . '"' : ''; ?>>
 
 	<?php if ( $show_filters || $show_search || ! empty( $show_sort ) ) : ?>
@@ -110,6 +121,7 @@ defined( 'ABSPATH' ) || exit;
 					array(
 						'query'  => $query,
 						'params' => $params,
+						'anchor' => $jszr_listing_id,
 					)
 				);
 				?>

@@ -8,6 +8,7 @@
  *
  * @var \WP_Query $query  Job query.
  * @var array     $params Listing parameters.
+ * @var string    $anchor Element id of the listing, so page links land on it.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -18,7 +19,8 @@ if ( $jszr_total < 2 ) {
 	return;
 }
 
-$jszr_current = max( 1, (int) ( $params['page'] ?? 1 ) );
+$jszr_current  = max( 1, (int) ( $params['page'] ?? 1 ) );
+$jszr_fragment = ! empty( $anchor ) ? '#' . sanitize_html_class( (string) $anchor ) : '';
 
 /*
  * "Load more" is one link to the next page. Without JavaScript it simply opens
@@ -38,7 +40,7 @@ if ( 'load_more' === jszr_get_setting( 'pagination_style', 'numbers' ) ) {
 	?>
 	<nav class="jszr-pagination jszr-pagination--more" aria-label="<?php esc_attr_e( 'Job listing pages', 'jobs-sync-for-zoho-recruit' ); ?>">
 		<a class="jszr-button jszr-button--secondary jszr-pagination__more"
-			href="<?php echo esc_url( add_query_arg( 'jszr_page', $jszr_current + 1 ) ); ?>"
+			href="<?php echo esc_url( add_query_arg( 'jszr_page', $jszr_current + 1 ) . $jszr_fragment ); ?>"
 			data-jszr-append="true"
 			data-jszr-page="<?php echo esc_attr( (string) ( $jszr_current + 1 ) ); ?>"
 			data-jszr-pages="<?php echo esc_attr( (string) $jszr_total ); ?>">
@@ -51,13 +53,14 @@ if ( 'load_more' === jszr_get_setting( 'pagination_style', 'numbers' ) ) {
 
 $jszr_links = paginate_links(
 	array(
-		'base'      => add_query_arg( 'jszr_page', '%#%' ),
-		'format'    => '',
-		'current'   => $jszr_current,
-		'total'     => $jszr_total,
-		'type'      => 'array',
-		'prev_text' => __( '&laquo; Previous', 'jobs-sync-for-zoho-recruit' ),
-		'next_text' => __( 'Next &raquo;', 'jobs-sync-for-zoho-recruit' ),
+		'base'         => add_query_arg( 'jszr_page', '%#%' ),
+		'format'       => '',
+		'current'      => $jszr_current,
+		'total'        => $jszr_total,
+		'type'         => 'array',
+		'prev_text'    => __( '&laquo; Previous', 'jobs-sync-for-zoho-recruit' ),
+		'next_text'    => __( 'Next &raquo;', 'jobs-sync-for-zoho-recruit' ),
+		'add_fragment' => $jszr_fragment,
 	)
 );
 

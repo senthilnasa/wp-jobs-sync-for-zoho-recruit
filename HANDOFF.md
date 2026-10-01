@@ -274,6 +274,12 @@ anywhere, deliberately.
   `window.location.assign( url )` on any failure and logs the reason with
   `console.warn`, keeping the panel only when the URL equals the current one
   (where navigating would loop). To diagnose a live site, read that warning.
+  The fetch also stopped sending `X-Requested-With: XMLHttpRequest` -- nothing
+  server-side read it, and it was the one thing distinguishing the request
+  from a click for a WAF. Pagination links carry `#jszr-jobs-N` (the listing's
+  own id, counted per page in `listing.php`) so every path lands on the
+  listing; the in-place swap scrolls with `window.scrollTo`, because
+  `scrollIntoView` did nothing in the embedded test browser.
 - **Slugs may be paths.** `Settings::sanitize_slug_path()` keeps
   `careers/openings`; `sanitize_title()` alone would have flattened it. Needed
   so Krea's sub-pages can be children of `/careers/` without the post type
