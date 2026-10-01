@@ -56,6 +56,14 @@ and behaves exactly as it did.
 - Filtering a listing on a page whose URL already carried a query string (for
   example a tracking parameter) produced a URL with two question marks. The
   filter form now replaces the query string instead of appending to it.
+- Moving between pages of a listing could end in the "Unable to load jobs"
+  panel on sites where the in-place request does not come back as expected
+  (a security layer answering XMLHttpRequest differently, a cache or proxy
+  returning a stripped page). The pagination links and the filter form always
+  point at a real server-rendered page, so the script now falls back to a plain
+  navigation to that page instead of showing the panel, and logs the reason to
+  the browser console. The panel remains only where navigating would reload
+  the current URL.
 
 ## [1.0.1] - 2026-09-18
 

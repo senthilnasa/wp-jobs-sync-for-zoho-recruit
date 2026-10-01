@@ -265,6 +265,15 @@ anywhere, deliberately.
   `jszr_status` in a URL is ignored while `show_status_filter` is off, so a
   crafted link cannot list closed jobs on a site that hides them. Same for
   `jszr_location_q` and `show_location_search`.
+- **A failed in-place load navigates; it does not show the error panel.**
+  A live site reported "Unable to load jobs" when moving between pages. It
+  could not be reproduced in wp-env (pagination fetched 200s and swapped
+  cleanly), so the cause is environmental -- a WAF or proxy treating the
+  `X-Requested-With` request differently, or a cache returning a page without
+  the results region. `load()` in `public/js/jobs.js` now falls back to
+  `window.location.assign( url )` on any failure and logs the reason with
+  `console.warn`, keeping the panel only when the URL equals the current one
+  (where navigating would loop). To diagnose a live site, read that warning.
 - **Slugs may be paths.** `Settings::sanitize_slug_path()` keeps
   `careers/openings`; `sanitize_title()` alone would have flattened it. Needed
   so Krea's sub-pages can be children of `/careers/` without the post type

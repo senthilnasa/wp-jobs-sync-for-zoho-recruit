@@ -13,7 +13,9 @@
  *   loading        skeleton cards, results marked busy
  *   success        the new results, swapped in
  *   success, none  the server's own empty state
- *   failure        an error panel with a retry button
+ *   failure        a plain navigation to the same URL, which the server
+ *                  renders in full; the error panel with a retry button is
+ *                  only shown when navigating would reload the current URL
  *
  * Results are fetched as HTML from the same URL the form would have navigated
  * to, and the rendered region is swapped in. Nothing about the card markup is
@@ -325,8 +327,41 @@
 					heading.focus( { preventScroll: true } );
 				}
 			} )
-			.catch( function () {
+			.catch( function ( error ) {
 				clearLoading( root );
+
+				// Say why, so a site that only ever sees the fallback can be
+				// debugged from its own console.
+				if (
+					window.console &&
+					typeof window.console.warn === 'function'
+				) {
+					// eslint-disable-next-line no-console
+					window.console.warn(
+						'Jobs Sync for Zoho Recruit: could not load the listing in place (' +
+							( error && error.message
+								? error.message
+								: 'unknown error' ) +
+							'); falling back to a page load.'
+					);
+				}
+
+				/*
+				 * The URL is a real page: every pagination link and the filter
+				 * form resolve to server-rendered HTML. If fetching it in place
+				 * failed -- a security layer that dislikes XMLHttpRequest, a
+				 * cache serving something unexpected, a stripped response --
+				 * a plain navigation is what the visitor would have had without
+				 * this script, and it is strictly better than an error panel
+				 * sitting over a listing that exists. The panel is kept only
+				 * for the one case where navigating would loop: reloading the
+				 * URL already in the address bar.
+				 */
+				if ( url !== window.location.href ) {
+					window.location.assign( url );
+					return;
+				}
+
 				showError( root, url );
 			} );
 	}
