@@ -269,6 +269,110 @@
 	margin: 0;
 }
 
+/* Two search boxes side by side: keyword and location. */
+.jszr-filters__search-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--jszr-space-3);
+}
+
+.jszr-filters__search-row .jszr-filters__search {
+	flex: 1 1 16rem;
+}
+
+/*
+ * Pills: radio buttons drawn as a row of chips. The fieldset also carries
+ * .jszr-filters__field for spacing, and that class stacks its children, so
+ * the direction is set back to a row here.
+ */
+.jszr-scope .jszr-filters__pills {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--jszr-space-2);
+	margin: 0;
+	padding: 0;
+	border: 0;
+	min-width: 0;
+	flex-basis: 100%;
+}
+
+.jszr-scope .jszr-filters__pills legend {
+	float: left;
+	width: 100%;
+	margin: 0 0 var(--jszr-space-1);
+	padding: 0;
+	font-size: var(--jszr-text-sm);
+	font-weight: 600;
+	letter-spacing: 0.01em;
+}
+
+.jszr-scope .jszr-filters__field .jszr-pill {
+	position: relative;
+	display: inline-flex;
+	width: auto;
+	margin: 0;
+	font-size: var(--jszr-text-sm);
+	font-weight: 500;
+	letter-spacing: normal;
+	text-transform: none;
+}
+
+.jszr-scope .jszr-pill input {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	border: 0;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+.jszr-scope .jszr-pill span {
+	display: inline-flex;
+	align-items: center;
+	min-height: 2.25rem;
+	padding: var(--jszr-space-1) var(--jszr-space-4);
+	border: 1px solid var(--jszr-border-color);
+	border-radius: var(--jszr-radius-pill);
+	background: transparent;
+	color: inherit;
+	line-height: 1.2;
+	cursor: pointer;
+	transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+}
+
+.jszr-scope .jszr-pill:hover span {
+	border-color: var(--jszr-accent);
+}
+
+.jszr-scope .jszr-pill input:checked + span {
+	border-color: var(--jszr-accent);
+	background: var(--jszr-accent-soft);
+	color: var(--jszr-accent);
+	font-weight: 600;
+}
+
+.jszr-scope .jszr-pill input:focus-visible + span {
+	outline: 2px solid var(--jszr-accent);
+	outline-offset: 2px;
+}
+
+/* Load more: a single centred button instead of page numbers. */
+.jszr-pagination--more {
+	display: flex;
+	justify-content: center;
+}
+
+.jszr-scope .jszr-pagination__more[aria-busy="true"] {
+	opacity: 0.6;
+	pointer-events: none;
+}
+
 /* Buttons ---------------------------------------------------------------- */
 
 /*

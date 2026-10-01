@@ -11,6 +11,7 @@
  * @var array     $params          Normalised listing parameters.
  * @var string    $style           list|grid.
  * @var string    $layout          Card layout key.
+ * @var string    $card_template   Named card template, or an empty string.
  * @var int       $columns         Grid column count.
  * @var bool      $show_filters    Whether to render taxonomy filters.
  * @var bool      $show_search     Whether to render the search box.
@@ -87,9 +88,10 @@ defined( 'ABSPATH' ) || exit;
 						jszr_get_template(
 							'card.php',
 							array(
-								'post_id'      => get_the_ID(),
-								'show_excerpt' => $show_excerpt,
-								'layout'       => isset( $layout ) ? $layout : '',
+								'post_id'       => get_the_ID(),
+								'show_excerpt'  => $show_excerpt,
+								'layout'        => isset( $layout ) ? $layout : '',
+								'card_template' => isset( $card_template ) ? (string) $card_template : '',
 							)
 						);
 						?>

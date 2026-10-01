@@ -4,7 +4,7 @@ Tags: jobs, careers, recruitment, job board, hiring
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -42,7 +42,9 @@ This plugin reads Job Openings. It does not read, store or transmit candidate re
 
 `[zoho_jobs per_page="10" show_filters="true" show_search="true" style="grid"]`
 
-Supported attributes: `per_page`, `search`, `department`, `location`, `employment_type`, `category`, `experience`, `orderby`, `order`, `style`, `columns`, `show_filters`, `show_search`, `show_pagination`, `show_excerpt`.
+Supported attributes: `per_page`, `search`, `location_search`, `department`, `location`, `employment_type`, `category`, `experience`, `orderby`, `order`, `status`, `style`, `layout`, `template`, `columns`, `show_filters`, `show_search`, `show_sort`, `show_pagination`, `show_excerpt`, `exclude`, `related`.
+
+One page per group of jobs is the usual pattern: `[zoho_jobs category="staff-openings" template="staff"]` lists one category with a named card design. Settings → Display lists a ready-made shortcode for every term on your site.
 
 Two smaller shortcodes are available for single job layouts: `[zoho_job_apply]` and `[zoho_job_meta]`.
 
@@ -171,10 +173,33 @@ No. Every write path resolves the job by its Zoho record ID through a single loo
 
 == Changelog ==
 
+= 1.1.0 =
+* Named card templates: save any number of card designs on the Display tab and pick one per listing with `template="name"`.
+* A Shortcodes panel on the Display tab with a ready-to-paste shortcode for every department, category, location, employment type and experience term.
+* New card tags: `{posted_ago}`, `{org_name}` and `{status_label}`.
+* Filters can be drawn as pills, can be relabelled for visitors, and can include an opt-in Open / Closed / Expired status filter.
+* Search settings: label, placeholder, which fields a keyword matches, and an optional location text box.
+* Pagination can be a "Load more" button instead of page numbers.
+* `related="department"` and `exclude` attributes for a related-openings list on a job page.
+* Job and archive URL slugs may contain a path, such as `careers/openings`.
+* Custom card and job-details HTML may now contain inline SVG icons, buttons and responsive images, and inline styles keep `list-style`, `inset` and `transition`. Scripts, event handlers and frames are still removed.
+* New `jszr_allowed_template_css` and `jszr_named_templates` filters.
+* Fixed: filtering a listing on a page whose URL already had a query string produced a URL with two question marks.
+
+= 1.0.1 =
+* The Apply button now uses the Job Apply URL from Zoho Recruit. Zoho only returns it when a job is fetched by ID with `publish_URL=true`, so the sync fetches each active job without a stored link once more and keeps the link it finds. New "Apply link from Zoho" setting on the Frontend tab, on by default; the career site address remains the fallback.
+* New `jszr_record_query_args` and `jszr_apply_url_fields` filters.
+
 = 1.0.0 =
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.1.0 =
+New listing options: named card templates, pill filters, a location search box, "Load more" pagination and per-category shortcodes. Every one is off by default; existing sites look the same after updating.
+
+= 1.0.1 =
+Apply buttons now link to the Job Apply URL that Zoho Recruit returns for each job. Run a sync after updating.
 
 = 1.0.0 =
 Initial release.

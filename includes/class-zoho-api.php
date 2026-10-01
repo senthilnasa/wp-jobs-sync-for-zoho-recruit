@@ -125,6 +125,13 @@ class Zoho_API {
 	/**
 	 * Fetch a single job opening by Zoho record ID.
 	 *
+	 * The request carries `publish_URL=true`. Zoho Recruit support confirmed
+	 * that the Job Apply URL of a posting is only included in a Get Record by
+	 * ID response when that parameter is present; without it the record has
+	 * no link to the public posting at all. The list endpoint has no
+	 * documented equivalent, which is why the sync fetches single records to
+	 * fill the link in (see Sync::complete_apply_url()).
+	 *
 	 * @param string $record_id Zoho record ID.
 	 * @return array|\WP_Error Record array, or WP_Error. Empty array when absent.
 	 */
@@ -135,7 +142,18 @@ class Zoho_API {
 			return new \WP_Error( 'jszr_invalid_record_id', __( 'Invalid Zoho record ID.', 'jobs-sync-for-zoho-recruit' ) );
 		}
 
-		$response = $this->request( 'GET', '/' . $this->module() . '/' . $record_id );
+		/**
+		 * Filter the query parameters sent with a Get Record by ID request.
+		 *
+		 * `publish_URL=true` asks Zoho to include the Job Apply URL with the
+		 * record. Remove it here if an account turns out not to accept it.
+		 *
+		 * @param array  $query     Query parameters.
+		 * @param string $record_id Zoho record ID.
+		 */
+		$query = (array) apply_filters( 'jszr_record_query_args', array( 'publish_URL' => 'true' ), $record_id );
+
+		$response = $this->request( 'GET', '/' . $this->module() . '/' . $record_id, $query );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;

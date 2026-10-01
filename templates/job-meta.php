@@ -16,10 +16,9 @@ defined( 'ABSPATH' ) || exit;
 $jszr_info_template = \JobsSyncForZohoRecruit\Layouts::job_info_template();
 
 if ( '' !== $jszr_info_template ) {
-	echo wp_kses(
-		\JobsSyncForZohoRecruit\Template_Tags::render( $jszr_info_template, $post_id ),
-		\JobsSyncForZohoRecruit\Layouts::allowed_html()
-	);
+	$jszr_info_markup = \JobsSyncForZohoRecruit\Template_Tags::render( $jszr_info_template, $post_id );
+
+	echo \JobsSyncForZohoRecruit\Layouts::kses( $jszr_info_markup ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Layouts::kses() is wp_kses() with the plugin's allow-list.
 
 	return;
 }

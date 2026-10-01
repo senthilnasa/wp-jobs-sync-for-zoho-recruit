@@ -133,6 +133,112 @@
 	}
 
 	/**
+	 * Append the next page's cards below the current ones.
+	 *
+	 * Used by the "load more" pagination style. The count and the pagination
+	 * control are replaced by the fresh ones so they describe the new state.
+	 *
+	 * @param {Element} root Listing root.
+	 * @param {string}  html Fetched page HTML.
+	 * @return {Element|null} The first appended card, for focus.
+	 */
+	function appendResults( root, html ) {
+		const parsed = new window.DOMParser().parseFromString(
+			html,
+			'text/html'
+		);
+		const freshList = parsed.querySelector(
+			'.jszr-jobs__results .jszr-jobs__list:not(.jszr-skeleton .jszr-jobs__list)'
+		);
+		const currentList = root.querySelector(
+			'.jszr-jobs__results > .jszr-jobs__list'
+		);
+
+		if ( ! freshList || ! currentList ) {
+			return null;
+		}
+
+		let first = null;
+
+		Array.prototype.forEach.call(
+			freshList.querySelectorAll( ':scope > .jszr-jobs__item' ),
+			function ( item ) {
+				const imported = document.importNode( item, true );
+
+				if ( ! first ) {
+					first = imported;
+				}
+
+				currentList.appendChild( imported );
+			}
+		);
+
+		const freshNav = parsed.querySelector( '.jszr-pagination' );
+		const currentNav = root.querySelector( '.jszr-pagination' );
+
+		if ( currentNav ) {
+			if ( freshNav ) {
+				currentNav.replaceWith( document.importNode( freshNav, true ) );
+			} else {
+				currentNav.remove();
+			}
+		}
+
+		const freshCount = parsed.querySelector( '.jszr-jobs__count' );
+		const currentCount = root.querySelector( '.jszr-jobs__count' );
+
+		if ( freshCount && currentCount ) {
+			currentCount.textContent = freshCount.textContent;
+		}
+
+		return first;
+	}
+
+	/**
+	 * Fetch the next page and append it.
+	 *
+	 * @param {Element}           root Listing root.
+	 * @param {HTMLAnchorElement} link The "load more" link.
+	 */
+	function loadMore( root, link ) {
+		const url = link.href;
+
+		link.setAttribute( 'aria-busy', 'true' );
+		link.classList.add( 'is-loading' );
+
+		window
+			.fetch( url, {
+				credentials: 'same-origin',
+				headers: { 'X-Requested-With': 'XMLHttpRequest' },
+			} )
+			.then( function ( response ) {
+				if ( ! response.ok ) {
+					throw new Error( 'HTTP ' + response.status );
+				}
+
+				return response.text();
+			} )
+			.then( function ( html ) {
+				const first = appendResults( root, html );
+
+				if ( ! first ) {
+					throw new Error( 'No list in the response' );
+				}
+
+				const focusable = first.querySelector( 'a, button' );
+
+				if ( focusable ) {
+					focusable.focus( { preventScroll: false } );
+				}
+			} )
+			.catch( function () {
+				// Fall back to a plain navigation: the page exists, we just
+				// could not fetch it in place.
+				window.location.href = url;
+			} );
+	}
+
+	/**
 	 * Render the failure state, with a button that tries the same URL again.
 	 *
 	 * @param {Element} root Listing root.
@@ -247,7 +353,14 @@
 
 		const query = data.toString();
 
-		return form.action + ( query ? '?' + query : '' );
+		// The action may already carry a query string (the plugin keeps foreign
+		// parameters there and as hidden fields), so the query replaces it
+		// rather than being appended with a second "?".
+		const url = new window.URL( form.action, window.location.href );
+
+		url.search = query;
+
+		return url.toString();
 	}
 
 	/**
@@ -263,7 +376,9 @@
 		}
 
 		const hasValue = Array.prototype.some.call(
-			form.querySelectorAll( 'select, input[type="search"]' ),
+			form.querySelectorAll(
+				'select, input[type="search"], input[type="radio"]:checked'
+			),
 			function ( field ) {
 				return field.value !== '';
 			}
@@ -285,6 +400,20 @@
 					form.addEventListener( 'submit', function ( event ) {
 						event.preventDefault();
 						load( root, formUrl( form ), true );
+					} );
+
+					// A pill is a radio button; choosing one applies at once,
+					// which is what a row of pills promises. The submit button
+					// stays for visitors without scripts.
+					form.addEventListener( 'change', function ( event ) {
+						if (
+							event.target.matches(
+								'.jszr-filters__pills input[type="radio"]'
+							)
+						) {
+							toggleReset( form );
+							load( root, formUrl( form ), true );
+						}
 					} );
 				}
 			}
@@ -315,6 +444,12 @@
 				}
 
 				event.preventDefault();
+
+				if ( link.hasAttribute( 'data-jszr-append' ) ) {
+					loadMore( root, link );
+					return;
+				}
+
 				load( root, link.href, true );
 			} );
 		} );

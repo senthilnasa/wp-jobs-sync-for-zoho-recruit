@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Jobs Sync for Zoho Recruit 1.0.0\n"
+"Project-Id-Version: Jobs Sync for Zoho Recruit 1.1.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/jobs-sync-for-zoho-recruit\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-09T13:26:54+00:00\n"
+"POT-Creation-Date: 2026-10-01T08:35:20+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: jobs-sync-for-zoho-recruit\n"
@@ -70,7 +70,7 @@ msgstr ""
 #: admin/views/dashboard.php:76
 #: admin/views/dashboard.php:318
 #: admin/views/dashboard.php:337
-#: includes/class-settings.php:669
+#: includes/class-settings.php:826
 msgid "Status"
 msgstr ""
 
@@ -142,6 +142,8 @@ msgstr ""
 #: admin/views/settings.php:504
 #: includes/class-admin.php:1322
 #: includes/class-admin.php:1362
+#: includes/class-template-tags.php:287
+#: templates/filters.php:65
 msgid "Expired"
 msgstr ""
 
@@ -157,6 +159,8 @@ msgstr ""
 #: admin/views/settings.php:503
 #: includes/class-admin.php:1323
 #: includes/class-admin.php:1363
+#: includes/class-template-tags.php:290
+#: templates/filters.php:64
 msgid "Closed"
 msgstr ""
 
@@ -250,8 +254,8 @@ msgstr ""
 #: admin/views/dashboard.php:266
 #: admin/views/logs.php:107
 #: includes/class-field-mapper.php:78
-#: includes/class-settings.php:673
-#: includes/class-template-tags.php:248
+#: includes/class-settings.php:830
+#: includes/class-template-tags.php:319
 msgid "State"
 msgstr ""
 
@@ -300,8 +304,9 @@ msgstr ""
 
 #: admin/views/dashboard.php:317
 #: admin/views/dashboard.php:332
-#: includes/class-settings.php:663
-#: includes/class-template-tags.php:242
+#: includes/class-settings.php:672
+#: includes/class-settings.php:820
+#: includes/class-template-tags.php:313
 msgid "Job title"
 msgstr ""
 
@@ -309,7 +314,9 @@ msgstr ""
 #: admin/views/dashboard.php:348
 #: includes/class-post-type.php:181
 #: includes/class-post-type.php:183
-#: includes/class-settings.php:671
+#: includes/class-settings.php:828
+#: templates/filters.php:57
+#: templates/filters.php:149
 #: templates/hero.php:92
 #: blocks/job-meta/build/index.js:1
 #: blocks/job-meta/src/index.js:28
@@ -326,8 +333,10 @@ msgid "Manual"
 msgstr ""
 
 #. translators: %s: human readable time difference.
+#. translators: %s: a human readable time difference such as "3 weeks".
 #: admin/views/dashboard.php:355
 #: includes/class-admin.php:1274
+#: includes/class-template-tags.php:270
 #, php-format
 msgid "%s ago"
 msgstr ""
@@ -481,6 +490,7 @@ msgid "Transform"
 msgstr ""
 
 #: admin/views/mapping.php:94
+#: admin/views/settings.php:977
 msgid "Remove"
 msgstr ""
 
@@ -533,7 +543,7 @@ msgid "Mapping JSON file"
 msgstr ""
 
 #: admin/views/mapping.php:174
-#: templates/filters.php:165
+#: templates/filters.php:240
 msgid "Reset"
 msgstr ""
 
@@ -589,10 +599,11 @@ msgstr ""
 
 #: admin/views/meta-box.php:98
 #: includes/class-field-mapper.php:75
-#: includes/class-settings.php:636
-#: includes/class-settings.php:668
-#: includes/class-template-tags.php:246
-#: templates/job-meta.php:31
+#: includes/class-settings.php:675
+#: includes/class-settings.php:793
+#: includes/class-settings.php:825
+#: includes/class-template-tags.php:317
+#: templates/job-meta.php:30
 #: blocks/job-meta/build/index.js:1
 #: blocks/job-meta/src/index.js:44
 msgid "Job code"
@@ -610,9 +621,9 @@ msgstr ""
 
 #: admin/views/meta-box.php:121
 #: includes/class-field-mapper.php:86
-#: includes/class-settings.php:643
-#: includes/class-settings.php:684
-#: includes/class-template-tags.php:256
+#: includes/class-settings.php:800
+#: includes/class-settings.php:841
+#: includes/class-template-tags.php:328
 #: blocks/job-meta/build/index.js:1
 #: blocks/job-meta/src/index.js:66
 #: blocks/jobs/build/index.js:1
@@ -1084,386 +1095,534 @@ msgid "Applications are completed on Zoho Recruit, not on this site. A new tab k
 msgstr ""
 
 #: admin/views/settings.php:791
-msgid "Zoho career site address"
+msgid "Apply link from Zoho"
+msgstr ""
+
+#: admin/views/settings.php:797
+msgid "Read the Job Apply URL of each job from Zoho Recruit"
 msgstr ""
 
 #: admin/views/settings.php:798
-msgid "The home page of your Zoho Recruit career site, for example https://yourcompany.zohorecruit.com. Zoho does not send a link to the public job posting, so the apply button is built from this address and the Zoho record ID of each job. Leave empty if you set a fallback application URL below instead."
+msgid "Zoho Recruit only includes the Job Apply URL when a job is fetched on its own, so a job that arrives without one is fetched once more by ID during the sync. That costs one extra API call per job the first time it is seen; afterwards the stored link is reused. Turn this off to build every apply link from the career site address below instead."
+msgstr ""
+
+#: admin/views/settings.php:804
+msgid "Zoho career site address"
+msgstr ""
+
+#: admin/views/settings.php:811
+msgid "The home page of your Zoho Recruit career site, for example https://yourcompany.zohorecruit.com. When a job has no apply link from Zoho yet, the apply button is built from this address and the Zoho record ID of the job. Leave empty if you set a fallback application URL below instead."
 msgstr ""
 
 #. translators: %s: example generated apply URL.
-#: admin/views/settings.php:822
+#: admin/views/settings.php:835
 #, php-format
 msgid "Apply links will look like %s"
 msgstr ""
 
-#: admin/views/settings.php:831
+#: admin/views/settings.php:844
 msgid "Job posting path"
 msgstr ""
 
-#: admin/views/settings.php:838
+#: admin/views/settings.php:851
 msgid "Appended to the career site address to reach one posting. Placeholders: {zoho_id}, {job_code}, {slug}, {title}, {id}. Leave empty to restore the default."
 msgstr ""
 
 #. translators: 1: default path pattern, 2: alternative path pattern.
-#: admin/views/settings.php:845
+#: admin/views/settings.php:858
 #, php-format
 msgid "The default is %1$s. Add a readable segment with %2$s if you prefer links a candidate can read."
 msgstr ""
 
-#: admin/views/settings.php:854
+#: admin/views/settings.php:867
 msgid "Fallback application URL"
 msgstr ""
 
-#: admin/views/settings.php:861
+#: admin/views/settings.php:874
 msgid "Used when a Zoho record has no application URL. Placeholders: {zoho_id}, {job_code}, {slug}, {id}."
 msgstr ""
 
-#: admin/views/settings.php:867
+#: admin/views/settings.php:880
 msgid "Extra apply link parameters"
 msgstr ""
 
-#: admin/views/settings.php:874
+#: admin/views/settings.php:887
 msgid "Appended to every apply link, for example: utm_source=website&utm_medium=careers"
 msgstr ""
 
-#: admin/views/settings.php:880
+#: admin/views/settings.php:893
 msgid "Sitemap"
 msgstr ""
 
-#: admin/views/settings.php:886
+#: admin/views/settings.php:899
 msgid "Include jobs in the WordPress sitemap"
 msgstr ""
 
-#: admin/views/settings.php:896
+#: admin/views/settings.php:909
 msgid "Job listing"
 msgstr ""
 
-#: admin/views/settings.php:901
+#: admin/views/settings.php:914
 msgid "Listing layout"
 msgstr ""
 
-#: admin/views/settings.php:908
+#: admin/views/settings.php:921
 msgid "Applies to the shortcode, the block and the job archive. A copy of card.php in your theme still wins over all of these."
 msgstr ""
 
-#: admin/views/settings.php:914
+#: admin/views/settings.php:927
 msgid "Card HTML"
 msgstr ""
 
-#: admin/views/settings.php:920
+#: admin/views/settings.php:933
 msgid "Used when the layout is set to Custom. Leave it empty to fall back to the default card."
 msgstr ""
 
-#: admin/views/settings.php:926
+#: admin/views/settings.php:939
 msgid "Start from the Card layout"
 msgstr ""
 
-#: admin/views/settings.php:931
+#: admin/views/settings.php:944
 msgid "Start from the Compact layout"
 msgstr ""
 
-#: admin/views/settings.php:939
-msgid "Preview"
+#: admin/views/settings.php:950
+msgid "Named card templates"
 msgstr ""
 
-#: admin/views/settings.php:947
-msgid "The saved layout, drawn with a real job where one exists. Save the page to refresh it."
+#. translators: %s: example shortcode attribute.
+#: admin/views/settings.php:956
+#, php-format
+msgid "Extra card designs for pages that need a different look. Pick one per listing with %s. Names use letters, numbers and underscores."
 msgstr ""
 
-#: admin/views/settings.php:959
-msgid "The default card is rendered by a PHP template, so there is nothing to preview here. Choose another layout to see it."
+#: admin/views/settings.php:971
+msgid "Template name"
 msgstr ""
 
-#: admin/views/settings.php:972
-msgid "Job details"
+#: admin/views/settings.php:975
+msgid "name, for example staff"
 msgstr ""
 
-#: admin/views/settings.php:977
-msgid "Job details layout"
-msgstr ""
-
-#: admin/views/settings.php:984
-msgid "The facts shown on a single job page, by the Job Details block and by the [zoho_job_meta] shortcode."
-msgstr ""
-
-#: admin/views/settings.php:990
-#: admin/views/settings.php:993
-msgid "Fields to show"
+#: admin/views/settings.php:997
+msgid "Add a template"
 msgstr ""
 
 #: admin/views/settings.php:1004
+msgid "Shortcodes"
+msgstr ""
+
+#: admin/views/settings.php:1007
+msgid "Ready to paste. Each one lists the jobs in a single term; add template=\"name\" to use a named card, and per_page, show_filters, show_search or show_sort to adjust the listing."
+msgstr ""
+
+#: admin/views/settings.php:1013
+msgid "Lists"
+msgstr ""
+
+#: admin/views/settings.php:1014
+msgid "Shortcode"
+msgstr ""
+
+#: admin/views/settings.php:1019
+msgid "Every active job"
+msgstr ""
+
+#: admin/views/settings.php:1047
+msgid "Other jobs in the same department, on a single job page"
+msgstr ""
+
+#: admin/views/settings.php:1053
+msgid "Preview"
+msgstr ""
+
+#: admin/views/settings.php:1061
+msgid "The saved layout, drawn with a real job where one exists. Save the page to refresh it."
+msgstr ""
+
+#: admin/views/settings.php:1073
+msgid "The default card is rendered by a PHP template, so there is nothing to preview here. Choose another layout to see it."
+msgstr ""
+
+#: admin/views/settings.php:1086
+msgid "Job details"
+msgstr ""
+
+#: admin/views/settings.php:1091
+msgid "Job details layout"
+msgstr ""
+
+#: admin/views/settings.php:1098
+msgid "The facts shown on a single job page, by the Job Details block and by the [zoho_job_meta] shortcode."
+msgstr ""
+
+#: admin/views/settings.php:1104
+#: admin/views/settings.php:1107
+msgid "Fields to show"
+msgstr ""
+
+#: admin/views/settings.php:1118
 msgid "A field with no value on a job is skipped rather than shown empty. The Custom layout ignores this list and decides for itself."
 msgstr ""
 
-#: admin/views/settings.php:1008
+#: admin/views/settings.php:1122
 msgid "Job details HTML"
 msgstr ""
 
-#: admin/views/settings.php:1017
+#: admin/views/settings.php:1131
 msgid "Start from the Inline layout"
 msgstr ""
 
-#: admin/views/settings.php:1025
+#: admin/views/settings.php:1139
 msgid "Available tags"
 msgstr ""
 
-#: admin/views/settings.php:1028
+#: admin/views/settings.php:1142
 msgid "Use these in either HTML box. A tag with no value on a job becomes nothing at all."
 msgstr ""
 
 #. translators: 1: an example conditional opening tag, 2: the matching closing tag.
-#: admin/views/settings.php:1032
+#: admin/views/settings.php:1146
 #, php-format
 msgid "Wrap a part in %1$s and %2$s to drop it entirely when that value is missing."
 msgstr ""
 
-#: admin/views/settings.php:1042
+#: admin/views/settings.php:1156
 msgid "Tag"
 msgstr ""
 
-#: admin/views/settings.php:1043
+#: admin/views/settings.php:1157
 msgid "Value"
 msgstr ""
 
-#: admin/views/settings.php:1056
+#: admin/views/settings.php:1170
 msgid "Search and filters"
 msgstr ""
 
-#: admin/views/settings.php:1061
+#: admin/views/settings.php:1175
 msgid "Show by default"
 msgstr ""
 
-#: admin/views/settings.php:1064
+#: admin/views/settings.php:1178
 msgid "Search box"
 msgstr ""
 
-#: admin/views/settings.php:1066
+#: admin/views/settings.php:1180
 msgid "Filter dropdowns"
 msgstr ""
 
-#: admin/views/settings.php:1068
+#: admin/views/settings.php:1182
 msgid "Sort control"
 msgstr ""
 
-#: admin/views/settings.php:1070
+#: admin/views/settings.php:1184
 msgid "An individual shortcode or block can still switch each one on or off."
 msgstr ""
 
-#: admin/views/settings.php:1074
-#: admin/views/settings.php:1077
+#: admin/views/settings.php:1188
+#: admin/views/settings.php:1191
 msgid "Filters to offer"
 msgstr ""
 
-#: admin/views/settings.php:1089
+#: admin/views/settings.php:1203
 msgid "A filter with no terms yet is left out automatically."
 msgstr ""
 
-#: admin/views/settings.php:1093
+#: admin/views/settings.php:1207
 msgid "Filter bar layout"
 msgstr ""
 
-#: admin/views/settings.php:1100
+#: admin/views/settings.php:1214
 msgid "Inline — side by side"
 msgstr ""
 
-#: admin/views/settings.php:1101
+#: admin/views/settings.php:1215
 msgid "Stacked — one per line, for narrow columns"
 msgstr ""
 
-#: admin/views/settings.php:1108
+#: admin/views/settings.php:1222
+msgid "Filter style"
+msgstr ""
+
+#: admin/views/settings.php:1229
+msgid "Dropdowns — one select per filter"
+msgstr ""
+
+#: admin/views/settings.php:1230
+msgid "Pills — a row of choices per filter, applied on click"
+msgstr ""
+
+#: admin/views/settings.php:1232
+msgid "Pills suit filters with a handful of terms, such as employment type. They still post with the form, so they work without JavaScript."
+msgstr ""
+
+#: admin/views/settings.php:1238
+msgid "Filter labels"
+msgstr ""
+
+#: admin/views/settings.php:1254
+msgid "What visitors see above each filter. Leave one blank to keep the taxonomy name. For example, \"Functional area\" instead of \"Department\", or \"School\" instead of \"Category\"."
+msgstr ""
+
+#: admin/views/settings.php:1258
+#: templates/filters.php:213
+msgid "Application status"
+msgstr ""
+
+#: admin/views/settings.php:1264
+msgid "Offer an Open / Closed / Expired filter"
+msgstr ""
+
+#: admin/views/settings.php:1265
+msgid "Off by default: most sites only ever list open positions. Turning it on lets visitors see closed roles on request."
+msgstr ""
+
+#: admin/views/settings.php:1271
+msgid "Search label"
+msgstr ""
+
+#: admin/views/settings.php:1272
+msgid "The label above the keyword box. Leave blank to use \"Search jobs\"."
+msgstr ""
+
+#: admin/views/settings.php:1275
 msgid "Search placeholder"
 msgstr ""
 
-#: admin/views/settings.php:1109
+#: admin/views/settings.php:1276
 msgid "Leave blank to use \"Job title or code\"."
 msgstr ""
 
-#: admin/views/settings.php:1112
-msgid "Filter button label"
+#: admin/views/settings.php:1279
+#: admin/views/settings.php:1282
+msgid "Search looks in"
 msgstr ""
 
-#: admin/views/settings.php:1113
-msgid "Leave blank to use \"Filter\"."
+#: admin/views/settings.php:1294
+msgid "Every word typed has to match one of these. Untick Description to keep a search for \"manager\" from matching every job that reports to one."
 msgstr ""
 
-#: admin/views/settings.php:1118
-msgid "Custom CSS"
-msgstr ""
-
-#: admin/views/settings.php:1123
-msgid "CSS"
-msgstr ""
-
-#: admin/views/settings.php:1129
-msgid "Loaded only on pages that show jobs, and after the plugin stylesheet so it wins. Every class the plugin prints starts with jszr-."
-msgstr ""
-
-#: admin/views/settings.php:1144
-msgid "JobPosting markup"
-msgstr ""
-
-#: admin/views/settings.php:1150
-msgid "Output JobPosting structured data on single job pages"
-msgstr ""
-
-#: admin/views/settings.php:1151
-msgid "Markup is only emitted for active jobs, and only when the required information is present."
-msgstr ""
-
-#: admin/views/settings.php:1157
-msgid "SEO plugins"
-msgstr ""
-
-#: admin/views/settings.php:1163
-msgid "Skip output when another plugin already emits JobPosting markup for the job"
-msgstr ""
-
-#: admin/views/settings.php:1169
-msgid "Hiring organization name"
-msgstr ""
-
-#: admin/views/settings.php:1176
-msgid "Leave blank to use the site title."
-msgstr ""
-
-#: admin/views/settings.php:1182
-msgid "Organization URL"
-msgstr ""
-
-#: admin/views/settings.php:1186
-msgid "Organization logo URL"
-msgstr ""
-
-#: admin/views/settings.php:1197
-msgid "Debug logging"
-msgstr ""
-
-#: admin/views/settings.php:1203
-msgid "Record detailed debug entries"
-msgstr ""
-
-#: admin/views/settings.php:1204
-msgid "Tokens and secrets are always removed before anything is written to the log."
-msgstr ""
-
-#: admin/views/settings.php:1210
-msgid "Keep logs for (days)"
-msgstr ""
-
-#: admin/views/settings.php:1217
-msgid "0 keeps entries until the maximum count is reached."
-msgstr ""
-
-#: admin/views/settings.php:1227
-msgid "Maximum log entries"
-msgstr ""
-
-#: admin/views/settings.php:1244
-msgid "Webhook"
-msgstr ""
-
-#: admin/views/settings.php:1250
-msgid "Accept webhook triggers from Zoho Recruit"
-msgstr ""
-
-#: admin/views/settings.php:1251
-msgid "The payload is only used as a trigger; the record is always re-read from the Zoho API."
-msgstr ""
-
-#: admin/views/settings.php:1255
-msgid "Webhook URL"
-msgstr ""
-
-#: admin/views/settings.php:1262
-msgid "Uninstall"
-msgstr ""
-
-#: admin/views/settings.php:1268
-msgid "Delete plugin settings, tokens and logs when the plugin is deleted"
-msgstr ""
-
-#: admin/views/settings.php:1276
-msgid "Also delete synchronized job posts and their taxonomy terms"
-msgstr ""
-
-#: admin/views/settings.php:1277
-msgid "Off by default. Jobs created by hand are never deleted."
-msgstr ""
-
-#: admin/views/settings.php:1292
-msgid "Import and export"
-msgstr ""
-
-#: admin/views/settings.php:1293
-msgid "Move configuration between staging and production. Credentials and tokens are never included."
-msgstr ""
-
-#: admin/views/settings.php:1297
-msgid "Export settings"
+#: admin/views/settings.php:1298
+msgid "Location search"
 msgstr ""
 
 #: admin/views/settings.php:1304
+msgid "Add a second text box for the location"
+msgstr ""
+
+#: admin/views/settings.php:1305
+msgid "Matches the location terms and the city, state and country of each job. Shown next to the keyword box whenever the search box is shown."
+msgstr ""
+
+#: admin/views/settings.php:1309
+msgid "Placeholder"
+msgstr ""
+
+#: admin/views/settings.php:1315
+msgid "Pagination"
+msgstr ""
+
+#: admin/views/settings.php:1322
+msgid "Page numbers"
+msgstr ""
+
+#: admin/views/settings.php:1323
+msgid "A \"Load more\" button that adds the next page below"
+msgstr ""
+
+#: admin/views/settings.php:1328
+msgid "Button label"
+msgstr ""
+
+#: admin/views/settings.php:1329
+msgid "Leave blank to use \"Load more listings\"."
+msgstr ""
+
+#: admin/views/settings.php:1334
+msgid "Filter button label"
+msgstr ""
+
+#: admin/views/settings.php:1335
+msgid "Leave blank to use \"Filter\"."
+msgstr ""
+
+#: admin/views/settings.php:1340
+msgid "Custom CSS"
+msgstr ""
+
+#: admin/views/settings.php:1345
+msgid "CSS"
+msgstr ""
+
+#: admin/views/settings.php:1351
+msgid "Loaded only on pages that show jobs, and after the plugin stylesheet so it wins. Every class the plugin prints starts with jszr-."
+msgstr ""
+
+#: admin/views/settings.php:1366
+msgid "JobPosting markup"
+msgstr ""
+
+#: admin/views/settings.php:1372
+msgid "Output JobPosting structured data on single job pages"
+msgstr ""
+
+#: admin/views/settings.php:1373
+msgid "Markup is only emitted for active jobs, and only when the required information is present."
+msgstr ""
+
+#: admin/views/settings.php:1379
+msgid "SEO plugins"
+msgstr ""
+
+#: admin/views/settings.php:1385
+msgid "Skip output when another plugin already emits JobPosting markup for the job"
+msgstr ""
+
+#: admin/views/settings.php:1391
+msgid "Hiring organization name"
+msgstr ""
+
+#: admin/views/settings.php:1398
+msgid "Leave blank to use the site title."
+msgstr ""
+
+#: admin/views/settings.php:1404
+msgid "Organization URL"
+msgstr ""
+
+#: admin/views/settings.php:1408
+msgid "Organization logo URL"
+msgstr ""
+
+#: admin/views/settings.php:1419
+msgid "Debug logging"
+msgstr ""
+
+#: admin/views/settings.php:1425
+msgid "Record detailed debug entries"
+msgstr ""
+
+#: admin/views/settings.php:1426
+msgid "Tokens and secrets are always removed before anything is written to the log."
+msgstr ""
+
+#: admin/views/settings.php:1432
+msgid "Keep logs for (days)"
+msgstr ""
+
+#: admin/views/settings.php:1439
+msgid "0 keeps entries until the maximum count is reached."
+msgstr ""
+
+#: admin/views/settings.php:1449
+msgid "Maximum log entries"
+msgstr ""
+
+#: admin/views/settings.php:1466
+msgid "Webhook"
+msgstr ""
+
+#: admin/views/settings.php:1472
+msgid "Accept webhook triggers from Zoho Recruit"
+msgstr ""
+
+#: admin/views/settings.php:1473
+msgid "The payload is only used as a trigger; the record is always re-read from the Zoho API."
+msgstr ""
+
+#: admin/views/settings.php:1477
+msgid "Webhook URL"
+msgstr ""
+
+#: admin/views/settings.php:1484
+msgid "Uninstall"
+msgstr ""
+
+#: admin/views/settings.php:1490
+msgid "Delete plugin settings, tokens and logs when the plugin is deleted"
+msgstr ""
+
+#: admin/views/settings.php:1498
+msgid "Also delete synchronized job posts and their taxonomy terms"
+msgstr ""
+
+#: admin/views/settings.php:1499
+msgid "Off by default. Jobs created by hand are never deleted."
+msgstr ""
+
+#: admin/views/settings.php:1514
+msgid "Import and export"
+msgstr ""
+
+#: admin/views/settings.php:1515
+msgid "Move configuration between staging and production. Credentials and tokens are never included."
+msgstr ""
+
+#: admin/views/settings.php:1519
+msgid "Export settings"
+msgstr ""
+
+#: admin/views/settings.php:1526
 msgid "Settings JSON file"
 msgstr ""
 
-#: admin/views/settings.php:1306
+#: admin/views/settings.php:1528
 msgid "Import settings"
 msgstr ""
 
-#: admin/views/settings.php:1310
+#: admin/views/settings.php:1532
 msgid "Webhook secret"
 msgstr ""
 
-#: admin/views/settings.php:1314
+#: admin/views/settings.php:1536
 msgid "Generate a new webhook URL"
 msgstr ""
 
-#: admin/views/settings.php:1318
+#: admin/views/settings.php:1540
 msgid "Start again"
 msgstr ""
 
-#: admin/views/settings.php:1324
+#: admin/views/settings.php:1546
 msgid "Deletes the local copies so a full sync can rebuild them. Use this after a field mapping mistake: removing a mapping row stops the plugin writing that field, but it does not remove the values already written, so a wrong value can outlive the mapping that caused it."
 msgstr ""
 
-#: admin/views/settings.php:1331
+#: admin/views/settings.php:1553
 msgid "Zoho Recruit keeps the originals."
 msgstr ""
 
-#: admin/views/settings.php:1332
+#: admin/views/settings.php:1554
 msgid "Nothing here can be lost that a full sync will not bring back, and jobs you created by hand in WordPress are never touched. The Zoho connection and your settings are left alone."
 msgstr ""
 
-#: admin/views/settings.php:1336
+#: admin/views/settings.php:1558
 msgid "Delete the selected data? A full sync will rebuild the jobs from Zoho Recruit."
 msgstr ""
 
-#: admin/views/settings.php:1341
+#: admin/views/settings.php:1563
 msgid "What to delete"
 msgstr ""
 
 #. translators: %s: number of synchronized jobs.
-#: admin/views/settings.php:1349
+#: admin/views/settings.php:1571
 #, php-format
 msgid "Synchronized jobs and their unused taxonomy terms (%s jobs)"
 msgstr ""
 
-#: admin/views/settings.php:1358
+#: admin/views/settings.php:1580
 msgid "Sync history and log entries"
 msgstr ""
 
-#: admin/views/settings.php:1364
+#: admin/views/settings.php:1586
 msgid "Field mapping (reset to the shipped defaults)"
 msgstr ""
 
 #. translators: %s: the word that must be typed to confirm.
-#: admin/views/settings.php:1374
+#: admin/views/settings.php:1596
 #, php-format
 msgid "Type %s to confirm"
 msgstr ""
 
-#: admin/views/settings.php:1385
+#: admin/views/settings.php:1607
 msgid "Delete and start again"
 msgstr ""
 
@@ -1645,7 +1804,7 @@ msgid "Field mapping imported."
 msgstr ""
 
 #: includes/class-admin.php:938
-#: includes/class-field-mapper.php:936
+#: includes/class-field-mapper.php:1002
 msgid "The uploaded file is not valid JSON."
 msgstr ""
 
@@ -1700,7 +1859,7 @@ msgid "You do not have permission to refresh this job."
 msgstr ""
 
 #: includes/class-admin.php:1152
-#: includes/class-rest-api.php:666
+#: includes/class-rest-api.php:678
 msgid "This job was not imported from Zoho Recruit."
 msgstr ""
 
@@ -1864,60 +2023,60 @@ msgid "Taxonomy: %s"
 msgstr ""
 
 #: includes/class-field-mapper.php:77
-#: includes/class-settings.php:672
-#: includes/class-template-tags.php:247
+#: includes/class-settings.php:829
+#: includes/class-template-tags.php:318
 msgid "City"
 msgstr ""
 
 #: includes/class-field-mapper.php:79
-#: includes/class-settings.php:674
-#: includes/class-template-tags.php:249
+#: includes/class-settings.php:831
+#: includes/class-template-tags.php:320
 msgid "Country"
 msgstr ""
 
 #: includes/class-field-mapper.php:80
-#: includes/class-settings.php:675
+#: includes/class-settings.php:832
 msgid "Remote / work mode"
 msgstr ""
 
 #: includes/class-field-mapper.php:81
-#: includes/class-settings.php:638
-#: includes/class-settings.php:679
-#: includes/class-template-tags.php:252
-#: templates/job-meta.php:33
+#: includes/class-settings.php:795
+#: includes/class-settings.php:836
+#: includes/class-template-tags.php:323
+#: templates/job-meta.php:32
 #: blocks/job-meta/build/index.js:1
 #: blocks/job-meta/src/index.js:49
 msgid "Industry"
 msgstr ""
 
 #: includes/class-field-mapper.php:82
-#: includes/class-settings.php:639
-#: includes/class-settings.php:680
-#: includes/class-template-tags.php:253
-#: templates/job-meta.php:34
+#: includes/class-settings.php:796
+#: includes/class-settings.php:837
+#: includes/class-template-tags.php:324
+#: templates/job-meta.php:33
 #: blocks/job-meta/build/index.js:1
 #: blocks/job-meta/src/index.js:51
 msgid "Client"
 msgstr ""
 
 #: includes/class-field-mapper.php:83
-#: includes/class-settings.php:681
+#: includes/class-settings.php:838
 msgid "Number of positions"
 msgstr ""
 
 #: includes/class-field-mapper.php:84
-#: includes/class-settings.php:637
-#: includes/class-settings.php:682
-#: templates/job-meta.php:32
+#: includes/class-settings.php:794
+#: includes/class-settings.php:839
+#: templates/job-meta.php:31
 #: blocks/job-meta/build/index.js:1
 #: blocks/job-meta/src/index.js:46
 msgid "Salary"
 msgstr ""
 
 #: includes/class-field-mapper.php:85
-#: includes/class-settings.php:642
-#: includes/class-settings.php:683
-#: includes/class-template-tags.php:255
+#: includes/class-settings.php:799
+#: includes/class-settings.php:840
+#: includes/class-template-tags.php:326
 #: blocks/job-meta/build/index.js:1
 #: blocks/job-meta/src/index.js:62
 #: blocks/jobs/build/index.js:1
@@ -1934,8 +2093,8 @@ msgid "Modified time"
 msgstr ""
 
 #: includes/class-field-mapper.php:89
-#: includes/class-settings.php:686
-#: includes/class-template-tags.php:257
+#: includes/class-settings.php:843
+#: includes/class-template-tags.php:331
 msgid "Application URL"
 msgstr ""
 
@@ -1949,21 +2108,21 @@ msgstr ""
 msgid "Meta: %s"
 msgstr ""
 
-#: includes/class-field-mapper.php:418
+#: includes/class-field-mapper.php:484
 msgid "Untitled job"
 msgstr ""
 
-#: includes/class-field-mapper.php:672
+#: includes/class-field-mapper.php:738
 #: includes/class-site-health.php:316
 msgid "Yes"
 msgstr ""
 
-#: includes/class-field-mapper.php:673
+#: includes/class-field-mapper.php:739
 #: includes/class-site-health.php:316
 msgid "No"
 msgstr ""
 
-#: includes/class-field-mapper.php:943
+#: includes/class-field-mapper.php:1009
 msgid "The file did not contain any valid mapping rows."
 msgstr ""
 
@@ -1979,39 +2138,39 @@ msgstr ""
 msgid "Another sync process is already importing this job."
 msgstr ""
 
-#: includes/class-layouts.php:143
+#: includes/class-layouts.php:300
 msgid "Default — the plugin's standard card"
 msgstr ""
 
-#: includes/class-layouts.php:144
+#: includes/class-layouts.php:301
 msgid "Card — image, badges and summary"
 msgstr ""
 
-#: includes/class-layouts.php:145
+#: includes/class-layouts.php:302
 msgid "Compact — one line per job"
 msgstr ""
 
-#: includes/class-layouts.php:146
+#: includes/class-layouts.php:303
 msgid "Columns — aligned columns on wide screens"
 msgstr ""
 
-#: includes/class-layouts.php:147
-#: includes/class-layouts.php:160
+#: includes/class-layouts.php:304
+#: includes/class-layouts.php:317
 msgid "Custom — your own HTML"
 msgstr ""
 
-#: includes/class-layouts.php:158
+#: includes/class-layouts.php:315
 msgid "Default — a labelled list"
 msgstr ""
 
-#: includes/class-layouts.php:159
+#: includes/class-layouts.php:316
 msgid "Inline — pills in a row"
 msgstr ""
 
 #. translators: %s: the {closing_date} token, replaced with a date.
 #. translators: %s: closing date.
-#: includes/class-layouts.php:173
-#: templates/card.php:127
+#: includes/class-layouts.php:330
+#: templates/card.php:131
 #, php-format
 msgid "Closes %s"
 msgstr ""
@@ -2095,9 +2254,9 @@ msgid "Edit Job"
 msgstr ""
 
 #: includes/class-post-type.php:78
-#: includes/class-template-tags.php:98
-#: includes/class-template-tags.php:211
-#: templates/card.php:117
+#: includes/class-template-tags.php:101
+#: includes/class-template-tags.php:228
+#: templates/card.php:121
 msgid "View Job"
 msgstr ""
 
@@ -2151,7 +2310,7 @@ msgstr ""
 
 #: includes/class-post-type.php:172
 #: includes/class-post-type.php:174
-#: includes/class-settings.php:670
+#: includes/class-settings.php:827
 #: blocks/job-meta/build/index.js:1
 #: blocks/job-meta/src/index.js:24
 #: blocks/jobs/build/index.js:1
@@ -2177,7 +2336,7 @@ msgid "Employment Types"
 msgstr ""
 
 #: includes/class-post-type.php:199
-#: includes/class-settings.php:678
+#: includes/class-settings.php:835
 #: blocks/job-meta/build/index.js:1
 #: blocks/job-meta/src/index.js:36
 #: blocks/jobs/build/index.js:1
@@ -2195,7 +2354,7 @@ msgstr ""
 
 #: includes/class-post-type.php:208
 #: includes/class-post-type.php:210
-#: includes/class-settings.php:677
+#: includes/class-settings.php:834
 #: blocks/job-meta/build/index.js:1
 #: blocks/job-meta/src/index.js:40
 #: blocks/jobs/build/index.js:1
@@ -2247,18 +2406,30 @@ msgstr ""
 msgid "You do not have permission to manage Zoho Recruit synchronization."
 msgstr ""
 
+#: includes/class-rest-api.php:354
+msgid "Comma separated post IDs to leave out."
+msgstr ""
+
+#: includes/class-rest-api.php:360
+msgid "Free text matched against the location, city, state and country."
+msgstr ""
+
 #. translators: %s: taxonomy name.
-#: includes/class-rest-api.php:359
+#: includes/class-rest-api.php:371
 #, php-format
 msgid "Comma separated term slugs or names for %s."
 msgstr ""
 
-#: includes/class-rest-api.php:1041
+#: includes/class-rest-api.php:1108
 msgid "Job not found."
 msgstr ""
 
-#: includes/class-rest-api.php:1087
+#: includes/class-rest-api.php:1154
 msgid "Listing style."
+msgstr ""
+
+#: includes/class-rest-api.php:1186
+msgid "A named card template from Settings → Display."
 msgstr ""
 
 #: includes/class-settings.php:51
@@ -2293,41 +2464,46 @@ msgstr ""
 msgid "Saudi Arabia (zoho.sa)"
 msgstr ""
 
-#: includes/class-settings.php:640
-#: templates/job-meta.php:35
+#: includes/class-settings.php:673
+msgid "Summary"
+msgstr ""
+
+#: includes/class-settings.php:674
+#: includes/class-settings.php:824
+msgid "Description"
+msgstr ""
+
+#: includes/class-settings.php:797
+#: templates/job-meta.php:34
 #: blocks/job-meta/build/index.js:1
 #: blocks/job-meta/src/index.js:54
 msgid "Work mode"
 msgstr ""
 
-#: includes/class-settings.php:641
-#: templates/job-meta.php:36
+#: includes/class-settings.php:798
+#: templates/job-meta.php:35
 #: blocks/job-meta/build/index.js:1
 #: blocks/job-meta/src/index.js:58
 msgid "Openings"
 msgstr ""
 
-#: includes/class-settings.php:662
+#: includes/class-settings.php:819
 msgid "Job ID (WordPress)"
 msgstr ""
 
-#: includes/class-settings.php:664
+#: includes/class-settings.php:821
 msgid "Slug"
 msgstr ""
 
-#: includes/class-settings.php:665
+#: includes/class-settings.php:822
 msgid "Permalink"
 msgstr ""
 
-#: includes/class-settings.php:666
+#: includes/class-settings.php:823
 msgid "Excerpt"
 msgstr ""
 
-#: includes/class-settings.php:667
-msgid "Description"
-msgstr ""
-
-#: includes/class-settings.php:676
+#: includes/class-settings.php:833
 #: blocks/job-meta/build/index.js:1
 #: blocks/job-meta/src/index.js:32
 #: blocks/jobs/build/index.js:1
@@ -2335,11 +2511,11 @@ msgstr ""
 msgid "Employment type"
 msgstr ""
 
-#: includes/class-settings.php:685
+#: includes/class-settings.php:842
 msgid "Zoho modified time"
 msgstr ""
 
-#: includes/class-settings.php:687
+#: includes/class-settings.php:844
 msgid "Zoho record ID"
 msgstr ""
 
@@ -2561,17 +2737,17 @@ msgid "Could not acquire the sync lock."
 msgstr ""
 
 #. translators: 1: percentage of jobs, 2: configured threshold percentage, 3: number of jobs.
-#: includes/class-sync.php:794
+#: includes/class-sync.php:903
 #, php-format
 msgid "Deactivation was skipped: the sync would have deactivated %1$d%% of jobs (%3$d jobs), which is above the %2$d%% safety threshold. Check the Zoho connection and filters, then run a full sync again."
 msgstr ""
 
-#: includes/class-sync.php:1028
-#: includes/class-zoho-api.php:135
+#: includes/class-sync.php:1137
+#: includes/class-zoho-api.php:142
 msgid "Invalid Zoho record ID."
 msgstr ""
 
-#: includes/class-sync.php:1060
+#: includes/class-sync.php:1169
 msgid "That job no longer exists in Zoho Recruit."
 msgstr ""
 
@@ -2585,7 +2761,7 @@ msgid "Work with our platform team on the services behind everything we ship."
 msgstr ""
 
 #: includes/class-template-tags.php:86
-#: includes/class-template-tags.php:104
+#: includes/class-template-tags.php:107
 msgid "Chennai"
 msgstr ""
 
@@ -2598,8 +2774,8 @@ msgid "India"
 msgstr ""
 
 #: includes/class-template-tags.php:89
-#: includes/class-template-tags.php:193
-#: templates/card.php:101
+#: includes/class-template-tags.php:210
+#: templates/card.php:105
 msgid "Remote"
 msgstr ""
 
@@ -2607,69 +2783,91 @@ msgstr ""
 msgid "Software"
 msgstr ""
 
-#: includes/class-template-tags.php:99
+#: includes/class-template-tags.php:98
+#: includes/class-template-tags.php:283
+#: templates/filters.php:63
+msgid "Open"
+msgstr ""
+
+#: includes/class-template-tags.php:102
 #: includes/class-templates.php:350
 msgid "Apply Now"
 msgstr ""
 
-#: includes/class-template-tags.php:103
+#: includes/class-template-tags.php:106
 msgid "Engineering"
 msgstr ""
 
-#: includes/class-template-tags.php:105
+#: includes/class-template-tags.php:108
 msgid "Full time"
 msgstr ""
 
-#: includes/class-template-tags.php:106
+#: includes/class-template-tags.php:109
 msgid "2 - 5 years"
 msgstr ""
 
-#: includes/class-template-tags.php:107
+#: includes/class-template-tags.php:110
 msgid "Product"
 msgstr ""
 
-#: includes/class-template-tags.php:243
+#: includes/class-template-tags.php:265
+msgid "Just now"
+msgstr ""
+
+#: includes/class-template-tags.php:314
 msgid "Link to the job page"
 msgstr ""
 
-#: includes/class-template-tags.php:244
+#: includes/class-template-tags.php:315
 msgid "Short summary"
 msgstr ""
 
-#: includes/class-template-tags.php:245
+#: includes/class-template-tags.php:316
 msgid "Full description"
 msgstr ""
 
-#: includes/class-template-tags.php:250
+#: includes/class-template-tags.php:321
 msgid "The word \"Remote\" when the job is remote, nothing otherwise"
 msgstr ""
 
-#: includes/class-template-tags.php:251
+#: includes/class-template-tags.php:322
 msgid "Salary as Zoho stores it"
 msgstr ""
 
-#: includes/class-template-tags.php:254
+#: includes/class-template-tags.php:325
 msgid "Number of openings"
 msgstr ""
 
-#: includes/class-template-tags.php:258
+#: includes/class-template-tags.php:327
+msgid "How long ago the job was posted, for example \"3 weeks ago\""
+msgstr ""
+
+#: includes/class-template-tags.php:329
+msgid "Open, Closed or Expired"
+msgstr ""
+
+#: includes/class-template-tags.php:330
+msgid "The organisation name from the Structured Data settings, or the site title"
+msgstr ""
+
+#: includes/class-template-tags.php:332
 msgid "A ready-made Apply button, or nothing if the job is closed"
 msgstr ""
 
-#: includes/class-template-tags.php:259
+#: includes/class-template-tags.php:333
 msgid "A ready-made \"View Job\" link"
 msgstr ""
 
-#: includes/class-template-tags.php:260
+#: includes/class-template-tags.php:334
 msgid "Featured image, if the job has one"
 msgstr ""
 
-#: includes/class-template-tags.php:261
+#: includes/class-template-tags.php:335
 msgid "WordPress post ID"
 msgstr ""
 
 #. translators: %s: taxonomy label.
-#: includes/class-template-tags.php:270
+#: includes/class-template-tags.php:344
 #, php-format
 msgid "%s terms, comma separated"
 msgstr ""
@@ -2722,77 +2920,77 @@ msgid "Too many webhook requests."
 msgstr ""
 
 #. translators: %s: transport error message.
-#: includes/class-zoho-api.php:322
+#: includes/class-zoho-api.php:340
 #, php-format
 msgid "Could not reach the Zoho Recruit API: %s"
 msgstr ""
 
-#: includes/class-zoho-api.php:442
+#: includes/class-zoho-api.php:460
 msgid "Zoho rejected the request as invalid."
 msgstr ""
 
-#: includes/class-zoho-api.php:443
+#: includes/class-zoho-api.php:461
 msgid "Zoho rejected the access token. Please reconnect Zoho Recruit."
 msgstr ""
 
-#: includes/class-zoho-api.php:444
+#: includes/class-zoho-api.php:462
 msgid "Access to this Zoho module was refused. Check the OAuth scopes and the user profile permissions."
 msgstr ""
 
-#: includes/class-zoho-api.php:445
+#: includes/class-zoho-api.php:463
 msgid "The Zoho endpoint or record was not found. Check the module API name."
 msgstr ""
 
-#: includes/class-zoho-api.php:446
-#: includes/class-zoho-api.php:506
+#: includes/class-zoho-api.php:464
+#: includes/class-zoho-api.php:524
 msgid "Zoho rate limit reached. The sync will resume automatically later."
 msgstr ""
 
-#: includes/class-zoho-api.php:447
-#: includes/class-zoho-api.php:507
+#: includes/class-zoho-api.php:465
+#: includes/class-zoho-api.php:525
 msgid "Zoho reported an internal error."
 msgstr ""
 
-#: includes/class-zoho-api.php:448
+#: includes/class-zoho-api.php:466
 msgid "The Zoho Recruit API is temporarily unavailable."
 msgstr ""
 
 #. translators: %d: HTTP status code.
-#: includes/class-zoho-api.php:455
+#: includes/class-zoho-api.php:473
 #, php-format
 msgid "Zoho returned HTTP %d."
 msgstr ""
 
-#: includes/class-zoho-api.php:499
+#: includes/class-zoho-api.php:517
 msgid "The Zoho access token is invalid. Please reconnect Zoho Recruit."
 msgstr ""
 
-#: includes/class-zoho-api.php:500
+#: includes/class-zoho-api.php:518
 msgid "Zoho could not authenticate this request. Please reconnect Zoho Recruit."
 msgstr ""
 
-#: includes/class-zoho-api.php:501
+#: includes/class-zoho-api.php:519
 msgid "The connection is missing a required scope. Disconnect and reconnect to grant the requested permissions."
 msgstr ""
 
-#: includes/class-zoho-api.php:502
+#: includes/class-zoho-api.php:520
 msgid "Zoho rejected one of the request parameters as invalid."
 msgstr ""
 
-#: includes/class-zoho-api.php:503
+#: includes/class-zoho-api.php:521
 msgid "The configured Zoho module does not exist in this account."
 msgstr ""
 
-#: includes/class-zoho-api.php:504
+#: includes/class-zoho-api.php:522
 msgid "The API endpoint is not valid for this Zoho account."
 msgstr ""
 
-#: includes/class-zoho-api.php:505
+#: includes/class-zoho-api.php:523
 msgid "The connected Zoho user does not have permission to read job openings."
 msgstr ""
 
 #. translators: %s: Zoho error code.
-#: includes/class-zoho-api.php:522
+#: includes/class-zoho-api.php:540
 #, php-format
 msgid "Zoho reported error code %s."
 msgstr ""
@@ -2912,49 +3110,50 @@ msgid "You do not have permission to perform this action."
 msgstr ""
 
 #. translators: %s: job reference code.
-#: templates/card.php:81
+#: templates/card.php:85
 #: templates/single.php:57
 #, php-format
 msgid "Job Code: %s"
 msgstr ""
 
-#: templates/filters.php:56
-msgid "Job title or code"
-msgstr ""
-
-#: templates/filters.php:62
-msgid "Filter"
-msgstr ""
-
-#: templates/filters.php:76
-msgid "Newest first"
-msgstr ""
-
-#: templates/filters.php:77
-msgid "Oldest first"
-msgstr ""
-
-#: templates/filters.php:78
-msgid "Title A–Z"
-msgstr ""
-
-#: templates/filters.php:79
-msgid "Title Z–A"
-msgstr ""
-
-#: templates/filters.php:80
-msgid "Closing soonest"
-msgstr ""
-
-#: templates/filters.php:108
+#: templates/filters.php:51
 msgid "Search jobs"
 msgstr ""
 
-#: templates/filters.php:138
+#: templates/filters.php:87
+msgid "Job title or code"
+msgstr ""
+
+#: templates/filters.php:93
+msgid "Filter"
+msgstr ""
+
+#: templates/filters.php:107
+msgid "Newest first"
+msgstr ""
+
+#: templates/filters.php:108
+msgid "Oldest first"
+msgstr ""
+
+#: templates/filters.php:109
+msgid "Title A–Z"
+msgstr ""
+
+#: templates/filters.php:110
+msgid "Title Z–A"
+msgstr ""
+
+#: templates/filters.php:111
+msgid "Closing soonest"
+msgstr ""
+
+#: templates/filters.php:183
+#: templates/filters.php:199
 msgid "All"
 msgstr ""
 
-#: templates/filters.php:152
+#: templates/filters.php:227
 msgid "Sort by"
 msgstr ""
 
@@ -2976,20 +3175,20 @@ msgid_plural "Open positions"
 msgstr[0] ""
 msgstr[1] ""
 
-#: templates/job-meta.php:37
+#: templates/job-meta.php:36
 msgid "Posted"
 msgstr ""
 
-#: templates/job-meta.php:38
+#: templates/job-meta.php:37
 msgid "Closes"
 msgstr ""
 
-#: templates/listing.php:42
+#: templates/listing.php:43
 msgid "Job results"
 msgstr ""
 
 #. translators: %s: number of jobs.
-#: templates/listing.php:50
+#: templates/listing.php:51
 #, php-format
 msgid "%s job found"
 msgid_plural "%s jobs found"
@@ -3022,16 +3221,21 @@ msgstr ""
 msgid "View all positions"
 msgstr ""
 
-#: templates/pagination.php:30
-msgid "&laquo; Previous"
-msgstr ""
-
-#: templates/pagination.php:31
-msgid "Next &raquo;"
+#: templates/pagination.php:36
+msgid "Load more listings"
 msgstr ""
 
 #: templates/pagination.php:39
+#: templates/pagination.php:68
 msgid "Job listing pages"
+msgstr ""
+
+#: templates/pagination.php:59
+msgid "&laquo; Previous"
+msgstr ""
+
+#: templates/pagination.php:60
+msgid "Next &raquo;"
 msgstr ""
 
 #: templates/single.php:45
@@ -3050,11 +3254,11 @@ msgstr ""
 msgid "Apply"
 msgstr ""
 
-#: templates/single.php:100
+#: templates/single.php:97
 msgid "Applications are handled on Zoho Recruit. You will be taken there to complete yours."
 msgstr ""
 
-#: templates/single.php:105
+#: templates/single.php:102
 msgid "Position details"
 msgstr ""
 

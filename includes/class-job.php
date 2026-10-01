@@ -1074,11 +1074,13 @@ class Job {
 	/**
 	 * Build the career-site application URL for a job.
 	 *
-	 * The Job Openings API does not return a link to the public posting. There
-	 * is no field for it: `Website` on a job opening is the client's own site,
-	 * and is usually empty, so a site that maps it gets no apply button at all.
-	 * The career site does have a stable address, though, and it is built from
-	 * the record ID the sync already stores:
+	 * The Job Openings list API returns no link to the public posting, and the
+	 * Job Apply URL only arrives when a record is fetched by ID with
+	 * `publish_URL=true` (see Sync::complete_apply_url()). `Website` on a job
+	 * opening is the client's own site, and is usually empty, so a site that
+	 * maps it gets no apply button at all. The career site does have a stable
+	 * address, though, and it is built from the record ID the sync already
+	 * stores when no link has been fetched yet:
 	 *
 	 *     https://<career site>/jobs/Careers/<record id>/
 	 *

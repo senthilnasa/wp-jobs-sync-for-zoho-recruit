@@ -463,9 +463,16 @@ class Sync {
 	 * @param bool  $force   Overwrite fields even when they were edited in
 	 *                       WordPress. Only ever set by an explicit
 	 *                       administrator action, never by a scheduled sync.
+	 * @param array $options {
+	 *     Optional. How the record was obtained.
+	 *
+	 *     @type bool $complete True when $record came from Get Record by ID and
+	 *                          already carries everything Zoho will send, so
+	 *                          it is never fetched again to find its apply link.
+	 * }
 	 * @return string created|updated|skipped|error
 	 */
-	public function process_record( array $record, $run_id = 0, $dry_run = false, $force = false ) {
+	public function process_record( array $record, $run_id = 0, $dry_run = false, $force = false, array $options = array() ) {
 		$zoho_id = Job::sanitize_zoho_id( $record['id'] ?? '' );
 
 		if ( '' === $zoho_id ) {
@@ -504,6 +511,16 @@ class Sync {
 		if ( 'active' === $status && $this->is_past_closing( $payload ) ) {
 			$status = 'expired';
 		}
+
+		$payload = $this->complete_apply_url(
+			$payload,
+			$record,
+			$status,
+			(int) $run_id,
+			(bool) $dry_run,
+			(bool) $force,
+			! empty( $options['complete'] )
+		);
 
 		if ( $dry_run ) {
 			$existing = Job::find_by_zoho_id( $zoho_id );
@@ -561,6 +578,98 @@ class Sync {
 		}
 
 		return $result['action'];
+	}
+
+	/**
+	 * Make sure the payload carries the job's apply link where Zoho has one.
+	 *
+	 * A full sync reads records from the list endpoint, which does not include
+	 * the Job Apply URL: Zoho only adds it to a Get Record by ID response, and
+	 * only when asked with `publish_URL=true`. So a record that arrives without
+	 * a usable application URL gets one of two treatments. If the job already
+	 * has a link stored from an earlier fetch it is carried over, which also
+	 * stops the overwrite-all conflict mode from clearing it as "no longer
+	 * mapped". Otherwise the record is fetched once by ID and the link taken
+	 * from that. A job is therefore fetched individually at most once, and
+	 * again only when an administrator forces a re-sync. A fetch that fails
+	 * never fails the record: the job is written without the link and the
+	 * career-site fallback covers it until the next run.
+	 *
+	 * Jobs that are not active are not fetched. The apply button is not
+	 * rendered for them, so the extra API call would buy nothing.
+	 *
+	 * @param array  $payload  Mapped payload.
+	 * @param array  $record   Raw Zoho record.
+	 * @param string $status   Normalised job status.
+	 * @param int    $run_id   Run ID, for logging.
+	 * @param bool   $dry_run  Whether the record is being previewed only.
+	 * @param bool   $force    Whether a stored link must be refreshed.
+	 * @param bool   $complete Whether the record already came from Get Record by ID.
+	 * @return array
+	 */
+	private function complete_apply_url( array $payload, array $record, $status, $run_id, $dry_run, $force, $complete ) {
+		if ( $dry_run || ! Settings::get( 'fetch_apply_url', true ) ) {
+			return $payload;
+		}
+
+		$key = '_zoho_recruit_application_url';
+
+		if ( isset( $payload['meta'][ $key ] ) && '' !== Job::usable_apply_url( $payload['meta'][ $key ] ) ) {
+			return $payload;
+		}
+
+		$zoho_id = Job::sanitize_zoho_id( $record['id'] ?? '' );
+		$post_id = Job::find_by_zoho_id( $zoho_id );
+
+		if ( $post_id && ! $force ) {
+			$stored = Job::usable_apply_url( get_post_meta( $post_id, $key, true ) );
+
+			if ( '' !== $stored ) {
+				return self::with_apply_url( $payload, $stored );
+			}
+		}
+
+		if ( $complete || 'active' !== $status || self::is_unpublished( $record ) ) {
+			return $payload;
+		}
+
+		$full = $this->api->get_record( $zoho_id );
+
+		if ( is_wp_error( $full ) ) {
+			Logger::warning(
+				'apply_url_fetch_failed',
+				'Could not fetch the job by ID to read its apply link; the career site fallback applies until the next sync.',
+				array(
+					'zoho_id' => $zoho_id,
+					'error'   => $full->get_error_message(),
+				),
+				$run_id
+			);
+
+			return $payload;
+		}
+
+		$url = is_array( $full ) ? Field_Mapper::find_apply_url( $full ) : '';
+
+		if ( '' === $url ) {
+			return $payload;
+		}
+
+		return self::with_apply_url( $payload, $url );
+	}
+
+	/**
+	 * Put an application URL into a mapped payload.
+	 *
+	 * @param array  $payload Mapped payload.
+	 * @param string $url     Sanitized application URL.
+	 * @return array
+	 */
+	private static function with_apply_url( array $payload, $url ) {
+		$payload['meta']['_zoho_recruit_application_url']        = (string) $url;
+		$payload['mapped']['meta:_zoho_recruit_application_url'] = (string) $url;
+
+		return $payload;
 	}
 
 	/**
@@ -1063,7 +1172,7 @@ class Sync {
 		self::$syncing = true;
 
 		try {
-			$action = $this->process_record( $record, 0, false, (bool) $force );
+			$action = $this->process_record( $record, 0, false, (bool) $force, array( 'complete' => true ) );
 		} finally {
 			self::$syncing = false;
 		}

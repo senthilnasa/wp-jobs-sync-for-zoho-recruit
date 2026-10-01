@@ -247,10 +247,73 @@
 		} );
 	}
 
+	/**
+	 * Add and remove named card template rows on the Display tab.
+	 */
+	function initTemplates() {
+		const container = document.getElementById( 'jszr-template-rows' );
+
+		if ( ! container ) {
+			return;
+		}
+
+		const template = document.getElementById(
+			'jszr-template-row-template'
+		);
+		const addButton = document.getElementById( 'jszr-add-template' );
+
+		container.addEventListener( 'click', function ( event ) {
+			const button = event.target.closest( '.jszr-remove-template' );
+
+			if ( ! button ) {
+				return;
+			}
+
+			event.preventDefault();
+
+			const row = button.closest( '.jszr-template-row' );
+
+			if ( row && row.parentNode ) {
+				row.parentNode.removeChild( row );
+			}
+		} );
+
+		if ( ! addButton || ! template ) {
+			return;
+		}
+
+		let nextIndex =
+			container.querySelectorAll( '.jszr-template-row' ).length;
+
+		addButton.addEventListener( 'click', function () {
+			const markup = template.innerHTML
+				.split( '__INDEX__' )
+				.join( 'new' + nextIndex );
+			const holder = document.createElement( 'div' );
+
+			holder.innerHTML = markup;
+
+			const row = holder.querySelector( '.jszr-template-row' );
+
+			if ( row ) {
+				container.appendChild( row );
+
+				const nameField = row.querySelector( 'input' );
+
+				if ( nameField ) {
+					nameField.focus();
+				}
+			}
+
+			nextIndex += 1;
+		} );
+	}
+
 	document.addEventListener( 'DOMContentLoaded', function () {
 		initMapping();
 		initProgress();
 		initConfirm();
 		initPresets();
+		initTemplates();
 	} );
 } )( window.wp, window.jszrAdmin );

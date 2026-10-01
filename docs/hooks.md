@@ -108,6 +108,24 @@ apply_filters( 'jszr_status_mapping',        array $map );
 apply_filters( 'jszr_record_status',         string $status, array $record );
 apply_filters( 'jszr_post_status_for_job_status', string $post_status, string $status );
 apply_filters( 'jszr_strip_inline_styles',   bool $strip );
+apply_filters( 'jszr_record_query_args',     array $query, string $record_id );
+apply_filters( 'jszr_apply_url_fields',      array $keys );
+```
+
+`jszr_record_query_args` filters the query string of a Get Record by ID
+request. It defaults to `publish_URL=true`, which is what makes Zoho include
+the Job Apply URL in the record. `jszr_apply_url_fields` is the ordered list of
+record keys the plugin looks in for that link before falling back to any key
+that mentions "apply" and "url"; add your account's key at the front if the
+guess is wrong. A value that is not a real URL is ignored whichever key it
+came from.
+
+```php
+// Zoho returns the apply link under a key this plugin does not know.
+add_filter( 'jszr_apply_url_fields', function ( $keys ) {
+	array_unshift( $keys, 'Careers_Page_Link' );
+	return $keys;
+} );
 ```
 
 `jszr_job_data` is the most useful of these: it receives the mapped payload
@@ -204,6 +222,9 @@ visitor should not see.
 
 ```php
 apply_filters( 'jszr_template_path',   string $path, string $template );
+apply_filters( 'jszr_allowed_template_html', array $allowed );
+apply_filters( 'jszr_allowed_template_css',  array $properties );
+apply_filters( 'jszr_named_templates',       array $templates );
 apply_filters( 'jszr_apply_url',       string $url, int $post_id );
 apply_filters( 'jszr_structured_data', array $schema, WP_Post $post );
 apply_filters( 'jszr_employment_type_map', array $map );
@@ -224,7 +245,24 @@ add_filter( 'jszr_structured_data', function ( $schema, $post ) {
 
 // Emit JobPosting even though an SEO plugin also does.
 add_filter( 'jszr_seo_plugin_handles_schema', '__return_false' );
+
+// Let card templates carry one more inline CSS property.
+add_filter( 'jszr_allowed_template_css', function ( $properties ) {
+	$properties[] = 'scroll-margin-top';
+	return $properties;
+} );
+
+// Ship a named card template from a theme rather than the settings screen.
+add_filter( 'jszr_named_templates', function ( $templates ) {
+	$templates['sidebar'] = '<article class="my-mini"><a href="{permalink}">{title}</a></article>';
+	return $templates;
+} );
 ```
+
+`jszr_allowed_template_html` and `jszr_allowed_template_css` shape the
+allow-list applied to custom card and job-details HTML, both on save and on
+output. `jszr_named_templates` adds to or replaces the templates a shortcode can
+pick with `template="name"`.
 
 ### Frontend control
 

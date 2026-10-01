@@ -314,38 +314,50 @@ class REST_API {
 		$max = (int) Settings::get( 'rest_max_per_page', 100 );
 
 		$args = array(
-			'page'     => array(
+			'page'            => array(
 				'type'              => 'integer',
 				'default'           => 1,
 				'minimum'           => 1,
 				'sanitize_callback' => 'absint',
 			),
-			'per_page' => array(
+			'per_page'        => array(
 				'type'              => 'integer',
 				'default'           => (int) Settings::get( 'rest_per_page', 20 ),
 				'minimum'           => 1,
 				'maximum'           => $max,
 				'sanitize_callback' => 'absint',
 			),
-			'search'   => array(
+			'search'          => array(
 				'type'              => 'string',
 				'default'           => '',
 				'sanitize_callback' => 'sanitize_text_field',
 			),
-			'orderby'  => array(
+			'orderby'         => array(
 				'type'    => 'string',
 				'enum'    => array( 'date', 'title', 'closing_date', 'posted_date' ),
 				'default' => 'date',
 			),
-			'order'    => array(
+			'order'           => array(
 				'type'    => 'string',
 				'enum'    => array( 'asc', 'desc', 'ASC', 'DESC' ),
 				'default' => 'desc',
 			),
-			'status'   => array(
+			'status'          => array(
 				'type'    => 'string',
 				'enum'    => array( 'active', 'inactive', 'expired', 'closed', 'any' ),
 				'default' => 'active',
+			),
+			'exclude'         => array( // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude -- A handful of IDs (the current job), not a bulk exclusion.
+				'type'              => 'string',
+				'default'           => '',
+				'sanitize_callback' => 'sanitize_text_field',
+				'description'       => __( 'Comma separated post IDs to leave out.', 'jobs-sync-for-zoho-recruit' ),
+			),
+			'location_search' => array(
+				'type'              => 'string',
+				'default'           => '',
+				'sanitize_callback' => 'sanitize_text_field',
+				'description'       => __( 'Free text matched against the location, city, state and country.', 'jobs-sync-for-zoho-recruit' ),
 			),
 		);
 
@@ -736,12 +748,14 @@ class REST_API {
 		$params = wp_parse_args(
 			$params,
 			array(
-				'page'     => 1,
-				'per_page' => (int) Settings::get( 'rest_per_page', 20 ),
-				'search'   => '',
-				'orderby'  => 'date',
-				'order'    => 'desc',
-				'status'   => 'active',
+				'page'            => 1,
+				'per_page'        => (int) Settings::get( 'rest_per_page', 20 ),
+				'search'          => '',
+				'orderby'         => 'date',
+				'order'           => 'desc',
+				'status'          => 'active',
+				'exclude'         => '', // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude -- A handful of IDs, not a bulk exclusion.
+				'location_search' => '',
 			)
 		);
 
@@ -903,21 +917,38 @@ class REST_API {
 			$args['jszr_search'] = $search;
 		}
 
+		// A second free-text box for "where", matched against the location
+		// terms and the city, state and country meta. Same reasoning as above
+		// for not touching `s`.
+		$location_search = trim( (string) $params['location_search'] );
+
+		if ( '' !== $location_search ) {
+			$args['jszr_location_search'] = $location_search;
+		}
+
+		// Posts to leave out -- the current job on a "related openings" list.
+		$exclude = array_filter( array_map( 'absint', explode( ',', (string) $params['exclude'] ) ) );
+
+		if ( ! empty( $exclude ) ) {
+			$args['post__not_in'] = array_values( array_unique( $exclude ) ); // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_post__not_in -- One or two IDs: the job being viewed on a related-openings list.
+		}
+
 		return $args;
 	}
 
 	/**
 	 * Whether a query opted into the extended job search.
 	 *
-	 * @param \WP_Query $query Query object.
+	 * @param \WP_Query $query     Query object.
+	 * @param string    $query_var Query variable holding the term.
 	 * @return string The search term, or an empty string.
 	 */
-	private static function search_term( $query ) {
+	private static function search_term( $query, $query_var = 'jszr_search' ) {
 		if ( ! $query instanceof \WP_Query ) {
 			return '';
 		}
 
-		$term = $query->get( 'jszr_search' );
+		$term = $query->get( $query_var );
 
 		return is_string( $term ) ? trim( $term ) : '';
 	}
@@ -932,7 +963,8 @@ class REST_API {
 	 * results on a site running a search plugin as on one that is not.
 	 *
 	 * Every word has to match somewhere, which is what a visitor typing two
-	 * words expects.
+	 * words expects. Which columns count is a setting (Settings → Display →
+	 * Search), so a site can keep the description out of keyword matches.
 	 *
 	 * @param string    $where WHERE clause.
 	 * @param \WP_Query $query Query object.
@@ -941,35 +973,70 @@ class REST_API {
 	public static function search_where( $where, $query ) {
 		global $wpdb;
 
-		$term = self::search_term( $query );
+		$term     = self::search_term( $query );
+		$location = self::search_term( $query, 'jszr_location_search' );
 
-		if ( '' === $term ) {
+		if ( '' === $term && '' === $location ) {
 			return $where;
 		}
 
-		$words = preg_split( '/\s+/', $term, -1, PREG_SPLIT_NO_EMPTY );
+		if ( '' !== $term ) {
+			$words = preg_split( '/\s+/', $term, -1, PREG_SPLIT_NO_EMPTY );
 
-		if ( empty( $words ) ) {
-			return $where;
+			// A pathological query string must not turn into a hundred LIKEs.
+			$words  = array_slice( (array) $words, 0, 8 );
+			$fields = Settings::search_fields();
+
+			foreach ( $words as $word ) {
+				$like  = '%' . $wpdb->esc_like( $word ) . '%';
+				$parts = array();
+
+				if ( in_array( 'title', $fields, true ) ) {
+					$parts[] = $wpdb->prepare( "{$wpdb->posts}.post_title LIKE %s", $like );
+				}
+
+				if ( in_array( 'excerpt', $fields, true ) ) {
+					$parts[] = $wpdb->prepare( "{$wpdb->posts}.post_excerpt LIKE %s", $like );
+				}
+
+				if ( in_array( 'content', $fields, true ) ) {
+					$parts[] = $wpdb->prepare( "{$wpdb->posts}.post_content LIKE %s", $like );
+				}
+
+				if ( in_array( 'job_code', $fields, true ) ) {
+					$parts[] = $wpdb->prepare(
+						"{$wpdb->posts}.ID IN ( SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = %s AND meta_value LIKE %s )",
+						'_jszr_job_code',
+						$like
+					);
+				}
+
+				if ( ! empty( $parts ) ) {
+					$where .= ' AND ( ' . implode( ' OR ', $parts ) . ' )';
+				}
+			}
 		}
 
-		// A pathological query string must not turn into a hundred LIKEs.
-		$words = array_slice( $words, 0, 8 );
+		if ( '' !== $location ) {
+			$words = array_slice( (array) preg_split( '/\s+/', $location, -1, PREG_SPLIT_NO_EMPTY ), 0, 8 );
 
-		foreach ( $words as $word ) {
-			$like = '%' . $wpdb->esc_like( $word ) . '%';
+			foreach ( $words as $word ) {
+				$like = '%' . $wpdb->esc_like( $word ) . '%';
 
-			$where .= $wpdb->prepare(
-				" AND ( {$wpdb->posts}.post_title LIKE %s"
-				. " OR {$wpdb->posts}.post_excerpt LIKE %s"
-				. " OR {$wpdb->posts}.post_content LIKE %s"
-				. " OR {$wpdb->posts}.ID IN ( SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = %s AND meta_value LIKE %s ) )",
-				$like,
-				$like,
-				$like,
-				'_jszr_job_code',
-				$like
-			);
+				$where .= $wpdb->prepare(
+					" AND ( {$wpdb->posts}.ID IN ( SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key IN ( %s, %s, %s ) AND meta_value LIKE %s )"
+					. " OR {$wpdb->posts}.ID IN ( SELECT tr.object_id FROM {$wpdb->term_relationships} tr"
+					. " INNER JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id"
+					. " INNER JOIN {$wpdb->terms} t ON t.term_id = tt.term_id"
+					. ' WHERE tt.taxonomy = %s AND t.name LIKE %s ) )',
+					'_zoho_recruit_city',
+					'_zoho_recruit_state',
+					'_zoho_recruit_country',
+					$like,
+					Post_Type::TAX_LOCATION,
+					$like
+				);
+			}
 		}
 
 		return $where;
@@ -1112,6 +1179,12 @@ class REST_API {
 						'type'    => 'boolean',
 						'default' => true,
 					),
+					'template'        => array(
+						'type'              => 'string',
+						'default'           => '',
+						'sanitize_callback' => 'sanitize_key',
+						'description'       => __( 'A named card template from Settings → Display.', 'jobs-sync-for-zoho-recruit' ),
+					),
 				)
 			)
 		);
@@ -1141,6 +1214,9 @@ class REST_API {
 			'employment_type' => (string) $request['employment_type'],
 			'category'        => (string) $request['category'],
 			'experience'      => (string) $request['experience'],
+			'exclude'         => (string) $request['exclude'], // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude -- A handful of IDs, not a bulk exclusion.
+			'location_search' => (string) $request['location_search'],
+			'template'        => (string) $request['template'],
 			'style'           => (string) $request['style'],
 			'columns'         => (int) $request['columns'],
 			'show_filters'    => $request['show_filters'] ? 'true' : 'false',

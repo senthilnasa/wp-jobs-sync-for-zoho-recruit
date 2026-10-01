@@ -397,6 +397,62 @@ class Field_Mapper {
 	}
 
 	/**
+	 * Pick the Job Apply URL out of a Zoho record, when Zoho sent one.
+	 *
+	 * Zoho only includes the link when a record is fetched by ID with
+	 * `publish_URL=true`, and its documentation does not name the key it
+	 * arrives under. The list of names is therefore a best guess that can be
+	 * corrected with a filter, backed by a scan for any key that mentions
+	 * "apply" together with "url" or "link". Whatever is found still has to be
+	 * a real URL: to_url() drops anything else, so a stray job code can never
+	 * become `http://ZR_1_JOB` again.
+	 *
+	 * @param array $record Raw Zoho record.
+	 * @return string The sanitized URL, or an empty string when absent.
+	 */
+	public static function find_apply_url( array $record ) {
+		/**
+		 * Filter the record keys checked for the Job Apply URL, in order.
+		 *
+		 * @param string[] $keys Candidate keys.
+		 */
+		$keys = (array) apply_filters(
+			'jszr_apply_url_fields',
+			array( 'Job_Apply_URL', '$job_apply_url', 'Job_Apply_Url', 'job_apply_url', 'Apply_URL', '$apply_url' )
+		);
+
+		foreach ( $keys as $key ) {
+			$key = (string) $key;
+
+			if ( '' === $key || ! isset( $record[ $key ] ) || ! is_scalar( $record[ $key ] ) ) {
+				continue;
+			}
+
+			$url = self::to_url( $record[ $key ] );
+
+			if ( '' !== $url ) {
+				return $url;
+			}
+		}
+
+		foreach ( $record as $key => $value ) {
+			$key = (string) $key;
+
+			if ( ! is_scalar( $value ) || ! preg_match( '/apply/i', $key ) || ! preg_match( '/url|link/i', $key ) ) {
+				continue;
+			}
+
+			$url = self::to_url( $value );
+
+			if ( '' !== $url ) {
+				return $url;
+			}
+		}
+
+		return '';
+	}
+
+	/**
 	 * Fill in values that are derived rather than mapped one to one.
 	 *
 	 * @param array $data   Mapped payload.
@@ -404,6 +460,16 @@ class Field_Mapper {
 	 * @return array
 	 */
 	private static function apply_derived_values( array $data, array $record ) {
+		// The Job Apply URL Zoho includes with publish_URL=true beats whatever
+		// the mapping produced. The default row reads `Website`, which is the
+		// client's own site, not where a candidate applies.
+		$apply_url = self::find_apply_url( $record );
+
+		if ( '' !== $apply_url ) {
+			$data['meta']['_zoho_recruit_application_url']        = $apply_url;
+			$data['mapped']['meta:_zoho_recruit_application_url'] = $apply_url;
+		}
+
 		// Title fallback so a job is never created with an empty title.
 		if ( empty( $data['post']['post_title'] ) ) {
 			foreach ( array( 'Posting_Title', 'Job_Opening_Name', 'Job_Opening_ID' ) as $candidate ) {

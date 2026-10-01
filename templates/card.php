@@ -6,8 +6,10 @@
  *
  * @package JobsSyncForZohoRecruit
  *
- * @var int  $post_id      Job post ID.
- * @var bool $show_excerpt Whether to show the excerpt.
+ * @var int    $post_id      Job post ID.
+ * @var bool   $show_excerpt Whether to show the excerpt.
+ * @var string $layout       Card layout key.
+ * @var string $card_template Named card template, when the listing asked for one.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -18,13 +20,15 @@ defined( 'ABSPATH' ) || exit;
  * rendered here and this file's markup is used only for the default layout.
  * A theme override of this file still wins over both.
  */
-$jszr_layout_template = \JobsSyncForZohoRecruit\Layouts::listing_template( isset( $layout ) ? (string) $layout : '' );
+$jszr_layout_template = \JobsSyncForZohoRecruit\Layouts::listing_template(
+	isset( $layout ) ? (string) $layout : '',
+	isset( $card_template ) ? (string) $card_template : ''
+);
 
 if ( '' !== $jszr_layout_template ) {
-	echo wp_kses(
-		\JobsSyncForZohoRecruit\Template_Tags::render( $jszr_layout_template, $post_id ),
-		\JobsSyncForZohoRecruit\Layouts::allowed_html()
-	);
+	$jszr_card_markup = \JobsSyncForZohoRecruit\Template_Tags::render( $jszr_layout_template, $post_id );
+
+	echo \JobsSyncForZohoRecruit\Layouts::kses( $jszr_card_markup ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Layouts::kses() is wp_kses() with the plugin's allow-list.
 
 	return;
 }

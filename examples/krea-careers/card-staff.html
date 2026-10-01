@@ -1,0 +1,15 @@
+<article class="jszr-job-card krea-card krea-card--staff">
+	<div class="krea-card__body">
+		<h3 class="krea-card__title"><a class="krea-card__link" href="{permalink}">{title}</a></h3>
+		<ul class="krea-card__facts">
+			{if:job_code}<li><strong>Code:</strong> {job_code}</li>{/if:job_code}
+			{if:department}<li><strong>Functional area:</strong> {department}</li>{/if:department}
+			{if:category}<li><strong>School:</strong> {category}</li>{/if:category}
+			{if:location}<li><strong>Location:</strong> {location}</li>{/if:location}
+			{if:experience}<li><strong>Experience:</strong> {experience}</li>{/if:experience}
+		</ul>
+	</div>
+	<span class="krea-card__arrow" aria-hidden="true">
+		<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+	</span>
+</article>

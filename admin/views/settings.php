@@ -788,6 +788,19 @@ $jszr_input = static function ( $key, $values, $type = 'text', $help = '', $attr
 							</td>
 						</tr>
 						<tr>
+							<th scope="row"><?php esc_html_e( 'Apply link from Zoho', 'jobs-sync-for-zoho-recruit' ); ?></th>
+							<td>
+								<?php
+								$jszr_checkbox(
+									'fetch_apply_url',
+									$settings,
+									__( 'Read the Job Apply URL of each job from Zoho Recruit', 'jobs-sync-for-zoho-recruit' ),
+									__( 'Zoho Recruit only includes the Job Apply URL when a job is fetched on its own, so a job that arrives without one is fetched once more by ID during the sync. That costs one extra API call per job the first time it is seen; afterwards the stored link is reused. Turn this off to build every apply link from the career site address below instead.', 'jobs-sync-for-zoho-recruit' )
+								);
+								?>
+							</td>
+						</tr>
+						<tr>
 							<th scope="row"><label for="jszr-career_site_url"><?php esc_html_e( 'Zoho career site address', 'jobs-sync-for-zoho-recruit' ); ?></label></th>
 							<td>
 								<?php
@@ -795,7 +808,7 @@ $jszr_input = static function ( $key, $values, $type = 'text', $help = '', $attr
 									'career_site_url',
 									$settings,
 									'url',
-									__( 'The home page of your Zoho Recruit career site, for example https://yourcompany.zohorecruit.com. Zoho does not send a link to the public job posting, so the apply button is built from this address and the Zoho record ID of each job. Leave empty if you set a fallback application URL below instead.', 'jobs-sync-for-zoho-recruit' )
+									__( 'The home page of your Zoho Recruit career site, for example https://yourcompany.zohorecruit.com. When a job has no apply link from Zoho yet, the apply button is built from this address and the Zoho record ID of the job. Leave empty if you set a fallback application URL below instead.', 'jobs-sync-for-zoho-recruit' )
 								);
 								?>
 
@@ -932,6 +945,107 @@ $jszr_input = static function ( $key, $values, $type = 'text', $help = '', $attr
 									</button>
 								</p>
 							</td>
+						</tr>
+						<tr>
+							<th scope="row"><?php esc_html_e( 'Named card templates', 'jobs-sync-for-zoho-recruit' ); ?></th>
+							<td>
+								<p class="description">
+									<?php
+									printf(
+										/* translators: %s: example shortcode attribute. */
+										esc_html__( 'Extra card designs for pages that need a different look. Pick one per listing with %s. Names use letters, numbers and underscores.', 'jobs-sync-for-zoho-recruit' ),
+										'<code>[zoho_jobs template="staff"]</code>'
+									);
+									?>
+								</p>
+
+								<?php
+								$jszr_named     = (array) $settings['card_templates'];
+								$jszr_row_index = 0;
+
+								$jszr_template_row = static function ( $index, $name, $html ) use ( $jszr_option ) {
+									?>
+									<div class="jszr-template-row">
+										<p class="jszr-template-row__head">
+											<label>
+												<span class="screen-reader-text"><?php esc_html_e( 'Template name', 'jobs-sync-for-zoho-recruit' ); ?></span>
+												<input type="text" class="regular-text code"
+													name="<?php echo esc_attr( $jszr_option ); ?>[card_templates][<?php echo esc_attr( (string) $index ); ?>][name]"
+													value="<?php echo esc_attr( $name ); ?>"
+													placeholder="<?php esc_attr_e( 'name, for example staff', 'jobs-sync-for-zoho-recruit' ); ?>" />
+											</label>
+											<button type="button" class="button-link jszr-remove-template"><?php esc_html_e( 'Remove', 'jobs-sync-for-zoho-recruit' ); ?></button>
+										</p>
+										<textarea class="large-text code" rows="10" spellcheck="false"
+											name="<?php echo esc_attr( $jszr_option ); ?>[card_templates][<?php echo esc_attr( (string) $index ); ?>][html]"><?php echo esc_textarea( $html ); ?></textarea>
+									</div>
+									<?php
+								};
+	?>
+
+								<div id="jszr-template-rows">
+									<?php foreach ( $jszr_named as $jszr_name => $jszr_html ) : ?>
+										<?php $jszr_template_row( $jszr_row_index++, (string) $jszr_name, (string) $jszr_html ); ?>
+									<?php endforeach; ?>
+								</div>
+
+								<template id="jszr-template-row-template">
+									<?php $jszr_template_row( '__INDEX__', '', '' ); ?>
+								</template>
+
+								<p>
+									<button type="button" class="button" id="jszr-add-template"><?php esc_html_e( 'Add a template', 'jobs-sync-for-zoho-recruit' ); ?></button>
+								</p>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+
+				<h2><?php esc_html_e( 'Shortcodes', 'jobs-sync-for-zoho-recruit' ); ?></h2>
+
+				<p class="description">
+					<?php esc_html_e( 'Ready to paste. Each one lists the jobs in a single term; add template="name" to use a named card, and per_page, show_filters, show_search or show_sort to adjust the listing.', 'jobs-sync-for-zoho-recruit' ); ?>
+				</p>
+
+				<table class="widefat striped jszr-tag-reference">
+					<thead>
+						<tr>
+							<th scope="col"><?php esc_html_e( 'Lists', 'jobs-sync-for-zoho-recruit' ); ?></th>
+							<th scope="col"><?php esc_html_e( 'Shortcode', 'jobs-sync-for-zoho-recruit' ); ?></th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><?php esc_html_e( 'Every active job', 'jobs-sync-for-zoho-recruit' ); ?></td>
+							<td><code>[zoho_jobs]</code></td>
+						</tr>
+						<?php foreach ( REST_API::filter_map() as $jszr_param => $jszr_taxonomy ) : ?>
+							<?php
+							$jszr_terms = get_terms(
+								array(
+									'taxonomy'   => $jszr_taxonomy,
+									'hide_empty' => false,
+									'number'     => 40,
+								)
+							);
+
+							if ( is_wp_error( $jszr_terms ) || empty( $jszr_terms ) ) {
+								continue;
+							}
+
+							$jszr_tax_object = get_taxonomy( $jszr_taxonomy );
+							$jszr_tax_label  = $jszr_tax_object ? $jszr_tax_object->labels->singular_name : $jszr_param;
+							?>
+							<?php foreach ( $jszr_terms as $jszr_term ) : ?>
+								<tr>
+									<td><?php echo esc_html( $jszr_tax_label . ': ' . $jszr_term->name ); ?></td>
+									<td><code>[zoho_jobs <?php echo esc_html( $jszr_param ); ?>="<?php echo esc_html( $jszr_term->slug ); ?>"]</code></td>
+								</tr>
+							<?php endforeach; ?>
+						<?php endforeach; ?>
+						<tr>
+							<td><?php esc_html_e( 'Other jobs in the same department, on a single job page', 'jobs-sync-for-zoho-recruit' ); ?></td>
+							<td><code>[zoho_jobs related="department" per_page="3" show_filters="false" show_search="false" show_pagination="false"]</code></td>
 						</tr>
 					</tbody>
 				</table>
@@ -1105,8 +1219,116 @@ $jszr_input = static function ( $key, $values, $type = 'text', $help = '', $attr
 							</td>
 						</tr>
 						<tr>
+							<th scope="row"><label for="jszr-filters_style"><?php esc_html_e( 'Filter style', 'jobs-sync-for-zoho-recruit' ); ?></label></th>
+							<td>
+								<?php
+								$jszr_select(
+									'filters_style',
+									$settings,
+									array(
+										'dropdowns' => __( 'Dropdowns — one select per filter', 'jobs-sync-for-zoho-recruit' ),
+										'pills'     => __( 'Pills — a row of choices per filter, applied on click', 'jobs-sync-for-zoho-recruit' ),
+									),
+									__( 'Pills suit filters with a handful of terms, such as employment type. They still post with the form, so they work without JavaScript.', 'jobs-sync-for-zoho-recruit' )
+								);
+								?>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><?php esc_html_e( 'Filter labels', 'jobs-sync-for-zoho-recruit' ); ?></th>
+							<td>
+								<?php $jszr_saved_labels = (array) $settings['filter_labels']; ?>
+								<?php foreach ( REST_API::filter_map() as $jszr_param => $jszr_taxonomy ) : ?>
+									<?php $jszr_tax_object = get_taxonomy( $jszr_taxonomy ); ?>
+									<p>
+										<label for="jszr-filter_label-<?php echo esc_attr( $jszr_param ); ?>" class="jszr-inline-label">
+											<?php echo esc_html( $jszr_tax_object ? $jszr_tax_object->labels->singular_name : $jszr_param ); ?>
+										</label>
+										<input type="text" class="regular-text"
+											id="jszr-filter_label-<?php echo esc_attr( $jszr_param ); ?>"
+											name="<?php echo esc_attr( $jszr_option ); ?>[filter_labels][<?php echo esc_attr( $jszr_param ); ?>]"
+											value="<?php echo esc_attr( (string) ( $jszr_saved_labels[ $jszr_param ] ?? '' ) ); ?>"
+											placeholder="<?php echo esc_attr( $jszr_tax_object ? $jszr_tax_object->labels->singular_name : $jszr_param ); ?>" />
+									</p>
+								<?php endforeach; ?>
+								<p class="description"><?php esc_html_e( 'What visitors see above each filter. Leave one blank to keep the taxonomy name. For example, "Functional area" instead of "Department", or "School" instead of "Category".', 'jobs-sync-for-zoho-recruit' ); ?></p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><?php esc_html_e( 'Application status', 'jobs-sync-for-zoho-recruit' ); ?></th>
+							<td>
+								<?php
+								$jszr_checkbox(
+									'show_status_filter',
+									$settings,
+									__( 'Offer an Open / Closed / Expired filter', 'jobs-sync-for-zoho-recruit' ),
+									__( 'Off by default: most sites only ever list open positions. Turning it on lets visitors see closed roles on request.', 'jobs-sync-for-zoho-recruit' )
+								);
+								?>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><label for="jszr-search_label"><?php esc_html_e( 'Search label', 'jobs-sync-for-zoho-recruit' ); ?></label></th>
+							<td><?php $jszr_input( 'search_label', $settings, 'text', __( 'The label above the keyword box. Leave blank to use "Search jobs".', 'jobs-sync-for-zoho-recruit' ) ); ?></td>
+						</tr>
+						<tr>
 							<th scope="row"><label for="jszr-search_placeholder"><?php esc_html_e( 'Search placeholder', 'jobs-sync-for-zoho-recruit' ); ?></label></th>
 							<td><?php $jszr_input( 'search_placeholder', $settings, 'text', __( 'Leave blank to use "Job title or code".', 'jobs-sync-for-zoho-recruit' ) ); ?></td>
+						</tr>
+						<tr>
+							<th scope="row"><?php esc_html_e( 'Search looks in', 'jobs-sync-for-zoho-recruit' ); ?></th>
+							<td>
+								<fieldset>
+									<legend class="screen-reader-text"><?php esc_html_e( 'Search looks in', 'jobs-sync-for-zoho-recruit' ); ?></legend>
+									<?php $jszr_chosen_search = Settings::search_fields(); ?>
+									<?php foreach ( Settings::available_search_fields() as $jszr_field => $jszr_label ) : ?>
+										<label class="jszr-checkbox-row">
+											<input type="checkbox"
+												name="<?php echo esc_attr( $jszr_option ); ?>[search_fields][]"
+												value="<?php echo esc_attr( $jszr_field ); ?>"
+												<?php checked( in_array( $jszr_field, $jszr_chosen_search, true ) ); ?> />
+											<?php echo esc_html( $jszr_label ); ?>
+										</label>
+									<?php endforeach; ?>
+								</fieldset>
+								<p class="description"><?php esc_html_e( 'Every word typed has to match one of these. Untick Description to keep a search for "manager" from matching every job that reports to one.', 'jobs-sync-for-zoho-recruit' ); ?></p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><?php esc_html_e( 'Location search', 'jobs-sync-for-zoho-recruit' ); ?></th>
+							<td>
+								<?php
+								$jszr_checkbox(
+									'show_location_search',
+									$settings,
+									__( 'Add a second text box for the location', 'jobs-sync-for-zoho-recruit' ),
+									__( 'Matches the location terms and the city, state and country of each job. Shown next to the keyword box whenever the search box is shown.', 'jobs-sync-for-zoho-recruit' )
+								);
+								?>
+								<p>
+									<label for="jszr-location_search_placeholder" class="jszr-inline-label"><?php esc_html_e( 'Placeholder', 'jobs-sync-for-zoho-recruit' ); ?></label>
+									<?php $jszr_input( 'location_search_placeholder', $settings, 'text' ); ?>
+								</p>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><label for="jszr-pagination_style"><?php esc_html_e( 'Pagination', 'jobs-sync-for-zoho-recruit' ); ?></label></th>
+							<td>
+								<?php
+								$jszr_select(
+									'pagination_style',
+									$settings,
+									array(
+										'numbers'   => __( 'Page numbers', 'jobs-sync-for-zoho-recruit' ),
+										'load_more' => __( 'A "Load more" button that adds the next page below', 'jobs-sync-for-zoho-recruit' ),
+									)
+								);
+								?>
+								<p>
+									<label for="jszr-load_more_label" class="jszr-inline-label"><?php esc_html_e( 'Button label', 'jobs-sync-for-zoho-recruit' ); ?></label>
+									<?php $jszr_input( 'load_more_label', $settings, 'text', __( 'Leave blank to use "Load more listings".', 'jobs-sync-for-zoho-recruit' ) ); ?>
+								</p>
+							</td>
 						</tr>
 						<tr>
 							<th scope="row"><label for="jszr-filters_button_label"><?php esc_html_e( 'Filter button label', 'jobs-sync-for-zoho-recruit' ); ?></label></th>

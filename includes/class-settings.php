@@ -189,6 +189,7 @@ class Settings {
 			'career_site_url'               => '',
 			'career_site_path'              => self::DEFAULT_CAREER_SITE_PATH,
 			'apply_utm'                     => '',
+			'fetch_apply_url'               => true,
 
 			// Display: layouts, filters and custom CSS.
 			'listing_layout'                => 'default',
@@ -200,6 +201,16 @@ class Settings {
 			'show_filters_default'          => true,
 			'show_search_default'           => true,
 			'filters_layout'                => 'inline',
+			'filters_style'                 => 'dropdowns',
+			'filter_labels'                 => array(),
+			'show_status_filter'            => false,
+			'show_location_search'          => false,
+			'search_fields'                 => array( 'title', 'excerpt', 'content', 'job_code' ),
+			'search_label'                  => '',
+			'location_search_placeholder'   => '',
+			'pagination_style'              => 'numbers',
+			'load_more_label'               => '',
+			'card_templates'                => array(),
 			'filter_fields'                 => array( 'department', 'location', 'employment_type', 'experience' ),
 			'show_sort'                     => false,
 			'search_placeholder'            => '',
@@ -379,6 +390,9 @@ class Settings {
 			'show_filters_default',
 			'show_search_default',
 			'show_sort',
+			'fetch_apply_url',
+			'show_status_filter',
+			'show_location_search',
 		);
 
 		foreach ( $booleans as $key ) {
@@ -425,6 +439,8 @@ class Settings {
 			'listing_layout'   => array( 'default', 'card', 'compact', 'table', 'custom' ),
 			'job_info_layout'  => array( 'default', 'inline', 'custom' ),
 			'filters_layout'   => array( 'inline', 'stacked' ),
+			'filters_style'    => array( 'dropdowns', 'pills' ),
+			'pagination_style' => array( 'numbers', 'load_more' ),
 			'apply_target'     => array( 'new_tab', 'same_tab' ),
 		);
 
@@ -439,7 +455,7 @@ class Settings {
 
 		foreach ( $slugs as $key ) {
 			if ( isset( $input[ $key ] ) ) {
-				$value       = sanitize_title( (string) $input[ $key ] );
+				$value       = self::sanitize_slug_path( (string) $input[ $key ] );
 				$out[ $key ] = '' === $value ? $defaults[ $key ] : $value;
 			}
 		}
@@ -459,7 +475,7 @@ class Settings {
 			$out['notify_email'] = is_email( $email ) ? $email : '';
 		}
 
-		$texts = array( 'apply_label', 'apply_url_template', 'apply_utm', 'org_name', 'search_placeholder', 'filters_button_label' );
+		$texts = array( 'apply_label', 'apply_url_template', 'apply_utm', 'org_name', 'search_placeholder', 'filters_button_label', 'search_label', 'location_search_placeholder', 'load_more_label' );
 
 		foreach ( $texts as $key ) {
 			if ( isset( $input[ $key ] ) ) {
@@ -485,8 +501,39 @@ class Settings {
 			}
 		}
 
+		// Named card templates arrive as rows of name + HTML. A row with no name
+		// or no markup is dropped; two rows with the same name keep the last.
+		if ( isset( $input['card_templates'] ) ) {
+			$out['card_templates'] = self::sanitize_card_templates( $input['card_templates'] );
+		}
+
 		if ( isset( $input['custom_css'] ) ) {
 			$out['custom_css'] = Layouts::sanitize_css( (string) $input['custom_css'] );
+		}
+
+		if ( isset( $input['search_fields'] ) ) {
+			$available = array_keys( self::available_search_fields() );
+			$fields    = is_array( $input['search_fields'] ) ? $input['search_fields'] : array();
+			$fields    = array_map( 'sanitize_key', $fields );
+
+			$out['search_fields'] = array_values( array_intersect( $available, $fields ) );
+		}
+
+		if ( isset( $input['filter_labels'] ) ) {
+			$labels = array();
+			$params = array_keys( REST_API::filter_map() );
+			$raw    = is_array( $input['filter_labels'] ) ? $input['filter_labels'] : array();
+
+			foreach ( $raw as $param => $label ) {
+				$param = sanitize_key( (string) $param );
+				$label = sanitize_text_field( (string) $label );
+
+				if ( in_array( $param, $params, true ) && '' !== $label ) {
+					$labels[ $param ] = $label;
+				}
+			}
+
+			$out['filter_labels'] = $labels;
 		}
 
 		if ( isset( $input['filter_fields'] ) ) {
@@ -619,6 +666,116 @@ class Settings {
 	 * Fields the job info block can display, in the order it displays them.
 	 *
 	 * @return array<string,string> Key => human label.
+	 */
+	public static function available_search_fields() {
+		return array(
+			'title'    => __( 'Job title', 'jobs-sync-for-zoho-recruit' ),
+			'excerpt'  => __( 'Summary', 'jobs-sync-for-zoho-recruit' ),
+			'content'  => __( 'Description', 'jobs-sync-for-zoho-recruit' ),
+			'job_code' => __( 'Job code', 'jobs-sync-for-zoho-recruit' ),
+		);
+	}
+
+	/**
+	 * The fields the keyword search looks in, as configured.
+	 *
+	 * Never empty: a search that matches nothing by configuration would look
+	 * like a site with no jobs.
+	 *
+	 * @return string[]
+	 */
+	public static function search_fields() {
+		$available = array_keys( self::available_search_fields() );
+		$chosen    = array_values( array_intersect( $available, (array) self::get( 'search_fields', $available ) ) );
+
+		return empty( $chosen ) ? $available : $chosen;
+	}
+
+	/**
+	 * The visitor-facing label for a filter.
+	 *
+	 * Administrators rename "Department" to "Functional area" or "Category" to
+	 * "School" here, without touching the taxonomy itself.
+	 *
+	 * @param string $param    Filter parameter name.
+	 * @param string $fallback Label to use when none is configured.
+	 * @return string
+	 */
+	public static function filter_label( $param, $fallback ) {
+		$labels = (array) self::get( 'filter_labels', array() );
+		$param  = sanitize_key( (string) $param );
+
+		return isset( $labels[ $param ] ) && '' !== (string) $labels[ $param ]
+			? (string) $labels[ $param ]
+			: (string) $fallback;
+	}
+
+	/**
+	 * Clean a URL slug that may contain several path segments.
+	 *
+	 * `careers/openings` is a legitimate base for job URLs when the careers
+	 * pages themselves live under /careers/. Each segment is sanitized on its
+	 * own and empty segments vanish, so `//careers///` becomes `careers`.
+	 *
+	 * @param string $slug Raw slug or path.
+	 * @return string
+	 */
+	public static function sanitize_slug_path( $slug ) {
+		$segments = array();
+
+		foreach ( explode( '/', str_replace( '\\', '/', (string) $slug ) ) as $segment ) {
+			$segment = sanitize_title( $segment );
+
+			if ( '' !== $segment ) {
+				$segments[] = $segment;
+			}
+		}
+
+		return implode( '/', $segments );
+	}
+
+	/**
+	 * Clean the named card templates posted by the settings form.
+	 *
+	 * Accepts either rows (`[ [ 'name' => ..., 'html' => ... ], ... ]`) as the
+	 * form posts them, or an already keyed map.
+	 *
+	 * @param mixed $input Posted value.
+	 * @return array<string,string> Name => sanitized template.
+	 */
+	public static function sanitize_card_templates( $input ) {
+		$out = array();
+
+		if ( ! is_array( $input ) ) {
+			return $out;
+		}
+
+		foreach ( $input as $key => $row ) {
+			if ( is_array( $row ) ) {
+				$name = isset( $row['name'] ) ? (string) $row['name'] : '';
+				$html = isset( $row['html'] ) ? (string) $row['html'] : '';
+			} else {
+				$name = (string) $key;
+				$html = (string) $row;
+			}
+
+			$name = sanitize_key( str_replace( ' ', '_', trim( $name ) ) );
+			$html = Layouts::sanitize_template( $html );
+
+			if ( '' === $name || '' === $html ) {
+				continue;
+			}
+
+			$out[ $name ] = $html;
+		}
+
+		return $out;
+	}
+
+	/**
+	 * Fields the job info block can display.
+	 *
+	 * @return array<string,string> Key => label.
 	 */
 	public static function available_job_info_fields() {
 		$fields = array();

@@ -41,6 +41,10 @@ editor is what visitors get, and a template override applies to both.
 | `show_sort` | Setting (off) | Sort dropdown |
 | `show_pagination` | `true` | |
 | `show_excerpt` | `true` | |
+| `template` | — | A **named card template** from Settings → Display, see below |
+| `exclude` | — | Post IDs to leave out, comma separated |
+| `related` | — | On a job page: a filter name (`department`, `category`…) whose terms are copied from the current job, which is itself excluded |
+| `location_search` | — | Fixed text matched against location terms, city, state and country |
 
 Attributes named "Setting" above default to whatever **Settings → Display** says,
 so a site can change every listing at once and still override one of them here.
@@ -48,7 +52,14 @@ so a site can change every listing at once and still override one of them here.
 ```
 [zoho_jobs per_page="12" style="grid" columns="3" show_filters="true" show_search="true"]
 [zoho_jobs department="engineering" location="chennai" show_pagination="false"]
+[zoho_jobs category="staff-openings" template="staff"]
+[zoho_jobs related="department" per_page="3" show_filters="false" show_search="false" show_pagination="false"]
 ```
+
+One page per group of jobs is the common pattern: a page for each school or
+department, each holding one shortcode filtered by `category` or `department`.
+**Settings → Display → Shortcodes** lists a ready-made shortcode for every term
+on the site, so nobody has to look up slugs.
 
 Two more, for use on a single job page (or inside a loop):
 
@@ -98,10 +109,33 @@ including any taxonomy you registered through `jszr_taxonomies`. `{view_link}`,
 `{apply_button}` and `{thumbnail}` produce ready-made markup; the rest are plain
 values.
 
-The HTML is filtered through an allow-list when you save: structural tags, links
-and images are kept, and `script`, `style`, `iframe`, `form` and event handler
-attributes are removed. Starting from a preset with the **Start from…** buttons
-gives you working markup to edit rather than an empty box.
+The HTML is filtered through an allow-list when you save: structural tags, links,
+images, inline `svg` icons, `button` and `picture` are kept, and `script`,
+`style`, `iframe`, `form` and event handler attributes are removed. Inline
+`style` attributes are kept, including `list-style`, `inset` and `transition`,
+which WordPress drops from post content; anything that could load a resource
+or run is not. The place for real styling is still the **Custom CSS** box: give
+elements classes in the template and style the classes there. Starting from a
+preset with the **Start from…** buttons gives you working markup to edit rather
+than an empty box.
+
+#### Named card templates
+
+One custom card is rarely enough for a site with more than one kind of listing.
+**Named card templates** on the same screen holds any number of extra token
+templates, each with a short name, and a listing picks one with
+`template="name"`:
+
+```
+[zoho_jobs category="sias-faculty" template="faculty"]
+[zoho_jobs category="staff-openings" template="staff"]
+```
+
+A named template wins over the layout setting and the `layout` attribute for
+that listing only; every other listing on the site is unaffected. Tags useful
+for design-led cards: `{posted_ago}` ("3 weeks ago"), `{org_name}` (the
+organisation from the Structured Data settings, or the site title) and
+`{status_label}` (Open, Closed or Expired).
 
 ### Job details layout
 
@@ -116,6 +150,26 @@ Choose which taxonomy filters appear and in what order, whether the search box
 and sort dropdown are on by default, whether the bar is laid out inline or
 stacked (for a sidebar), and the placeholder and button text. A filter whose
 taxonomy has no terms yet is left out automatically.
+
+The same screen also offers:
+
+- **Filter style**: dropdowns, or **pills**, a row of choices per filter that
+  applies as soon as one is clicked. Pills are radio buttons underneath, so the
+  Filter button still submits them without JavaScript.
+- **Filter labels**: what visitors see above each filter, for example
+  "Functional area" instead of "Department" or "School" instead of "Category".
+  The taxonomy itself is not renamed.
+- **Application status**: an opt-in Open / Closed / Expired filter. Off by
+  default, and a `jszr_status` parameter in the URL is ignored while it is off,
+  so closed jobs cannot be listed on a site that hides them.
+- **Search label**, **Search placeholder** and **Search looks in**: the label
+  and placeholder of the keyword box, and which of title, summary, description
+  and job code a keyword has to match.
+- **Location search**: a second text box next to the keyword box, matched
+  against the location terms and each job's city, state and country.
+- **Pagination**: page numbers, or a **Load more** button that appends the next
+  page below the current cards. Without JavaScript the button is a link to the
+  next page.
 
 Everything still works with JavaScript off: the bar is a plain GET form.
 
@@ -136,9 +190,10 @@ that option.
 ### Precedence
 
 1. A template file in your theme (`yourtheme/jobs-sync-for-zoho-recruit/card.php`)
-2. A shortcode or block `layout` attribute
-3. **Settings → Display**
-4. The plugin's default card
+2. A shortcode `template` attribute naming a saved card template
+3. A shortcode or block `layout` attribute
+4. **Settings → Display**
+5. The plugin's default card
 
 A theme override wins outright: the layout settings never run when one exists.
 

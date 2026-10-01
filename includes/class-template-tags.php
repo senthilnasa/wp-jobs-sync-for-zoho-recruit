@@ -94,6 +94,9 @@ class Template_Tags {
 			'posted_date'  => wp_date( (string) get_option( 'date_format' ), time() - ( 9 * DAY_IN_SECONDS ) ),
 			'closing_date' => wp_date( (string) get_option( 'date_format' ), time() + ( 21 * DAY_IN_SECONDS ) ),
 			'apply_url'    => '#',
+			'posted_ago'   => esc_html( self::ago( time() - ( 9 * DAY_IN_SECONDS ) ) ),
+			'status_label' => esc_html__( 'Open', 'jobs-sync-for-zoho-recruit' ),
+			'org_name'     => esc_html( self::org_name() ),
 			'thumbnail'    => '',
 			'view_link'    => '<a class="jszr-job-card__link" href="#">' . esc_html__( 'View Job', 'jobs-sync-for-zoho-recruit' ) . '</a>',
 			'apply_button' => '<a class="jszr-apply-button" href="#">' . esc_html__( 'Apply Now', 'jobs-sync-for-zoho-recruit' ) . '</a>',
@@ -186,6 +189,20 @@ class Template_Tags {
 			$values[ $token ] = $timestamp ? esc_html( wp_date( $date_format, $timestamp ) ) : '';
 		}
 
+		// Relative posting age, from Zoho's posted date when it is known and
+		// from the WordPress publish date otherwise, so the tag is never empty.
+		$posted_raw = (string) get_post_meta( $post_id, '_zoho_recruit_posted_date', true );
+		$posted_ts  = '' !== $posted_raw ? strtotime( $posted_raw ) : false;
+
+		if ( ! $posted_ts ) {
+			$posted_ts = get_post_time( 'U', true, $post_id );
+		}
+
+		$values['posted_ago'] = $posted_ts ? esc_html( self::ago( (int) $posted_ts ) ) : '';
+
+		$values['status_label'] = esc_html( self::status_label( $post_id ) );
+		$values['org_name']     = esc_html( self::org_name() );
+
 		// A flag, shown as a word that means something on its own.
 		$remote = (string) get_post_meta( $post_id, '_zoho_recruit_remote', true );
 
@@ -231,6 +248,60 @@ class Template_Tags {
 	}
 
 	/**
+	 * "3 weeks ago", in the site's language.
+	 *
+	 * @param int $timestamp Unix timestamp.
+	 * @return string
+	 */
+	public static function ago( $timestamp ) {
+		$timestamp = (int) $timestamp;
+		$now       = time();
+
+		if ( $timestamp <= 0 ) {
+			return '';
+		}
+
+		if ( $timestamp > $now ) {
+			return __( 'Just now', 'jobs-sync-for-zoho-recruit' );
+		}
+
+		return sprintf(
+			/* translators: %s: a human readable time difference such as "3 weeks". */
+			__( '%s ago', 'jobs-sync-for-zoho-recruit' ),
+			human_time_diff( $timestamp, $now )
+		);
+	}
+
+	/**
+	 * A candidate-facing word for the job's status.
+	 *
+	 * @param int $post_id Job post ID.
+	 * @return string
+	 */
+	public static function status_label( $post_id ) {
+		if ( Job::is_active( (int) $post_id ) ) {
+			return __( 'Open', 'jobs-sync-for-zoho-recruit' );
+		}
+
+		if ( 'expired' === Job::get_status( (int) $post_id ) ) {
+			return __( 'Expired', 'jobs-sync-for-zoho-recruit' );
+		}
+
+		return __( 'Closed', 'jobs-sync-for-zoho-recruit' );
+	}
+
+	/**
+	 * The hiring organisation's name.
+	 *
+	 * @return string
+	 */
+	public static function org_name() {
+		$name = trim( (string) Settings::get( 'org_name', '' ) );
+
+		return '' !== $name ? $name : (string) get_bloginfo( 'name' );
+	}
+
+	/**
 	 * Every token an administrator can use, with a short description.
 	 *
 	 * Used by the settings screen to document the templates.
@@ -253,7 +324,10 @@ class Template_Tags {
 			'client'       => __( 'Client', 'jobs-sync-for-zoho-recruit' ),
 			'positions'    => __( 'Number of openings', 'jobs-sync-for-zoho-recruit' ),
 			'posted_date'  => __( 'Posted date', 'jobs-sync-for-zoho-recruit' ),
+			'posted_ago'   => __( 'How long ago the job was posted, for example "3 weeks ago"', 'jobs-sync-for-zoho-recruit' ),
 			'closing_date' => __( 'Closing date', 'jobs-sync-for-zoho-recruit' ),
+			'status_label' => __( 'Open, Closed or Expired', 'jobs-sync-for-zoho-recruit' ),
+			'org_name'     => __( 'The organisation name from the Structured Data settings, or the site title', 'jobs-sync-for-zoho-recruit' ),
 			'apply_url'    => __( 'Application URL', 'jobs-sync-for-zoho-recruit' ),
 			'apply_button' => __( 'A ready-made Apply button, or nothing if the job is closed', 'jobs-sync-for-zoho-recruit' ),
 			'view_link'    => __( 'A ready-made "View Job" link', 'jobs-sync-for-zoho-recruit' ),

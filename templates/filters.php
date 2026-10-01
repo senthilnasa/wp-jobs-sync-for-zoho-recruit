@@ -28,14 +28,45 @@ $jszr_labels     = array();
 
 foreach ( $jszr_map as $jszr_param => $jszr_taxonomy ) {
 	if ( isset( $jszr_taxonomies[ $jszr_taxonomy ]['label'] ) ) {
-		$jszr_labels[ $jszr_param ] = $jszr_taxonomies[ $jszr_taxonomy ]['label'];
-		continue;
+		$jszr_default_label = $jszr_taxonomies[ $jszr_taxonomy ]['label'];
+	} else {
+		$jszr_object        = get_taxonomy( $jszr_taxonomy );
+		$jszr_default_label = $jszr_object ? $jszr_object->labels->singular_name : $jszr_param;
 	}
 
-	$jszr_object = get_taxonomy( $jszr_taxonomy );
-
-	$jszr_labels[ $jszr_param ] = $jszr_object ? $jszr_object->labels->singular_name : $jszr_param;
+	// An administrator can call "Department" something else for visitors.
+	$jszr_labels[ $jszr_param ] = \JobsSyncForZohoRecruit\Settings::filter_label( $jszr_param, $jszr_default_label );
 }
+
+// Dropdowns, or a row of pills per filter. Pills are radio buttons under the
+// hood, so they still post with the form and work without JavaScript.
+$jszr_style = 'pills' === jszr_get_setting( 'filters_style', 'dropdowns' ) ? 'pills' : 'dropdowns';
+
+$jszr_show_status   = (bool) jszr_get_setting( 'show_status_filter', false );
+$jszr_show_location = ! empty( $show_search ) && (bool) jszr_get_setting( 'show_location_search', false );
+
+$jszr_search_label = (string) jszr_get_setting( 'search_label', '' );
+
+if ( '' === $jszr_search_label ) {
+	$jszr_search_label = __( 'Search jobs', 'jobs-sync-for-zoho-recruit' );
+}
+
+$jszr_location_placeholder = (string) jszr_get_setting( 'location_search_placeholder', '' );
+
+if ( '' === $jszr_location_placeholder ) {
+	$jszr_location_placeholder = __( 'Location', 'jobs-sync-for-zoho-recruit' );
+}
+
+// "Open" is the empty value: it is the default, so it stays out of the URL the
+// same way an unset dropdown does.
+$jszr_status_options = array(
+	''        => __( 'Open', 'jobs-sync-for-zoho-recruit' ),
+	'closed'  => __( 'Closed', 'jobs-sync-for-zoho-recruit' ),
+	'expired' => __( 'Expired', 'jobs-sync-for-zoho-recruit' ),
+);
+
+$jszr_status_current = (string) ( $params['status'] ?? 'active' );
+$jszr_status_current = 'active' === $jszr_status_current ? '' : $jszr_status_current;
 
 // Only the filters the administrator chose, in the map's order.
 $jszr_chosen = (array) jszr_get_setting( 'filter_fields', array_keys( $jszr_map ) );
@@ -64,7 +95,7 @@ if ( '' === $jszr_button ) {
 
 // Every parameter this form owns is dropped from the action URL, so submitting
 // replaces them rather than stacking a second copy on the query string.
-$jszr_owned = array( 'jszr_page', 'jszr_search', 'jszr_sort' );
+$jszr_owned = array( 'jszr_page', 'jszr_search', 'jszr_sort', 'jszr_location_q', 'jszr_status' );
 
 foreach ( array_keys( $jszr_map ) as $jszr_param ) {
 	$jszr_owned[] = 'jszr_' . $jszr_param;
@@ -86,7 +117,7 @@ $jszr_current_sort = sprintf(
 	strtolower( isset( $params['order'] ) ? (string) $params['order'] : 'desc' )
 );
 ?>
-<form class="jszr-filters jszr-filters--<?php echo esc_attr( $jszr_layout ); ?>"
+<form class="jszr-filters jszr-filters--<?php echo esc_attr( $jszr_layout ); ?> jszr-filters--<?php echo esc_attr( $jszr_style ); ?>"
 	method="get" action="<?php echo esc_url( $jszr_action ); ?>" role="search">
 	<?php
 	// Preserve any query arguments the theme or another plugin relies on.
@@ -104,13 +135,25 @@ $jszr_current_sort = sprintf(
 	?>
 
 	<?php if ( ! empty( $show_search ) ) : ?>
-		<p class="jszr-filters__search">
-			<label for="jszr-search"><?php esc_html_e( 'Search jobs', 'jobs-sync-for-zoho-recruit' ); ?></label>
-			<?php jszr_icon( 'search', 'jszr-filters__search-icon' ); ?>
-			<input type="search" id="jszr-search" name="jszr_search"
-				value="<?php echo esc_attr( (string) ( $params['search'] ?? '' ) ); ?>"
-				placeholder="<?php echo esc_attr( $jszr_placeholder ); ?>" />
-		</p>
+		<div class="jszr-filters__search-row">
+			<p class="jszr-filters__search">
+				<label for="jszr-search"><?php echo esc_html( $jszr_search_label ); ?></label>
+				<?php jszr_icon( 'search', 'jszr-filters__search-icon' ); ?>
+				<input type="search" id="jszr-search" name="jszr_search"
+					value="<?php echo esc_attr( (string) ( $params['search'] ?? '' ) ); ?>"
+					placeholder="<?php echo esc_attr( $jszr_placeholder ); ?>" />
+			</p>
+
+			<?php if ( $jszr_show_location ) : ?>
+				<p class="jszr-filters__search jszr-filters__search--location">
+					<label for="jszr-location-q"><?php esc_html_e( 'Location', 'jobs-sync-for-zoho-recruit' ); ?></label>
+					<?php jszr_icon( 'location', 'jszr-filters__search-icon' ); ?>
+					<input type="search" id="jszr-location-q" name="jszr_location_q"
+						value="<?php echo esc_attr( (string) ( $params['location_search'] ?? '' ) ); ?>"
+						placeholder="<?php echo esc_attr( $jszr_location_placeholder ); ?>" />
+				</p>
+			<?php endif; ?>
+		</div>
 	<?php endif; ?>
 
 	<div class="jszr-filters__row">
@@ -129,22 +172,54 @@ $jszr_current_sort = sprintf(
 			if ( is_wp_error( $jszr_terms ) || empty( $jszr_terms ) ) {
 				continue;
 			}
+
+			$jszr_selected = (string) ( $params[ $jszr_param ] ?? '' );
 			?>
-			<p class="jszr-filters__field">
-				<label for="jszr-filter-<?php echo esc_attr( $jszr_param ); ?>">
-					<?php echo esc_html( $jszr_labels[ $jszr_param ] ?? $jszr_param ); ?>
-				</label>
-				<select id="jszr-filter-<?php echo esc_attr( $jszr_param ); ?>" name="jszr_<?php echo esc_attr( $jszr_param ); ?>">
-					<option value=""><?php esc_html_e( 'All', 'jobs-sync-for-zoho-recruit' ); ?></option>
+			<?php if ( 'pills' === $jszr_style ) : ?>
+				<fieldset class="jszr-filters__field jszr-filters__pills">
+					<legend><?php echo esc_html( $jszr_labels[ $jszr_param ] ?? $jszr_param ); ?></legend>
+					<label class="jszr-pill">
+						<input type="radio" name="jszr_<?php echo esc_attr( $jszr_param ); ?>" value="" <?php checked( '' === $jszr_selected ); ?> />
+						<span><?php esc_html_e( 'All', 'jobs-sync-for-zoho-recruit' ); ?></span>
+					</label>
 					<?php foreach ( $jszr_terms as $jszr_term ) : ?>
-						<option value="<?php echo esc_attr( $jszr_term->slug ); ?>"
-							<?php selected( (string) ( $params[ $jszr_param ] ?? '' ), $jszr_term->slug ); ?>>
-							<?php echo esc_html( $jszr_term->name ); ?>
+						<label class="jszr-pill">
+							<input type="radio" name="jszr_<?php echo esc_attr( $jszr_param ); ?>"
+								value="<?php echo esc_attr( $jszr_term->slug ); ?>" <?php checked( $jszr_selected, $jszr_term->slug ); ?> />
+							<span><?php echo esc_html( $jszr_term->name ); ?></span>
+						</label>
+					<?php endforeach; ?>
+				</fieldset>
+			<?php else : ?>
+				<p class="jszr-filters__field">
+					<label for="jszr-filter-<?php echo esc_attr( $jszr_param ); ?>">
+						<?php echo esc_html( $jszr_labels[ $jszr_param ] ?? $jszr_param ); ?>
+					</label>
+					<select id="jszr-filter-<?php echo esc_attr( $jszr_param ); ?>" name="jszr_<?php echo esc_attr( $jszr_param ); ?>">
+						<option value=""><?php esc_html_e( 'All', 'jobs-sync-for-zoho-recruit' ); ?></option>
+						<?php foreach ( $jszr_terms as $jszr_term ) : ?>
+							<option value="<?php echo esc_attr( $jszr_term->slug ); ?>"
+								<?php selected( $jszr_selected, $jszr_term->slug ); ?>>
+								<?php echo esc_html( $jszr_term->name ); ?>
+							</option>
+						<?php endforeach; ?>
+					</select>
+				</p>
+			<?php endif; ?>
+		<?php endforeach; ?>
+
+		<?php if ( $jszr_show_status ) : ?>
+			<p class="jszr-filters__field jszr-filters__field--status">
+				<label for="jszr-filter-status"><?php esc_html_e( 'Application status', 'jobs-sync-for-zoho-recruit' ); ?></label>
+				<select id="jszr-filter-status" name="jszr_status">
+					<?php foreach ( $jszr_status_options as $jszr_value => $jszr_label ) : ?>
+						<option value="<?php echo esc_attr( $jszr_value ); ?>" <?php selected( $jszr_status_current, $jszr_value ); ?>>
+							<?php echo esc_html( $jszr_label ); ?>
 						</option>
 					<?php endforeach; ?>
 				</select>
 			</p>
-		<?php endforeach; ?>
+		<?php endif; ?>
 	<?php endif; ?>
 
 	<?php if ( $jszr_show_sort ) : ?>

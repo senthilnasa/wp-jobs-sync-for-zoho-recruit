@@ -218,7 +218,7 @@ class Diagnostics {
 			0 === $missing
 				? 'every active job has an application link'
 				: sprintf(
-					'%d active job(s) have no application link, so no apply button is shown. Zoho does not send one: set the career site address on the Frontend settings screen.',
+					'%d active job(s) have no application link, so no apply button is shown. Zoho only sends the link when a job is fetched by ID, so run a sync with "Apply link from Zoho" on, or set the career site address on the Frontend settings screen.',
 					$missing
 				),
 			'warning'

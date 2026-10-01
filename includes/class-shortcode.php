@@ -53,6 +53,17 @@ class Shortcode {
 				'show_pagination' => 'true',
 				'show_excerpt'    => 'true',
 				'show_sort'       => Settings::get( 'show_sort', false ) ? 'true' : 'false',
+
+				// A named card template from Settings → Display, so two pages
+				// can show two different cards.
+				'template'        => '',
+
+				// Post IDs to leave out, and a "related" shortcut: the name of a
+				// filter (department, category...) whose terms are copied from
+				// the job currently being viewed, with that job excluded.
+				'exclude'         => '', // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude -- A handful of IDs, not a bulk exclusion.
+				'related'         => '',
+				'location_search' => '',
 			)
 		);
 	}
@@ -86,13 +97,17 @@ class Shortcode {
 		// Visitor-supplied values from the no-JS filter form take precedence.
 		$request = self::request_values( $show_filters, $show_search );
 
+		$atts = self::apply_related( $atts );
+
 		$params = array(
-			'page'     => $request['page'],
-			'per_page' => max( 1, (int) $atts['per_page'] ),
-			'search'   => '' !== $request['search'] ? $request['search'] : (string) $atts['search'],
-			'orderby'  => '' !== $request['orderby'] ? $request['orderby'] : (string) $atts['orderby'],
-			'order'    => '' !== $request['order'] ? $request['order'] : (string) $atts['order'],
-			'status'   => (string) $atts['status'],
+			'page'            => $request['page'],
+			'per_page'        => max( 1, (int) $atts['per_page'] ),
+			'search'          => '' !== $request['search'] ? $request['search'] : (string) $atts['search'],
+			'location_search' => '' !== $request['location_search'] ? $request['location_search'] : (string) $atts['location_search'],
+			'orderby'         => '' !== $request['orderby'] ? $request['orderby'] : (string) $atts['orderby'],
+			'order'           => '' !== $request['order'] ? $request['order'] : (string) $atts['order'],
+			'status'          => '' !== $request['status'] ? $request['status'] : (string) $atts['status'],
+			'exclude'         => (string) $atts['exclude'], // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude -- A handful of IDs, not a bulk exclusion.
 		);
 
 		foreach ( array_keys( REST_API::filter_map() ) as $key ) {
@@ -127,6 +142,9 @@ class Shortcode {
 				'params'          => $params,
 				'style'           => $style,
 				'layout'          => $layout,
+				// Not "template": Templates::render() already has a variable of
+				// that name (the file being included), and EXTR_SKIP keeps it.
+				'card_template'   => sanitize_key( (string) $atts['template'] ),
 				'columns'         => $columns,
 				'show_filters'    => $show_filters,
 				'show_search'     => $show_search,
@@ -148,10 +166,12 @@ class Shortcode {
 	 */
 	private static function request_values( $allow_filters, $allow_search ) {
 		$values = array(
-			'page'    => 1,
-			'search'  => '',
-			'orderby' => '',
-			'order'   => '',
+			'page'            => 1,
+			'search'          => '',
+			'location_search' => '',
+			'orderby'         => '',
+			'order'           => '',
+			'status'          => '',
 		);
 
 		foreach ( array_keys( REST_API::filter_map() ) as $key ) {
@@ -167,6 +187,20 @@ class Shortcode {
 
 		if ( $allow_search && isset( $_GET['jszr_search'] ) ) {
 			$values['search'] = sanitize_text_field( wp_unslash( $_GET['jszr_search'] ) );
+		}
+
+		if ( $allow_search && isset( $_GET['jszr_location_q'] ) && Settings::get( 'show_location_search', false ) ) {
+			$values['location_search'] = sanitize_text_field( wp_unslash( $_GET['jszr_location_q'] ) );
+		}
+
+		// The status filter is only honoured when the administrator offers it,
+		// so a crafted URL cannot list closed jobs on a site that hides them.
+		if ( $allow_filters && isset( $_GET['jszr_status'] ) && Settings::get( 'show_status_filter', false ) ) {
+			$status = sanitize_key( wp_unslash( $_GET['jszr_status'] ) );
+
+			if ( in_array( $status, array( 'active', 'closed', 'expired', 'inactive' ), true ) ) {
+				$values['status'] = $status;
+			}
 		}
 
 		// The sort control posts one value, "orderby:order", so the visitor gets
@@ -200,6 +234,49 @@ class Shortcode {
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		return $values;
+	}
+
+	/**
+	 * Turn `related="department"` into concrete filter values.
+	 *
+	 * On a single job page, `[zoho_jobs related="department" per_page="3"]`
+	 * lists other jobs sharing the current job's department. The current job
+	 * is always excluded. Outside a job page, or when the job has no terms in
+	 * that taxonomy, the attribute is ignored and the listing is unfiltered.
+	 *
+	 * @param array $atts Listing attributes.
+	 * @return array
+	 */
+	private static function apply_related( array $atts ) {
+		$related = sanitize_key( (string) ( $atts['related'] ?? '' ) );
+
+		if ( '' === $related ) {
+			return $atts;
+		}
+
+		$post_id = get_the_ID();
+
+		if ( ! $post_id || Post_Type::POST_TYPE !== get_post_type( $post_id ) ) {
+			return $atts;
+		}
+
+		$exclude         = array_filter( array_map( 'absint', explode( ',', (string) $atts['exclude'] ) ) );
+		$exclude[]       = (int) $post_id;
+		$atts['exclude'] = implode( ',', array_unique( $exclude ) ); // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude -- Only the job being viewed.
+
+		$map = REST_API::filter_map();
+
+		if ( ! isset( $map[ $related ] ) || '' !== (string) $atts[ $related ] ) {
+			return $atts;
+		}
+
+		$terms = get_the_terms( $post_id, $map[ $related ] );
+
+		if ( is_array( $terms ) && ! empty( $terms ) ) {
+			$atts[ $related ] = implode( ',', wp_list_pluck( $terms, 'slug' ) );
+		}
+
+		return $atts;
 	}
 
 	/**

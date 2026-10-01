@@ -1,0 +1,191 @@
+/*
+ * Krea careers listing — paste into Settings → Display → Custom CSS.
+ *
+ * Everything is scoped to .jszr-scope, so it only touches the plugin's own
+ * markup. Colours are taken from the Figma export: navy headings, a blue
+ * accent, soft blue-grey panels.
+ */
+
+.jszr-scope {
+	--jszr-accent: #0b5cab;
+	--jszr-accent-contrast: #fff;
+	--jszr-accent-soft: #e8f1fb;
+	--jszr-border-color: #d9dee7;
+	--jszr-surface: #f5f8fc;
+	--jszr-radius-sm: 6px;
+	--jszr-radius: 10px;
+	--jszr-radius-lg: 14px;
+	--jszr-muted: #5b6573;
+	--krea-navy: #0a2f55;
+	--krea-green: #157347;
+}
+
+/* The plugin's own result count is not in the design. */
+.jszr-scope .jszr-jobs__toolbar {
+	display: none;
+}
+
+/* Filter bar: a soft panel on the staff page, bare inputs elsewhere. */
+.jszr-scope .jszr-filters {
+	padding: 1.25rem;
+	border: 1px solid var(--jszr-border-color);
+	border-radius: var(--jszr-radius);
+	background: var(--jszr-surface);
+}
+
+.jszr-scope .jszr-filters--pills {
+	padding: 0;
+	border: 0;
+	background: transparent;
+}
+
+.jszr-scope .jszr-filters__field > label,
+.jszr-scope .jszr-filters__search > label,
+.jszr-scope .jszr-filters__pills legend {
+	font-size: 0.75rem;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--krea-navy);
+}
+
+.jszr-scope .jszr-filters--pills .jszr-filters__pills legend {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+}
+
+.jszr-scope .jszr-filters__field select,
+.jszr-scope .jszr-filters__field input,
+.jszr-scope .jszr-filters__search input {
+	background: #fff;
+}
+
+.jszr-scope .jszr-pill input:checked + span {
+	border-color: var(--krea-green);
+	background: #eaf6ee;
+	color: var(--krea-green);
+}
+
+.jszr-scope .jszr-filters__submit {
+	background: var(--krea-navy) !important;
+	border-radius: var(--jszr-radius-sm);
+	padding-inline: 2rem;
+}
+
+/* Cards --------------------------------------------------------------- */
+
+.jszr-scope .krea-card {
+	position: relative;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1.5rem;
+	padding: 1.25rem 1.5rem;
+	border: 1px solid var(--jszr-border-color);
+	border-radius: var(--jszr-radius);
+	background: #fff;
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.jszr-scope .krea-card:hover,
+.jszr-scope .krea-card:focus-within {
+	border-color: var(--krea-navy);
+	box-shadow: 0 2px 8px rgba(10, 47, 85, 0.08);
+}
+
+.jszr-scope .krea-card__body {
+	min-width: 0;
+	flex: 1 1 auto;
+}
+
+.jszr-scope .krea-card__badge {
+	display: inline-block;
+	margin-bottom: 0.5rem;
+	padding: 0.2rem 0.7rem;
+	border-radius: 999px;
+	background: #eaf6ee;
+	color: var(--krea-green);
+	font-size: 0.75rem;
+	font-weight: 600;
+}
+
+.jszr-scope .krea-card__title {
+	margin: 0 0 0.35rem;
+	font-size: 1.05rem;
+	font-weight: 600;
+	line-height: 1.3;
+	color: var(--krea-navy);
+}
+
+.jszr-scope .krea-card__title a {
+	color: inherit;
+	text-decoration: none;
+}
+
+/* The whole card is the link, without wrapping the card in an anchor. */
+.jszr-scope .krea-card__link::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+}
+
+.jszr-scope .krea-card__meta {
+	margin: 0;
+	font-size: 0.875rem;
+	color: var(--jszr-muted);
+}
+
+.jszr-scope .krea-card__facts {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.35rem 1.5rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	font-size: 0.875rem;
+	color: var(--jszr-muted);
+}
+
+.jszr-scope .krea-card__facts strong {
+	color: var(--krea-navy);
+	font-weight: 600;
+}
+
+.jszr-scope .krea-card__arrow {
+	flex: 0 0 auto;
+	color: var(--krea-navy);
+}
+
+.jszr-scope .krea-card--related {
+	display: block;
+	padding: 0.9rem 1rem;
+}
+
+.jszr-scope .krea-card--related .krea-card__title {
+	font-size: 0.95rem;
+}
+
+/* Load more: outlined navy button, centred. */
+.jszr-scope .jszr-pagination__more {
+	border-color: var(--krea-navy);
+	color: var(--krea-navy) !important;
+	border-radius: var(--jszr-radius-sm);
+	padding-inline: 1.75rem;
+}
+
+@media (max-width: 600px) {
+
+	.jszr-scope .krea-card {
+		align-items: flex-start;
+		padding: 1rem;
+	}
+
+	.jszr-scope .krea-card__facts {
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+}

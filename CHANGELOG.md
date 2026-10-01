@@ -5,6 +5,87 @@ All notable changes to Jobs Sync for Zoho Recruit are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-10-01
+
+Everything in this release is an option that is off by default, or an addition
+to what a template may contain. A site that updates and changes nothing looks
+and behaves exactly as it did.
+
+### Added
+
+- **Named card templates.** Settings → Display holds any number of extra card
+  designs, each with a short name, and a listing picks one with
+  `template="name"`. A site with faculty roles on one page and staff openings on
+  another no longer has to share a single custom card. `jszr_named_templates`
+  filter.
+- **Shortcodes panel** on the Display tab: a ready-to-paste shortcode for every
+  term in every filterable taxonomy, plus the related-openings pattern.
+- Card tags `{posted_ago}` ("3 weeks ago", from Zoho's posted date with the
+  publish date as fallback), `{org_name}` (the Structured Data organisation, or
+  the site title) and `{status_label}` (Open, Closed or Expired).
+- **Filter style**: dropdowns or pills. Pills are radio buttons styled as chips
+  and apply on click; the Filter button still submits them without JavaScript.
+- **Filter labels**: rename "Department" to "Functional area" or "Category" to
+  "School" for visitors without renaming the taxonomy.
+- **Application status filter**, opt-in. While it is off, a `jszr_status` URL
+  parameter is ignored, so a crafted link cannot list closed jobs.
+- **Search settings**: label, placeholder, which of title, summary, description
+  and job code a keyword must match, and an optional second text box that
+  searches the location terms and each job's city, state and country.
+- **Load more** pagination: one button that appends the next page's cards in
+  place, falling back to a plain link to the next page.
+- `exclude` and `related` shortcode attributes. `related="department"` on a job
+  page lists other jobs in the same department and leaves the current one out.
+  Both are also REST parameters on `/jobs` and `/jobs/render`, as is
+  `location_search`; `template` is accepted by `/jobs/render`.
+- Job and archive slugs may be a path (`careers/openings`), so job pages can sit
+  under a careers section whose sub-pages are ordinary WordPress pages.
+
+### Changed
+
+- Custom card and job-details HTML may contain inline `svg` icons (and their
+  drawing children), `button`, `picture` and `source`. Inline styles keep
+  `list-style`, `inset`, `transition` and a few other layout properties that
+  WordPress strips from post content; the widening applies only while the
+  plugin filters its own templates, never to post content. Scripts, event
+  handler attributes, `use`, frames and forms are still removed.
+  `jszr_allowed_template_css` filter.
+
+### Fixed
+
+- Filtering a listing on a page whose URL already carried a query string (for
+  example a tracking parameter) produced a URL with two question marks. The
+  filter form now replaces the query string instead of appending to it.
+
+## [1.0.1] - 2026-09-18
+
+### Changed
+
+- The Apply button now links to the **Job Apply URL that Zoho Recruit returns
+  for the job**. Zoho Recruit support confirmed that the link is only included
+  in a Get Record by ID response when the request carries `publish_URL=true`;
+  the list endpoint never sends it. `Zoho_API::get_record()` now always asks
+  for it, and the sync fetches each active job that has no stored link once
+  more by ID and keeps what it finds. A job is fetched individually at most
+  once, and again only on a forced re-sync; a stored link is carried over so
+  the overwrite-all conflict mode cannot clear it. The link found this way
+  takes precedence over the `Website` mapping row, which is the client's own
+  site rather than an application form.
+- The career site address is now the fallback for jobs that have no fetched
+  link, rather than the only source.
+
+### Added
+
+- **Apply link from Zoho** setting on the Frontend tab (`fetch_apply_url`, on
+  by default). Turning it off restores the previous behaviour of building every
+  link from the career site address.
+- `jszr_record_query_args` filter on the query string of a Get Record by ID
+  request, and `jszr_apply_url_fields` filter on the record keys checked for
+  the Job Apply URL. Zoho's documentation does not name the key, so the plugin
+  tries a short list and then any key mentioning "apply" and "url".
+- The diagnostics report and the troubleshooting guide explain how the link is
+  fetched and what to do when it still does not appear.
+
 ## [1.0.0] - 2026-09-07
 
 First release.

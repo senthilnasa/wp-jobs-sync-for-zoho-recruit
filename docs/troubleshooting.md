@@ -47,14 +47,26 @@ is left out — it is safe to send to whoever is helping you.
 
 ## No apply button appears on any job
 
-Zoho Recruit's Job Openings API does not send a link to the public job posting.
-There is no field for it. `Website` on a job opening is the client's own site,
-it is normally empty, and the plugin's default mapping points the application
-URL at it -- so on most accounts every job syncs with an empty application URL
-and the apply button has nothing to link to and is not rendered.
+Zoho Recruit's Job Openings list API does not send a link to the public job
+posting. The Job Apply URL is only returned when one job is fetched by ID with
+`publish_URL=true`, which Zoho Recruit support confirmed in September 2026.
+With **Settings → Frontend → Apply link from Zoho** on (the default), the sync
+fetches every active job that has no stored link once more by ID and keeps the
+link it finds. That is one extra API call per job the first time; afterwards
+the stored link is reused. Run a sync and the buttons should appear.
 
-The career site does have a stable address, built from the record ID the sync
-already stores:
+If they still do not, the link may be arriving under a key the plugin does not
+recognise. Turn on **Store raw record** on the Advanced tab, sync one job with
+**Refresh from Zoho**, and look at the raw record for the URL; the
+`jszr_apply_url_fields` filter in [hooks.md](hooks.md) adds that key.
+
+`Website` on a job opening is the client's own site, it is normally empty, and
+the plugin's default mapping points the application URL at it -- so without the
+fetched link every job syncs with an empty application URL and the apply button
+has nothing to link to and is not rendered.
+
+The career site also has a stable address, built from the record ID the sync
+already stores, and it is used whenever no link has been fetched:
 
 ```
 https://<your career site>/jobs/Careers/<record id>/

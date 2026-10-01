@@ -77,9 +77,9 @@ Three invariants the code is built around:
 | `Settings` | All options in one non-autoloaded `jszr_settings` option; defaults, sanitize, data-center map |
 | `Encryption` | libsodium secretbox, OpenSSL fallback; key from the site salts; `key_fingerprint()` detects salt rotation |
 | `Zoho_Auth` | Authorization URL with expiring `state`, callback validation, code exchange, refresh with stampede lock, revoke, circuit breaker (5 failures) |
-| `Zoho_API` | `get_records`, `get_record`, `get_deleted_records`, `get_fields`, `test_connection`; 204/304 as success, 429 with `Retry-After`, backoff, one forced refresh on 401 |
+| `Zoho_API` | `get_records`, `get_record` (always sends `publish_URL=true`, filter `jszr_record_query_args`), `get_deleted_records`, `get_fields`, `test_connection`; 204/304 as success, 429 with `Retry-After`, backoff, one forced refresh on 401 |
 | `Field_Metadata` | Fields API discovery, cached with a 12h freshness transient, bundled fallback list |
-| `Field_Mapper` | Mapping rows, 11 transforms, salary parsing, timezone-correct dates, hierarchical location path, JSON export/import. **Pure — no DB writes. Best unit-test surface** |
+| `Field_Mapper` | Mapping rows, 11 transforms, salary parsing, timezone-correct dates, hierarchical location path, `find_apply_url()` (the Job Apply URL detector, filter `jszr_apply_url_fields`), JSON export/import. **Pure — no DB writes. Best unit-test surface** |
 | `Job` | `find_by_zoho_id`, `upsert`, term writing, conflict modes, `deactivate`/`expire`/`orphan`, `is_active`, `get_apply_url`, `counts`. The single writer |
 | `Sync` | `start`, `run_now`, `process_batch`, `process_page`, `process_record`, `determine_status`, `is_unpublished`, `finalize`, `deactivate_missing`, `process_deleted_records`, `expire_due_jobs`, `sync_single` |
 | `Sync_Queue` | `{prefix}jszr_sync_runs` table, checkpointing, global lock with stale recovery, batch scheduling, cancel, prune |
@@ -94,7 +94,9 @@ Three invariants the code is built around:
 | `SEO` | Suggested title and meta description, both filterable; prints nothing when an SEO plugin is detected |
 | `Page_Cache` | Best-effort purge of nine caching plugins on `jszr_caches_invalidated`; every call guarded, throws swallowed |
 | `Templates` | Theme override resolution, `template_include` fallback (classic themes only), expired-job behaviour, asset registration, `register_block_template()` |
-| `Shortcode` | `[zoho_jobs]`, `[zoho_job_apply]`, `[zoho_job_meta]`; shared renderer with the block |
+| `Shortcode` | `[zoho_jobs]`, `[zoho_job_apply]`, `[zoho_job_meta]`; shared renderer with the block. 1.1.0 attributes: `template` (named card), `exclude`, `related` (`apply_related()` copies the current job's terms and excludes it), `location_search`; reads `jszr_location_q` and `jszr_status` from the request only when the matching setting is on |
+| `Layouts` | Allow-list (`allowed_html()`, now with inline SVG, `button`, `picture`), `allowed_css_properties()` + `kses()` (the only way template markup is filtered, on save and on output; attaches the CSS widening for that call only), presets, `named_templates()`, `listing_template( $layout, $template )` |
+| `Template_Tags` | Token rendering; 1.1.0 tags `posted_ago`, `status_label`, `org_name` via `ago()`, `status_label()`, `org_name()` |
 | `Blocks` | `register_block_type` from `block.json` with `render_callback` → `Shortcode::render` |
 | `Admin` | Menus, settings, `admin_post_*` handlers, list columns/filters/row actions, meta box, notices |
 | `Site_Health` | Connection, cron, last-sync, environment tests + debug info |
@@ -116,6 +118,11 @@ Three invariants the code is built around:
 `phpcs.xml`, `phpunit.xml.dist`, `.wp-env.json`, `.gitignore`, `.gitattributes`,
 `bin/install-wp-tests.sh`, `bin/smoke-test.php`, `.github/workflows/ci.yml`,
 `tests/phpunit/{bootstrap,field-mapper-test,sync-logic-test,rest-api-test}.php`
+
+`examples/krea-careers/` (not shipped, not in the `files` allow-list): the
+worked example for Krea University's careers pages — three named card templates,
+`krea.css`, a setup README and the Elementor single-page recipe. Site-specific
+material lives here precisely so the plugin's defaults never carry it.
 
 ### WordPress.org listing assets (`.wordpress-org/`, not shipped in the ZIP)
 `banner-1544x500.png`, `banner-772x250.png`, `icon-256x256.png`,
@@ -148,9 +155,24 @@ anywhere, deliberately.
 - **`only_published` is on by default**, reading `Publish_in_Career_Website`.
   A job that has never been published is **skipped entirely**; one that loses the
   flag later is deactivated, not deleted.
-- **The apply link is built, not synced, and its shape is a setting.** Zoho's
-  Job Openings API sends no link to the public posting, so the button is built
-  from `career_site_url` plus the `career_site_path` pattern
+- **The apply link is fetched by ID, with the career site as fallback.** Zoho
+  Recruit support confirmed (September 2026) that the Job Apply URL is only
+  included in a Get Record by ID response when the request carries
+  `publish_URL=true`; the list endpoint never sends it. `Zoho_API::get_record()`
+  always adds that parameter (filter `jszr_record_query_args`), and
+  `Sync::complete_apply_url()` fetches each *active* job that arrives from the
+  list without a usable link once more by ID, taking the URL via
+  `Field_Mapper::find_apply_url()` (known keys, filter `jszr_apply_url_fields`,
+  then any key mentioning "apply" + "url"/"link"; every hit passes `to_url()`).
+  A stored link is carried into the payload on later syncs so a job is fetched
+  individually at most once and `overwrite_all` cannot clear it; a forced
+  re-sync fetches again; a failed fetch logs `apply_url_fetch_failed` and
+  never fails the record. `sync_single()` passes `complete => true` so a
+  record that already came by ID is not fetched twice. The setting is
+  `fetch_apply_url` (Frontend tab, default on). **The response key name is
+  unverified** — Zoho's documentation does not give it, hence the detector.
+  When no link has been fetched the button is built from `career_site_url`
+  plus the `career_site_path` pattern
   (default `/jobs/Careers/{zoho_id}/`, tokens `{zoho_id}`, `{job_code}`,
   `{slug}`, `{title}`, `{id}`). The path is sanitized as a path, never a URL —
   a scheme or `//host` prefix is stripped, so it cannot redirect candidates
@@ -222,6 +244,31 @@ anywhere, deliberately.
   `jszr_filter_map` is only for overriding that derivation.
 - **Shell heredocs mangle backslashes in this environment.** Write PHP with the
   file tools, not `cat > file.php <<'EOF'`.
+- **Design-led sites get options, never a new default (1.1.0).** Krea's Figma
+  (see `examples/krea-careers/`) asked for pill filters, relabelled filters, a
+  location box, "load more", two different cards and per-category pages. Every
+  one landed as a setting that is off by default or a shortcode attribute, so a
+  site that updates and touches nothing looks identical. Site-specific HTML and
+  CSS go in the settings (named card templates + Custom CSS) or the theme, not
+  in the plugin.
+- **Template markup is filtered through `Layouts::kses()`, nowhere else.** It is
+  `wp_kses()` with the plugin allow-list plus a `safe_style_css` widening
+  (`list-style`, `inset`, `transition`…) attached only for that call. Krea's
+  "the sanitizer breaks our list" was exactly WordPress dropping the
+  `list-style` shorthand and the `<svg>` arrow; `ul`/`li` were never removed.
+  Do not turn filtering off for anyone — widen the list instead.
+- **Never name a template variable `$template`.** `Templates::render()` extracts
+  args with `EXTR_SKIP` and already holds `$template` (the file name), so the
+  value silently vanishes. The named-card variable is `card_template` for that
+  reason.
+- **The status filter is gated by its setting on read as well as on render.**
+  `jszr_status` in a URL is ignored while `show_status_filter` is off, so a
+  crafted link cannot list closed jobs on a site that hides them. Same for
+  `jszr_location_q` and `show_location_search`.
+- **Slugs may be paths.** `Settings::sanitize_slug_path()` keeps
+  `careers/openings`; `sanitize_title()` alone would have flattened it. Needed
+  so Krea's sub-pages can be children of `/careers/` without the post type
+  claiming them.
 
 ---
 
@@ -229,9 +276,23 @@ anywhere, deliberately.
 
 **Verified in a live WordPress 7.1 / PHP 8.1 (wp-env)**
 - PHPCS: 0 errors, 0 warnings across 63 files. PHPCompatibility clean for 8.1+.
-- PHPUnit: 116 tests single site, 116 multisite (`npm run test:php:multisite`).
+- PHPUnit: 216 tests single site, 216 multisite (`npm run test:php:multisite`).
+  `tests/phpunit/listing-options-test.php` (22 tests) covers the 1.1.0 options:
+  each one proves the default output is unchanged first, then what the option
+  adds — named templates, pills, labels, the gated status and location filters,
+  search fields, load more, related/exclude, slug paths, the widened allow-list
+  and that the CSS widening does not leak into `wp_kses_post()`.
+  `tests/phpunit/apply-url-fetch-test.php` fakes a connected account over
+  `pre_http_request` and covers the `publish_URL=true` request, the by-ID
+  completion, reuse of the stored link, force, `complete`, dry run, the
+  setting off, and a failed fetch.
 - `bin/smoke-test.php`: 66 checks. `bin/lifecycle-test.php`: 26 checks.
-  `bin/scale-test.php 2000`: 26 checks.
+  `bin/scale-test.php 2000`: 31 checks. The fake Zoho now answers Get Record
+  by ID (with `Job_Apply_URL` only when `publish_URL=true` is present) and the
+  list records carry no `Website`, so the first full sync makes exactly 2,000
+  by-ID requests and the second makes none. First sync ~9 jobs/s including the
+  extra call; re-sync 88 s. **Do not run the lifecycle test at the same time**:
+  it drops the plugin tables and made a concurrent scale run look broken.
 - Plugin Check: nothing against any file that ships.
 - ESLint and Stylelint clean; committed block bundles are byte-identical to a
   fresh `npm run build`.
@@ -280,6 +341,13 @@ anywhere, deliberately.
   batching and the safety rules are all genuinely exercised — but the field
   names, picklist values and error shapes still come from the documentation,
   not from an account. This is still the single biggest gap.
+- **The Job Apply URL key is a guess.** Zoho support confirmed `publish_URL=true`
+  on Get Record by ID returns the link, but neither the email nor the docs name
+  the response key. `Field_Mapper::find_apply_url()` tries `Job_Apply_URL`,
+  `$job_apply_url` and a few variants, then any key mentioning "apply" plus
+  "url"/"link". If a real account uses something else, turn on **Store raw
+  record**, refresh one job, read the key from the raw record and add it via
+  `jszr_apply_url_fields` (or to the default list in code).
 - The upgrade path has no previously released version to upgrade from.
 - Throughput was measured at ~10 jobs/s, but that is Docker-on-Windows bind
   mounts; it says little about a real host.
@@ -317,6 +385,25 @@ anywhere, deliberately.
    is assembled from a hard-coded allow-list of column names and then run
    through `$wpdb->prepare()`. Worth a comment in the submission notes if a
    reviewer queries them.
+9. **Newer Plugin Check rules flag pre-existing code.** On 2026-10-01 Plugin
+   Check reported `WordPressVIPMinimum.Performance.WPQueryParams.SuppressFilters`
+   for `suppress_filters => true` in `Job::synced_query_args()` and
+   `Diagnostics` (both deliberate: internal queries that other plugins must
+   not rewrite), plus `PluginCheck.CodeAnalysis.Localhost` somewhere in
+   `includes/` and the dev-only files in the working copy (`.wp-env.json`,
+   `phpunit*.xml.dist`, `bin/install-wp-tests.sh`, a built ZIP). None of it is
+   in the 1.1.0 diff and none of the dev files ship. Decide before submission
+   whether to switch those two queries to `suppress_filters => false` or to
+   argue the case in the review notes.
+10. **Krea rollout** (`examples/krea-careers/README.md`): Krea still has to say
+   which Zoho field groups jobs into the four tabs and which holds "School";
+   confirm the URL structure (recommended: sub-pages under `/careers/`, jobs at
+   `/careers/openings/<job>`); and decide how Educational qualifications,
+   Reporting to and Skills reach the single page (description headings, spare
+   meta targets, or new targets via `jszr_mapping_targets`). The listing block
+   (`blocks/jobs`) does not yet expose `template`, `related` or `exclude` in its
+   inspector; the shortcode does. Add them to `blocks/jobs/src/index.js` and
+   `block.json` if block-based sites ask.
 
 ---
 

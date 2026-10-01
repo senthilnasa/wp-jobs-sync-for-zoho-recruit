@@ -90,10 +90,7 @@ while ( have_posts() ) :
 							<?php
 							// Built by Templates::apply_link(), which is also what
 							// the shortcode, the block and {apply_button} use.
-							echo wp_kses(
-								jszr_apply_link( $jszr_post_id ),
-								\JobsSyncForZohoRecruit\Layouts::allowed_html()
-							);
+							echo \JobsSyncForZohoRecruit\Layouts::kses( jszr_apply_link( $jszr_post_id ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Layouts::kses() is wp_kses() with the plugin's allow-list.
 							?>
 
 							<p class="jszr-apply-note">

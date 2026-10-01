@@ -259,4 +259,94 @@ class JSZR_Field_Mapper_Test extends WP_UnitTestCase {
 		$this->assertTrue( Field_Mapper::import( $json ) );
 		$this->assertSame( $original, Field_Mapper::get_mapping() );
 	}
+
+	/**
+	 * The Job Apply URL is found under a known key.
+	 */
+	public function test_find_apply_url_reads_a_known_key() {
+		$this->assertSame(
+			'https://careers.example.test/jobs/Careers/1/apply',
+			Field_Mapper::find_apply_url( array( 'Job_Apply_URL' => 'https://careers.example.test/jobs/Careers/1/apply' ) )
+		);
+
+		$this->assertSame(
+			'https://careers.example.test/jobs/Careers/2/apply',
+			Field_Mapper::find_apply_url( array( '$job_apply_url' => 'https://careers.example.test/jobs/Careers/2/apply' ) )
+		);
+	}
+
+	/**
+	 * Zoho does not document the key, so any key mentioning apply and a link
+	 * is accepted as well.
+	 */
+	public function test_find_apply_url_scans_for_an_unknown_key() {
+		$record = array(
+			'id'                 => '1',
+			'Posting_Title'      => 'Writer',
+			'Job_Detail_URL'     => 'https://careers.example.test/jobs/Careers/1/',
+			'Careers_Apply_Link' => 'https://careers.example.test/jobs/Careers/1/apply',
+		);
+
+		$this->assertSame( 'https://careers.example.test/jobs/Careers/1/apply', Field_Mapper::find_apply_url( $record ) );
+	}
+
+	/**
+	 * The filter puts an account's own key first.
+	 */
+	public function test_find_apply_url_honours_the_filter() {
+		$filter = static function ( $keys ) {
+			array_unshift( $keys, 'Portal_URL' );
+
+			return $keys;
+		};
+
+		add_filter( 'jszr_apply_url_fields', $filter );
+
+		$url = Field_Mapper::find_apply_url( array( 'Portal_URL' => 'https://careers.example.test/portal/1' ) );
+
+		remove_filter( 'jszr_apply_url_fields', $filter );
+
+		$this->assertSame( 'https://careers.example.test/portal/1', $url );
+	}
+
+	/**
+	 * A value that is not a link is never accepted, whichever key it sits under.
+	 */
+	public function test_find_apply_url_rejects_non_urls() {
+		$this->assertSame( '', Field_Mapper::find_apply_url( array( 'Job_Apply_URL' => 'ZR_1_JOB' ) ) );
+		$this->assertSame( '', Field_Mapper::find_apply_url( array( 'Apply_Link' => 'apply now' ) ) );
+		$this->assertSame( '', Field_Mapper::find_apply_url( array( 'Job_Apply_URL' => array( 'https://careers.example.test/x' ) ) ) );
+		$this->assertSame( '', Field_Mapper::find_apply_url( array( 'Posting_Title' => 'https://careers.example.test/x' ) ) );
+	}
+
+	/**
+	 * A fetched Job Apply URL wins over the Website mapping row, which is the
+	 * client's own site rather than an application form.
+	 */
+	public function test_map_prefers_the_zoho_apply_url_over_website() {
+		$mapper = new Field_Mapper();
+
+		$payload = $mapper->map(
+			array(
+				'id'            => '1',
+				'Posting_Title' => 'Writer',
+				'Website'       => 'https://client.example.test/',
+				'Job_Apply_URL' => 'https://careers.example.test/jobs/Careers/1/apply',
+			)
+		);
+
+		$this->assertSame( 'https://careers.example.test/jobs/Careers/1/apply', $payload['meta']['_zoho_recruit_application_url'] );
+		$this->assertSame( 'https://careers.example.test/jobs/Careers/1/apply', $payload['mapped']['meta:_zoho_recruit_application_url'] );
+
+		// Without the fetched link the mapping row still applies as before.
+		$payload = $mapper->map(
+			array(
+				'id'            => '1',
+				'Posting_Title' => 'Writer',
+				'Website'       => 'https://client.example.test/',
+			)
+		);
+
+		$this->assertSame( 'https://client.example.test/', $payload['meta']['_zoho_recruit_application_url'] );
+	}
 }

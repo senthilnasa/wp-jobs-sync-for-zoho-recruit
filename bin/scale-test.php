@@ -65,6 +65,7 @@ final class JSZR_Fake_Zoho {
 	public static $calls = array(
 		'token'   => 0,
 		'records' => 0,
+		'by_id'   => 0,
 		'deleted' => 0,
 	);
 
@@ -77,8 +78,33 @@ final class JSZR_Fake_Zoho {
 		self::$calls = array(
 			'token'   => 0,
 			'records' => 0,
+			'by_id'   => 0,
 			'deleted' => 0,
 		);
+	}
+
+	/**
+	 * Whether a request URL is a Get Record by ID call.
+	 *
+	 * @param string $url Request URL.
+	 * @return string The record ID, or an empty string for any other request.
+	 */
+	public static function record_id_from_url( $url ) {
+		if ( preg_match( '#/JobOpenings/([A-Za-z0-9]+)(?:\?|$)#', (string) $url, $matches ) && 'deleted' !== $matches[1] ) {
+			return $matches[1];
+		}
+
+		return '';
+	}
+
+	/**
+	 * The apply link the fake account publishes for a record.
+	 *
+	 * @param string $id Record ID.
+	 * @return string
+	 */
+	public static function apply_url( $id ) {
+		return 'https://careers.example.test/jobs/Careers/' . $id . '/apply';
 	}
 
 	/**
@@ -115,7 +141,6 @@ final class JSZR_Fake_Zoho {
 			'Created_Time'              => gmdate( 'c', time() - ( 30 * DAY_IN_SECONDS ) ),
 			'Modified_Time'             => gmdate( 'c' ),
 			'Publish_in_Career_Website' => true,
-			'Website'                   => 'https://example.test/apply/' . $index,
 		);
 	}
 
@@ -194,6 +219,31 @@ final class JSZR_Fake_Zoho {
 					'info' => array( 'more_records' => false ),
 				)
 			);
+		}
+
+		// Get Record by ID. Like the real API, the Job Apply URL is only here,
+		// and only when the request asks for it with publish_URL=true.
+		$record_id = self::record_id_from_url( $url );
+
+		if ( '' !== $record_id ) {
+			++self::$calls['by_id'];
+
+			$query = array();
+			wp_parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
+
+			$index = 0 === strpos( $record_id, 'SCALE' ) ? (int) substr( $record_id, 5 ) : 0;
+
+			if ( $index < 1 || $index > self::$total || isset( self::$withheld[ $record_id ] ) ) {
+				return self::response( null, 204 );
+			}
+
+			$record = self::record( $index );
+
+			if ( ! empty( $query['publish_URL'] ) && 'true' === $query['publish_URL'] ) {
+				$record['Job_Apply_URL'] = self::apply_url( $record_id );
+			}
+
+			return self::response( array( 'data' => array( $record ) ) );
 		}
 
 		if ( false !== strpos( $url, '/JobOpenings' ) ) {
@@ -499,12 +549,13 @@ function jszr_run_scale_test( array $cli_args ) {
 
 	WP_CLI::log(
 		sprintf(
-			'   %s in %.1fs (%.0f jobs/s), peak memory %s, %d API page requests, %d token requests',
+			'   %s in %.1fs (%.0f jobs/s), peak memory %s, %d API page requests, %d single-record requests, %d token requests',
 			number_format_i18n( (int) $stats['processed'] ),
 			$elapsed,
 			$elapsed > 0 ? $stats['processed'] / $elapsed : 0,
 			size_format( $peak ),
 			JSZR_Fake_Zoho::$calls['records'],
+			JSZR_Fake_Zoho::$calls['by_id'],
 			JSZR_Fake_Zoho::$calls['token']
 		)
 	);
@@ -516,13 +567,28 @@ function jszr_run_scale_test( array $cli_args ) {
 	$checks[] = jszr_scale_check( 0 === (int) $stats['errors'], 'no errors', (string) $stats['errors'] );
 	$checks[] = jszr_scale_check( jszr_scale_count_jobs() === $total, 'post count matches', (string) jszr_scale_count_jobs() );
 	$checks[] = jszr_scale_check( 1 === JSZR_Fake_Zoho::$calls['token'], 'the access token was fetched once, not per request', (string) JSZR_Fake_Zoho::$calls['token'] );
+	$checks[] = jszr_scale_check(
+		JSZR_Fake_Zoho::$calls['by_id'] === $total,
+		'every new job was fetched by ID exactly once for its apply link',
+		JSZR_Fake_Zoho::$calls['by_id'] . ' of ' . $total
+	);
 
 	// Spot-check the mapping survived the volume.
-	$sample = Job::find_by_zoho_id( sprintf( 'SCALE%013d', (int) ceil( $total / 2 ) ) );
+	$sample_id = sprintf( 'SCALE%013d', (int) ceil( $total / 2 ) );
+	$sample    = Job::find_by_zoho_id( $sample_id );
 
 	$checks[] = jszr_scale_check( $sample > 0, 'a middle-of-the-run record exists' );
 
 	if ( $sample ) {
+		$checks[] = jszr_scale_check(
+			JSZR_Fake_Zoho::apply_url( $sample_id ) === get_post_meta( $sample, '_zoho_recruit_application_url', true ),
+			'its apply link came from the by-ID response',
+			(string) get_post_meta( $sample, '_zoho_recruit_application_url', true )
+		);
+		$checks[] = jszr_scale_check(
+			JSZR_Fake_Zoho::apply_url( $sample_id ) === Job::get_apply_url( $sample ),
+			'and is what the apply button renders'
+		);
 		$checks[] = jszr_scale_check(
 			'' !== get_post_meta( $sample, '_jszr_job_code', true ),
 			'its job code was mapped'
@@ -540,15 +606,29 @@ function jszr_run_scale_test( array $cli_args ) {
 	WP_CLI::log( '' );
 	WP_CLI::log( '== Second full sync: updates, never duplicates ==' );
 
+	JSZR_Fake_Zoho::reset_calls();
+
 	$started = microtime( true );
 	$stats   = plugin()->sync()->run_now( 'full', array( 'trigger' => 'scale-test' ) );
 	$elapsed = microtime( true ) - $started;
 
-	WP_CLI::log( sprintf( '   re-synced in %.1fs', $elapsed ) );
+	WP_CLI::log( sprintf( '   re-synced in %.1fs, %d single-record requests', $elapsed, JSZR_Fake_Zoho::$calls['by_id'] ) );
 
 	$checks[] = jszr_scale_check( 0 === (int) $stats['created'], 'nothing was created the second time', (string) $stats['created'] );
 	$checks[] = jszr_scale_check( (int) $stats['updated'] === $total, 'everything was updated', (string) $stats['updated'] );
 	$checks[] = jszr_scale_check( jszr_scale_count_jobs() === $total, 'still no duplicates', (string) jszr_scale_count_jobs() );
+	$checks[] = jszr_scale_check(
+		0 === JSZR_Fake_Zoho::$calls['by_id'],
+		'no job was fetched by ID again: the stored apply link was reused',
+		(string) JSZR_Fake_Zoho::$calls['by_id']
+	);
+
+	if ( $sample ) {
+		$checks[] = jszr_scale_check(
+			JSZR_Fake_Zoho::apply_url( $sample_id ) === get_post_meta( $sample, '_zoho_recruit_application_url', true ),
+			'the stored apply link survived the re-sync'
+		);
+	}
 
 	WP_CLI::log( '' );
 	WP_CLI::log( '== Safety threshold: Zoho suddenly returns 40% of the jobs ==' );
@@ -625,7 +705,9 @@ function jszr_run_scale_test( array $cli_args ) {
 	$page_calls     = 0;
 
 	$breaker = static function ( $preempt, $args, $url ) use ( &$page_calls, $fail_after ) {
-		if ( false !== strpos( $url, '/JobOpenings' ) && false === strpos( $url, '/deleted' ) ) {
+		// Only page requests count; a by-ID fetch for an apply link failing
+		// is logged and survived, which is not the interruption wanted here.
+		if ( false !== strpos( $url, '/JobOpenings' ) && false === strpos( $url, '/deleted' ) && '' === JSZR_Fake_Zoho::record_id_from_url( $url ) ) {
 			++$page_calls;
 
 			if ( $page_calls > $fail_after ) {

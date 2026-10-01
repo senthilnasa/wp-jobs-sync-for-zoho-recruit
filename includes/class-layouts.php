@@ -125,12 +125,169 @@ class Layouts {
 		$allowed['td']['colspan']    = true;
 		$allowed['th']['colspan']    = true;
 
+		/*
+		 * Design exports lean on three more things: an inline SVG icon (the
+		 * arrow on a card), a button-shaped element, and responsive images.
+		 * None of these can run anything without an attribute that is not in
+		 * the list -- no event handlers, no href on <use>, no script child.
+		 */
+		$allowed['button'] = array_merge(
+			$common,
+			array(
+				'type'     => true,
+				'disabled' => true,
+				'name'     => true,
+				'value'    => true,
+			)
+		);
+
+		$allowed['picture'] = $common;
+		$allowed['source']  = array_merge(
+			$common,
+			array(
+				'src'    => true,
+				'srcset' => true,
+				'sizes'  => true,
+				'media'  => true,
+				'type'   => true,
+			)
+		);
+
+		$svg_common = array_merge(
+			$common,
+			array(
+				'fill'            => true,
+				'stroke'          => true,
+				'stroke-width'    => true,
+				'stroke-linecap'  => true,
+				'stroke-linejoin' => true,
+				'opacity'         => true,
+				'transform'       => true,
+			)
+		);
+
+		$allowed['svg'] = array_merge(
+			$svg_common,
+			array(
+				'xmlns'     => true,
+				'viewbox'   => true,
+				'width'     => true,
+				'height'    => true,
+				'focusable' => true,
+			)
+		);
+
+		$allowed['g']        = $svg_common;
+		$allowed['path']     = array_merge( $svg_common, array( 'd' => true ) );
+		$allowed['circle']   = array_merge(
+			$svg_common,
+			array(
+				'cx' => true,
+				'cy' => true,
+				'r'  => true,
+			)
+		);
+		$allowed['rect']     = array_merge(
+			$svg_common,
+			array(
+				'x'      => true,
+				'y'      => true,
+				'width'  => true,
+				'height' => true,
+				'rx'     => true,
+				'ry'     => true,
+			)
+		);
+		$allowed['line']     = array_merge(
+			$svg_common,
+			array(
+				'x1' => true,
+				'y1' => true,
+				'x2' => true,
+				'y2' => true,
+			)
+		);
+		$allowed['polyline'] = array_merge( $svg_common, array( 'points' => true ) );
+		$allowed['polygon']  = array_merge( $svg_common, array( 'points' => true ) );
+
 		/**
 		 * Filter the HTML allowed in a custom layout template.
 		 *
 		 * @param array $allowed Tag => attributes, in wp_kses() form.
 		 */
 		return (array) apply_filters( 'jszr_allowed_template_html', $allowed );
+	}
+
+	/**
+	 * Inline CSS properties a layout template may use beyond WordPress's list.
+	 *
+	 * WordPress keeps most inline styles but drops the `list-style` shorthand,
+	 * `inset` and `transition`. A design export uses all three, and losing
+	 * `list-style: none` is exactly how a card grows bullet points. None of
+	 * them can load a resource or run anything.
+	 *
+	 * @param string[] $properties WordPress's safe property list.
+	 * @return string[]
+	 */
+	public static function allowed_css_properties( $properties ) {
+		$extra = array(
+			'list-style',
+			'list-style-position',
+			'list-style-image',
+			'inset',
+			'inset-inline',
+			'inset-block',
+			'transition',
+			'transition-property',
+			'transition-duration',
+			'transition-timing-function',
+			'transition-delay',
+			'object-position',
+			'pointer-events',
+			'appearance',
+			'outline',
+			'outline-offset',
+			'overflow-wrap',
+			'word-break',
+			'text-overflow',
+			'line-clamp',
+			'-webkit-line-clamp',
+			'-webkit-box-orient',
+			'aspect-ratio',
+			'place-items',
+			'place-content',
+			'align-content',
+		);
+
+		/**
+		 * Filter the extra inline CSS properties allowed in layout templates.
+		 *
+		 * @param string[] $extra Property names.
+		 */
+		$extra = (array) apply_filters( 'jszr_allowed_template_css', $extra );
+
+		return array_values( array_unique( array_merge( (array) $properties, $extra ) ) );
+	}
+
+	/**
+	 * Filter template markup through the plugin's allow-list.
+	 *
+	 * The same call serves saving and rendering, so what an administrator sees
+	 * survive on save is exactly what reaches the page. The CSS property
+	 * filter is attached only for the duration of this call: it must not
+	 * widen what post content elsewhere on the site may carry.
+	 *
+	 * @param string $html Markup to filter.
+	 * @return string
+	 */
+	public static function kses( $html ) {
+		add_filter( 'safe_style_css', array( __CLASS__, 'allowed_css_properties' ) );
+
+		$html = wp_kses( (string) $html, self::allowed_html() );
+
+		remove_filter( 'safe_style_css', array( __CLASS__, 'allowed_css_properties' ) );
+
+		return $html;
 	}
 
 	/**
@@ -243,12 +400,53 @@ class Layouts {
 	}
 
 	/**
+	 * The named card templates an administrator has saved.
+	 *
+	 * A site with more than one kind of listing -- faculty roles on one page,
+	 * staff openings on another -- needs more than the single custom card. Each
+	 * named template is picked per shortcode with `template="name"`.
+	 *
+	 * @return array<string,string> Name => token template.
+	 */
+	public static function named_templates() {
+		$saved = Settings::get( 'card_templates', array() );
+		$out   = array();
+
+		foreach ( is_array( $saved ) ? $saved : array() as $name => $template ) {
+			$name     = sanitize_key( (string) $name );
+			$template = trim( (string) $template );
+
+			if ( '' !== $name && '' !== $template ) {
+				$out[ $name ] = $template;
+			}
+		}
+
+		/**
+		 * Filter the named card templates.
+		 *
+		 * @param array $out Name => token template.
+		 */
+		return (array) apply_filters( 'jszr_named_templates', $out );
+	}
+
+	/**
 	 * The template that should render a job card, if any.
 	 *
-	 * @param string $layout Layout key, or an empty string to read the setting.
+	 * @param string $layout   Layout key, or an empty string to read the setting.
+	 * @param string $template Named template to use instead of the layout.
 	 * @return string Empty when the default PHP template should be used.
 	 */
-	public static function listing_template( $layout = '' ) {
+	public static function listing_template( $layout = '', $template = '' ) {
+		$template = sanitize_key( (string) $template );
+
+		if ( '' !== $template ) {
+			$named = self::named_templates();
+
+			if ( isset( $named[ $template ] ) ) {
+				return $named[ $template ];
+			}
+		}
+
 		$layout = '' !== $layout ? $layout : (string) Settings::get( 'listing_layout', 'default' );
 
 		if ( 'custom' === $layout ) {
@@ -310,7 +508,7 @@ class Layouts {
 			? Template_Tags::render( $template, (int) $posts[0] )
 			: Template_Tags::render_values( $template, Template_Tags::sample_values() );
 
-		return wp_kses( $markup, self::allowed_html() );
+		return self::kses( $markup );
 	}
 
 	/**
@@ -339,7 +537,7 @@ class Layouts {
 
 		$template = str_replace( array( '{', '}' ), array( $open, $close ), $template );
 
-		$template = wp_kses( $template, self::allowed_html() );
+		$template = self::kses( $template );
 
 		$template = str_replace( array( $open, $close ), array( '{', '}' ), $template );
 
