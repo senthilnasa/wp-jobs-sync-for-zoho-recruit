@@ -267,10 +267,15 @@ anywhere, deliberately.
   `jszr_location_q` and `show_location_search`.
 - **A failed in-place load navigates; it does not show the error panel.**
   A live site reported "Unable to load jobs" when moving between pages. It
-  could not be reproduced in wp-env (pagination fetched 200s and swapped
-  cleanly), so the cause is environmental -- a WAF or proxy treating the
-  `X-Requested-With` request differently, or a cache returning a page without
-  the results region. `load()` in `public/js/jobs.js` now falls back to
+  could not be reproduced in wp-env, and the real cause was found on
+  `dev.krea.edu.in` afterwards: **stale rewrite rules**. `/jobs/` answered
+  200 from the page cache while `/jobs/?anything`, `/jobs/page/2/` and every
+  single job returned the theme's 404, and `/?post_type=zoho_job&jszr_page=2`
+  worked. `Post_Type::heal_rewrite_rules()` (on `wp_loaded`) now regenerates
+  the rules when none start with the job or archive slug, at most once an
+  hour, and logs `rewrite_rules_healed`. The fallback below stays, because the
+  class of failure (anything answering the fetch differently from a click) is
+  still real. `load()` in `public/js/jobs.js` now falls back to
   `window.location.assign( url )` on any failure and logs the reason with
   `console.warn`, keeping the panel only when the URL equals the current one
   (where navigating would loop). To diagnose a live site, read that warning.

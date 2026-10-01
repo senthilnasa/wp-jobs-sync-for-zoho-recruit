@@ -52,6 +52,7 @@ class Post_Type {
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'register' ), 5 );
 		add_action( 'init', array( __CLASS__, 'register_meta' ), 6 );
+		add_action( 'wp_loaded', array( __CLASS__, 'heal_rewrite_rules' ) );
 		add_action( 'update_option_' . Settings::OPTION, array( __CLASS__, 'maybe_flush_rewrites' ), 10, 2 );
 		add_filter( 'wp_sitemaps_post_types', array( __CLASS__, 'filter_sitemap_post_types' ) );
 		add_filter( 'wp_unique_post_slug', array( __CLASS__, 'preserve_slug' ), 10, 6 );
@@ -368,6 +369,61 @@ class Post_Type {
 				return;
 			}
 		}
+	}
+
+	/**
+	 * Regenerate the rewrite rules when the job rules have gone missing.
+	 *
+	 * A site's rules can lose this post type without the plugin being told:
+	 * the plugin files were copied in rather than activated, another plugin
+	 * flushed while this one was not loaded, a migration restored an old
+	 * `rewrite_rules` option. The symptom is subtle -- `/jobs/` itself may keep
+	 * answering from a page cache while `/jobs/?jszr_page=2`, every filter and
+	 * every single job return the theme's 404. A live site hit exactly this.
+	 *
+	 * The check is one autoloaded option read on every request. A flush happens
+	 * at most once an hour, so a site whose rules are filtered away on purpose
+	 * cannot be made to flush on every page load.
+	 *
+	 * @return void
+	 */
+	public static function heal_rewrite_rules() {
+		if ( ! Settings::get( 'public_jobs', true ) || '' === (string) get_option( 'permalink_structure' ) ) {
+			return;
+		}
+
+		$rules = get_option( 'rewrite_rules' );
+
+		// Empty means WordPress has not generated rules yet; it will on its own.
+		if ( ! is_array( $rules ) || empty( $rules ) ) {
+			return;
+		}
+
+		$slug    = (string) Settings::get( 'job_slug', 'jobs' );
+		$archive = (string) Settings::get( 'archive_slug', 'jobs' );
+
+		foreach ( array_keys( $rules ) as $pattern ) {
+			if ( 0 === strpos( (string) $pattern, $slug . '/' ) || 0 === strpos( (string) $pattern, $archive . '/' ) ) {
+				return;
+			}
+		}
+
+		if ( get_transient( 'jszr_rewrite_heal' ) ) {
+			return;
+		}
+
+		set_transient( 'jszr_rewrite_heal', 1, HOUR_IN_SECONDS );
+
+		flush_rewrite_rules( false );
+
+		Logger::info(
+			'rewrite_rules_healed',
+			'The job URL rules were missing from the site and have been regenerated.',
+			array(
+				'job_slug'     => $slug,
+				'archive_slug' => $archive,
+			)
+		);
 	}
 
 	/**

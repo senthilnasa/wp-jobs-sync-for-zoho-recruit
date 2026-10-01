@@ -72,6 +72,12 @@ and behaves exactly as it did.
   the current URL. The request itself no longer carries an `X-Requested-With`
   header, which nothing on the server read and which is what lets a firewall
   or proxy treat it differently from a click.
+- **Stale rewrite rules are repaired automatically.** The failing page changes
+  on a live site turned out to be WordPress answering 404 for every job URL
+  that bypassed the page cache: the rules for the post type were missing from
+  the site, while the cached `/jobs/` page hid it. The plugin now checks on
+  each request that its rules exist and regenerates them when they do not, at
+  most once an hour, logging `rewrite_rules_healed`.
 - Choosing another page landed the visitor at the top of the page. Each listing
   now has its own `id`, every pagination link carries it as a fragment, and the
   in-place swap scrolls to the start of the listing, so page two opens on the

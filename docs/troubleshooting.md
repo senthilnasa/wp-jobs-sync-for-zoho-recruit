@@ -45,6 +45,29 @@ is left out — it is safe to send to whoever is helping you.
 
 ---
 
+## The jobs page works, but page 2, the filters and every job open a 404
+
+The site's rewrite rules have lost the job post type. `/jobs/` keeps answering
+because a page cache still holds a copy of it, while anything that bypasses
+the cache -- `/jobs/?jszr_page=2`, a filter, a single job's pretty URL -- is
+handled by WordPress live, which no longer knows the address. The listing's
+"Unable to load jobs" panel after choosing a page is the same fault seen from
+the script.
+
+Confirm it: open `/?post_type=zoho_job&jszr_page=2`. If that works while
+`/jobs/?jszr_page=2` does not, the rules are stale.
+
+Since 1.1.0 the plugin notices the missing rules and regenerates them itself,
+at most once an hour, and writes `rewrite_rules_healed` to the sync log when it
+does. To fix it by hand on an older version: Settings → Permalinks → Save
+Changes, then purge the page cache so `/jobs/` is fetched fresh.
+
+How rules go stale: the plugin files were copied in rather than activated,
+another plugin flushed the rules while this one was deactivated, or a
+database restore brought back an older `rewrite_rules` option.
+
+---
+
 ## No apply button appears on any job
 
 Zoho Recruit's Job Openings list API does not send a link to the public job

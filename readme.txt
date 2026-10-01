@@ -187,6 +187,7 @@ No. Every write path resolves the job by its Zoho record ID through a single loo
 * New `jszr_allowed_template_css` and `jszr_named_templates` filters.
 * Fixed: filtering a listing on a page whose URL already had a query string produced a URL with two question marks.
 * Fixed: moving between listing pages could show "Unable to load jobs" on sites where the in-place request is blocked or altered. The request now looks exactly like a normal page visit, and if it still fails the script falls back to a normal page load and logs the reason to the browser console.
+* Fixed: when a site's rewrite rules lose the job post type, every job URL that bypasses the page cache returns 404 and page changes fail. The plugin now notices and regenerates its rules automatically.
 * Fixed: choosing another page landed at the top of the page. Page links now carry the listing's anchor and the in-place swap scrolls to the start of the listing.
 
 = 1.0.1 =
