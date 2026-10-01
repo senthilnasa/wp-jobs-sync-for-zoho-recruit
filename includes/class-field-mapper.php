@@ -39,6 +39,7 @@ class Field_Mapper {
 		return array(
 			'text'        => __( 'Plain text', 'jobs-sync-for-zoho-recruit' ),
 			'html'        => __( 'HTML (sanitized)', 'jobs-sync-for-zoho-recruit' ),
+			'raw_html'    => __( 'Raw HTML — keep Zoho\'s formatting and inline styles', 'jobs-sync-for-zoho-recruit' ),
 			'autop'       => __( 'Plain text with paragraphs', 'jobs-sync-for-zoho-recruit' ),
 			'date'        => __( 'Date (Y-m-d)', 'jobs-sync-for-zoho-recruit' ),
 			'datetime'    => __( 'Date and time', 'jobs-sync-for-zoho-recruit' ),
@@ -540,6 +541,9 @@ class Field_Mapper {
 
 				return self::tidy_html( $html );
 
+			case 'raw_html':
+				return self::raw_html( self::stringify( $value ) );
+
 			case 'autop':
 				$text = wp_strip_all_tags( self::stringify( $value ) );
 
@@ -849,7 +853,38 @@ class Field_Mapper {
 	}
 
 	/**
-	 * Remove empty wrappers and, optionally, inline styles.
+	 * Keep Zoho's description HTML as written, minus anything that can run.
+	 *
+	 * The HTML transform tidies: inline styles go so the description takes the
+	 * site's typography, and empty paragraphs vanish. Some sites want the
+	 * opposite -- the description exactly as it looks in Zoho, inline styles,
+	 * spacing and tables included. This is that. "Raw" means unformatted, not
+	 * unfiltered: the result still passes wp_kses_post(), so scripts, event
+	 * handlers and frames never reach the database. That is the invariant for
+	 * every piece of Zoho HTML and no transform is allowed to break it.
+	 *
+	 * @param string $html Raw HTML from Zoho.
+	 * @return string
+	 */
+	public static function raw_html( $html ) {
+		$html = self::strip_code_blocks( (string) $html );
+
+		// The same CSS widening the layout templates get, so list-style and
+		// friends survive on a description Zoho formatted with inline styles.
+		add_filter( 'safe_style_css', array( Layouts::class, 'allowed_css_properties' ) );
+
+		$html = wp_kses_post( $html );
+
+		remove_filter( 'safe_style_css', array( Layouts::class, 'allowed_css_properties' ) );
+
+		return trim( $html );
+	}
+
+	/**
+	 * Remove the clutter Zoho's editor leaves in description HTML.
+	 *
+	 * Inline styles go unless `jszr_strip_inline_styles` says otherwise, and
+	 * empty paragraphs and spans vanish. The Raw HTML transform skips this.
 	 *
 	 * @param string $html Sanitized HTML.
 	 * @return string

@@ -40,6 +40,12 @@ and behaves exactly as it did.
   `location_search`; `template` is accepted by `/jobs/render`.
 - Job and archive slugs may be a path (`careers/openings`), so job pages can sit
   under a careers section whose sub-pages are ordinary WordPress pages.
+- **Raw HTML** mapping transform. The existing HTML transform strips inline
+  styles and empty paragraphs so a description takes the site's typography;
+  Raw HTML keeps Zoho's formatting as written -- inline styles, spacing, tables
+  -- for a site that wants the description to look exactly as it does in Zoho.
+  It still passes `wp_kses_post()`, so scripts, event handlers and frames are
+  removed; "raw" means unformatted, not unfiltered.
 
 ### Changed
 

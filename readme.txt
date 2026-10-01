@@ -182,6 +182,7 @@ No. Every write path resolves the job by its Zoho record ID through a single loo
 * Pagination can be a "Load more" button instead of page numbers.
 * `related="department"` and `exclude` attributes for a related-openings list on a job page.
 * Job and archive URL slugs may contain a path, such as `careers/openings`.
+* A "Raw HTML" mapping transform that keeps Zoho's inline styles and spacing instead of tidying them. Scripts and frames are still removed.
 * Custom card and job-details HTML may now contain inline SVG icons, buttons and responsive images, and inline styles keep `list-style`, `inset` and `transition`. Scripts, event handlers and frames are still removed.
 * New `jszr_allowed_template_css` and `jszr_named_templates` filters.
 * Fixed: filtering a listing on a page whose URL already had a query string produced a URL with two question marks.

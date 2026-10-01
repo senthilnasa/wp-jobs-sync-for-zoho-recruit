@@ -79,7 +79,7 @@ Three invariants the code is built around:
 | `Zoho_Auth` | Authorization URL with expiring `state`, callback validation, code exchange, refresh with stampede lock, revoke, circuit breaker (5 failures) |
 | `Zoho_API` | `get_records`, `get_record` (always sends `publish_URL=true`, filter `jszr_record_query_args`), `get_deleted_records`, `get_fields`, `test_connection`; 204/304 as success, 429 with `Retry-After`, backoff, one forced refresh on 401 |
 | `Field_Metadata` | Fields API discovery, cached with a 12h freshness transient, bundled fallback list |
-| `Field_Mapper` | Mapping rows, 11 transforms, salary parsing, timezone-correct dates, hierarchical location path, `find_apply_url()` (the Job Apply URL detector, filter `jszr_apply_url_fields`), JSON export/import. **Pure — no DB writes. Best unit-test surface** |
+| `Field_Mapper` | Mapping rows, 12 transforms (`raw_html` keeps Zoho's inline styles; still `wp_kses_post()`), salary parsing, timezone-correct dates, hierarchical location path, `find_apply_url()` (the Job Apply URL detector, filter `jszr_apply_url_fields`), JSON export/import. **Pure — no DB writes. Best unit-test surface** |
 | `Job` | `find_by_zoho_id`, `upsert`, term writing, conflict modes, `deactivate`/`expire`/`orphan`, `is_active`, `get_apply_url`, `counts`. The single writer |
 | `Sync` | `start`, `run_now`, `process_batch`, `process_page`, `process_record`, `determine_status`, `is_unpublished`, `finalize`, `deactivate_missing`, `process_deleted_records`, `expire_due_jobs`, `sync_single` |
 | `Sync_Queue` | `{prefix}jszr_sync_runs` table, checkpointing, global lock with stale recovery, batch scheduling, cancel, prune |

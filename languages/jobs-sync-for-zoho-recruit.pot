@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-01T08:35:20+00:00\n"
+"POT-Creation-Date: 2026-10-01T17:00:35+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: jobs-sync-for-zoho-recruit\n"
@@ -253,7 +253,7 @@ msgstr ""
 
 #: admin/views/dashboard.php:266
 #: admin/views/logs.php:107
-#: includes/class-field-mapper.php:78
+#: includes/class-field-mapper.php:79
 #: includes/class-settings.php:830
 #: includes/class-template-tags.php:319
 msgid "State"
@@ -598,7 +598,7 @@ msgid "Basic information"
 msgstr ""
 
 #: admin/views/meta-box.php:98
-#: includes/class-field-mapper.php:75
+#: includes/class-field-mapper.php:76
 #: includes/class-settings.php:675
 #: includes/class-settings.php:793
 #: includes/class-settings.php:825
@@ -615,12 +615,12 @@ msgstr ""
 
 #: admin/views/meta-box.php:111
 #: admin/views/settings.php:494
-#: includes/class-field-mapper.php:76
+#: includes/class-field-mapper.php:77
 msgid "Zoho status"
 msgstr ""
 
 #: admin/views/meta-box.php:121
-#: includes/class-field-mapper.php:86
+#: includes/class-field-mapper.php:87
 #: includes/class-settings.php:800
 #: includes/class-settings.php:841
 #: includes/class-template-tags.php:328
@@ -1804,7 +1804,7 @@ msgid "Field mapping imported."
 msgstr ""
 
 #: includes/class-admin.php:938
-#: includes/class-field-mapper.php:1002
+#: includes/class-field-mapper.php:1037
 msgid "The uploaded file is not valid JSON."
 msgstr ""
 
@@ -1969,77 +1969,81 @@ msgid "HTML (sanitized)"
 msgstr ""
 
 #: includes/class-field-mapper.php:42
-msgid "Plain text with paragraphs"
+msgid "Raw HTML — keep Zoho's formatting and inline styles"
 msgstr ""
 
 #: includes/class-field-mapper.php:43
-msgid "Date (Y-m-d)"
+msgid "Plain text with paragraphs"
 msgstr ""
 
 #: includes/class-field-mapper.php:44
-msgid "Date and time"
+msgid "Date (Y-m-d)"
 msgstr ""
 
 #: includes/class-field-mapper.php:45
-msgid "Number"
+msgid "Date and time"
 msgstr ""
 
 #: includes/class-field-mapper.php:46
-msgid "Whole number"
+msgid "Number"
 msgstr ""
 
 #: includes/class-field-mapper.php:47
-msgid "Yes / No"
+msgid "Whole number"
 msgstr ""
 
 #: includes/class-field-mapper.php:48
-msgid "Join list with commas"
+msgid "Yes / No"
 msgstr ""
 
 #: includes/class-field-mapper.php:49
-msgid "Use lookup name"
+msgid "Join list with commas"
 msgstr ""
 
 #: includes/class-field-mapper.php:50
+msgid "Use lookup name"
+msgstr ""
+
+#: includes/class-field-mapper.php:51
 msgid "URL"
 msgstr ""
 
-#: includes/class-field-mapper.php:61
+#: includes/class-field-mapper.php:62
 msgid "Post: Title"
 msgstr ""
 
-#: includes/class-field-mapper.php:62
+#: includes/class-field-mapper.php:63
 msgid "Post: Description"
 msgstr ""
 
-#: includes/class-field-mapper.php:63
+#: includes/class-field-mapper.php:64
 msgid "Post: Excerpt"
 msgstr ""
 
 #. translators: %s: taxonomy label.
-#: includes/class-field-mapper.php:69
+#: includes/class-field-mapper.php:70
 #, php-format
 msgid "Taxonomy: %s"
 msgstr ""
 
-#: includes/class-field-mapper.php:77
+#: includes/class-field-mapper.php:78
 #: includes/class-settings.php:829
 #: includes/class-template-tags.php:318
 msgid "City"
 msgstr ""
 
-#: includes/class-field-mapper.php:79
+#: includes/class-field-mapper.php:80
 #: includes/class-settings.php:831
 #: includes/class-template-tags.php:320
 msgid "Country"
 msgstr ""
 
-#: includes/class-field-mapper.php:80
+#: includes/class-field-mapper.php:81
 #: includes/class-settings.php:832
 msgid "Remote / work mode"
 msgstr ""
 
-#: includes/class-field-mapper.php:81
+#: includes/class-field-mapper.php:82
 #: includes/class-settings.php:795
 #: includes/class-settings.php:836
 #: includes/class-template-tags.php:323
@@ -2049,7 +2053,7 @@ msgstr ""
 msgid "Industry"
 msgstr ""
 
-#: includes/class-field-mapper.php:82
+#: includes/class-field-mapper.php:83
 #: includes/class-settings.php:796
 #: includes/class-settings.php:837
 #: includes/class-template-tags.php:324
@@ -2059,12 +2063,12 @@ msgstr ""
 msgid "Client"
 msgstr ""
 
-#: includes/class-field-mapper.php:83
+#: includes/class-field-mapper.php:84
 #: includes/class-settings.php:838
 msgid "Number of positions"
 msgstr ""
 
-#: includes/class-field-mapper.php:84
+#: includes/class-field-mapper.php:85
 #: includes/class-settings.php:794
 #: includes/class-settings.php:839
 #: templates/job-meta.php:31
@@ -2073,7 +2077,7 @@ msgstr ""
 msgid "Salary"
 msgstr ""
 
-#: includes/class-field-mapper.php:85
+#: includes/class-field-mapper.php:86
 #: includes/class-settings.php:799
 #: includes/class-settings.php:840
 #: includes/class-template-tags.php:326
@@ -2084,45 +2088,45 @@ msgstr ""
 msgid "Posted date"
 msgstr ""
 
-#: includes/class-field-mapper.php:87
+#: includes/class-field-mapper.php:88
 msgid "Created time"
 msgstr ""
 
-#: includes/class-field-mapper.php:88
+#: includes/class-field-mapper.php:89
 msgid "Modified time"
 msgstr ""
 
-#: includes/class-field-mapper.php:89
+#: includes/class-field-mapper.php:90
 #: includes/class-settings.php:843
 #: includes/class-template-tags.php:331
 msgid "Application URL"
 msgstr ""
 
-#: includes/class-field-mapper.php:90
+#: includes/class-field-mapper.php:91
 msgid "Source URL"
 msgstr ""
 
 #. translators: %s: meta field label.
-#: includes/class-field-mapper.php:96
+#: includes/class-field-mapper.php:97
 #, php-format
 msgid "Meta: %s"
 msgstr ""
 
-#: includes/class-field-mapper.php:484
+#: includes/class-field-mapper.php:485
 msgid "Untitled job"
 msgstr ""
 
-#: includes/class-field-mapper.php:738
+#: includes/class-field-mapper.php:742
 #: includes/class-site-health.php:316
 msgid "Yes"
 msgstr ""
 
-#: includes/class-field-mapper.php:739
+#: includes/class-field-mapper.php:743
 #: includes/class-site-health.php:316
 msgid "No"
 msgstr ""
 
-#: includes/class-field-mapper.php:1009
+#: includes/class-field-mapper.php:1044
 msgid "The file did not contain any valid mapping rows."
 msgstr ""
 
@@ -3183,12 +3187,12 @@ msgstr ""
 msgid "Closes"
 msgstr ""
 
-#: templates/listing.php:43
+#: templates/listing.php:54
 msgid "Job results"
 msgstr ""
 
 #. translators: %s: number of jobs.
-#: templates/listing.php:51
+#: templates/listing.php:62
 #, php-format
 msgid "%s job found"
 msgid_plural "%s jobs found"
@@ -3221,20 +3225,20 @@ msgstr ""
 msgid "View all positions"
 msgstr ""
 
-#: templates/pagination.php:36
+#: templates/pagination.php:38
 msgid "Load more listings"
 msgstr ""
 
-#: templates/pagination.php:39
-#: templates/pagination.php:68
+#: templates/pagination.php:41
+#: templates/pagination.php:71
 msgid "Job listing pages"
 msgstr ""
 
-#: templates/pagination.php:59
+#: templates/pagination.php:61
 msgid "&laquo; Previous"
 msgstr ""
 
-#: templates/pagination.php:60
+#: templates/pagination.php:62
 msgid "Next &raquo;"
 msgstr ""
 

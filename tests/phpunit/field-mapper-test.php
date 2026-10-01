@@ -349,4 +349,55 @@ class JSZR_Field_Mapper_Test extends WP_UnitTestCase {
 
 		$this->assertSame( 'https://client.example.test/', $payload['meta']['_zoho_recruit_application_url'] );
 	}
+
+	/**
+	 * Raw HTML keeps Zoho's formatting where the HTML transform tidies it.
+	 */
+	public function test_raw_html_keeps_inline_styles_and_spacing() {
+		$zoho = '<p style="margin:0 0 12px;list-style:none">Intro</p><p></p>'
+			. '<ul style="list-style:none"><li style="color:#0a2f55">One</li></ul>'
+			. '<table><tr><td style="padding:4px">Cell</td></tr></table>';
+
+		$tidy = Field_Mapper::transform( $zoho, 'html' );
+		$raw  = Field_Mapper::transform( $zoho, 'raw_html' );
+
+		$this->assertStringNotContainsString( 'style=', $tidy );
+		$this->assertStringNotContainsString( '<p></p>', $tidy );
+
+		$this->assertStringContainsString( 'style="margin:0 0 12px;list-style:none"', $raw );
+		$this->assertStringContainsString( '<p></p>', $raw );
+		$this->assertStringContainsString( 'color:#0a2f55', $raw );
+		$this->assertStringContainsString( '<td style="padding:4px">', $raw );
+	}
+
+	/**
+	 * "Raw" is unformatted, never unfiltered.
+	 */
+	public function test_raw_html_still_strips_scripts() {
+		$raw = Field_Mapper::transform(
+			'<p onclick="alert(1)">Hi</p><script>alert(1)</script><iframe src="https://evil.test"></iframe><style>p{display:none}</style>',
+			'raw_html'
+		);
+
+		$this->assertSame( '<p>Hi</p>', $raw );
+	}
+
+	/**
+	 * The transform is offered on the mapping screen and accepted on save.
+	 */
+	public function test_raw_html_is_a_valid_transform() {
+		$this->assertArrayHasKey( 'raw_html', Field_Mapper::transforms() );
+
+		$clean = Field_Mapper::sanitize_mapping(
+			array(
+				array(
+					'zoho_field' => 'Job_Description',
+					'target'     => 'post_content',
+					'transform'  => 'raw_html',
+				),
+			)
+		);
+
+		$this->assertSame( 'raw_html', $clean[0]['transform'] );
+	}
 }
