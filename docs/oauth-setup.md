@@ -174,6 +174,40 @@ stored token from the database, whether or not the revoke call succeeded.
 Disconnecting does not touch the jobs already synced. They stay published until
 you change them.
 
+## Testing credentials outside WordPress
+
+`bin/oauth-test.php` is a standalone page that runs the same flow against the
+same endpoints with no WordPress and no plugin involved. Use it when you want to
+know whether a Client ID, Secret, data centre and scope list work at all, before
+deciding anything about the plugin.
+
+It prints the refresh token, then calls two Recruit endpoints and shows the
+status of each, so you can see which scopes were actually granted rather than
+which ones were requested:
+
+```
+Read job openings   HTTP 200
+Read field list     HTTP 401   <- settings.fields.READ was not granted
+```
+
+To use it:
+
+1. Open the file and set `ACCESS_KEY` to any hard-to-guess string. It refuses to
+   do anything until you do, because a page that prints refresh tokens must not
+   be open to whoever finds the address.
+2. Put it somewhere reachable over HTTPS.
+3. Add the address it prints to the Zoho API console as an Authorized Redirect
+   URI. Zoho allows several, so it can sit beside the plugin's own.
+4. Open it with `?key=YOUR_KEY` and fill in the form.
+5. **Delete the file afterwards.** A refresh token does not expire.
+
+Nothing is written to disk, the Client Secret travels in the PHP session rather
+than on the redirect, and the `state` parameter is checked on the way back. The
+file lives in `bin/`, which is excluded from the release package, so it cannot
+reach a site by accident.
+
+---
+
 ## Troubleshooting the connection
 
 | Symptom | Cause |

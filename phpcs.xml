@@ -24,6 +24,16 @@
 		<!-- The plugin ships no filesystem writes that need WP_Filesystem beyond
 		     the settings import, which already uses it. -->
 		<exclude name="WordPress.WP.AlternativeFunctions.file_system_operations_fopen"/>
+
+		<!--
+			bin/oauth-test.php runs standalone, without WordPress loaded, which
+			is the whole point of it: it proves a Client ID, secret and scope
+			list work before the plugin is anywhere near them. So it cannot call
+			esc_html() or the other WordPress helpers this ruleset requires, and
+			measuring it against them reports noise rather than defects. PHP
+			compatibility below still applies to it, and so does php -l.
+		-->
+		<exclude-pattern>/bin/oauth-test\.php$</exclude-pattern>
 	</rule>
 
 	<rule ref="WordPress.WP.I18n">

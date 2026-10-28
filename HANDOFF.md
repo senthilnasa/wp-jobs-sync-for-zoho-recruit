@@ -116,7 +116,8 @@ Three invariants the code is built around:
 `readme.txt`, `LICENSE`, `CHANGELOG.md`, `README.md`, `docs/` (10 documents),
 `languages/jobs-sync-for-zoho-recruit.pot`, `composer.json`, `package.json`,
 `phpcs.xml`, `phpunit.xml.dist`, `.wp-env.json`, `.gitignore`, `.gitattributes`,
-`bin/install-wp-tests.sh`, `bin/smoke-test.php`, `.github/workflows/ci.yml`,
+`bin/install-wp-tests.sh`, `bin/smoke-test.php`, `bin/oauth-test.php`,
+`.github/workflows/ci.yml`,
 `tests/phpunit/{bootstrap,field-mapper-test,sync-logic-test,rest-api-test}.php`
 
 `examples/krea-careers/` (not shipped, not in the `files` allow-list): the
@@ -194,6 +195,11 @@ anywhere, deliberately.
   `get_header()`, which a block theme has no answer for.
 - **`jszr_verify_admin_request()` is a global function, not a method,** so PHPCS
   and Plugin Check can both see the nonce check at the call site.
+- **`bin/oauth-test.php` is the only thing here that has really talked to
+  Zoho.** It is standalone on purpose: no WordPress, no plugin, so a failure
+  cannot be blamed on either. It is excluded from the `WordPress` PHPCS ruleset
+  for the same reason -- it cannot call `esc_html()` -- while PHP compatibility
+  still applies to it. `bin/` never ships.
 - **Two settings look similar and are not.** `public_jobs` unregisters the job
   URLs entirely. `disable_default_jobs_frontend` keeps every URL and only stops
   the plugin's own templates, assets, block templates and expired-job redirect,
@@ -430,6 +436,10 @@ anywhere, deliberately.
 ## 7. Useful commands
 
 ```bash
+# Prove a Client ID, Secret and scope list work, with no WordPress involved.
+# Set ACCESS_KEY inside it first, serve it over HTTPS, delete it afterwards.
+#   bin/oauth-test.php  ->  https://example.com/oauth-test.php?key=YOUR_KEY
+
 # Lint every PHP file (works with no dependencies installed)
 find . -path ./node_modules -prune -o -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n1 php -l
 
