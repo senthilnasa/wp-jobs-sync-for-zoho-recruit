@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-01T17:00:35+00:00\n"
+"POT-Creation-Date: 2026-11-06T11:58:06+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: jobs-sync-for-zoho-recruit\n"
@@ -312,8 +312,8 @@ msgstr ""
 
 #: admin/views/dashboard.php:319
 #: admin/views/dashboard.php:348
-#: includes/class-post-type.php:181
-#: includes/class-post-type.php:183
+#: includes/class-post-type.php:182
+#: includes/class-post-type.php:184
 #: includes/class-settings.php:828
 #: templates/filters.php:57
 #: templates/filters.php:149
@@ -1804,7 +1804,7 @@ msgid "Field mapping imported."
 msgstr ""
 
 #: includes/class-admin.php:938
-#: includes/class-field-mapper.php:1037
+#: includes/class-field-mapper.php:1098
 msgid "The uploaded file is not valid JSON."
 msgstr ""
 
@@ -2116,17 +2116,17 @@ msgstr ""
 msgid "Untitled job"
 msgstr ""
 
-#: includes/class-field-mapper.php:742
+#: includes/class-field-mapper.php:740
 #: includes/class-site-health.php:316
 msgid "Yes"
 msgstr ""
 
-#: includes/class-field-mapper.php:743
+#: includes/class-field-mapper.php:741
 #: includes/class-site-health.php:316
 msgid "No"
 msgstr ""
 
-#: includes/class-field-mapper.php:1044
+#: includes/class-field-mapper.php:1105
 msgid "The file did not contain any valid mapping rows."
 msgstr ""
 
@@ -2221,99 +2221,99 @@ msgstr ""
 msgid "Zoho Recruit sync stopped before deactivating jobs"
 msgstr ""
 
-#: includes/class-post-type.php:70
+#: includes/class-post-type.php:71
 msgctxt "post type general name"
 msgid "Jobs"
 msgstr ""
 
-#: includes/class-post-type.php:71
+#: includes/class-post-type.php:72
 msgctxt "post type singular name"
 msgid "Job"
 msgstr ""
 
-#: includes/class-post-type.php:72
+#: includes/class-post-type.php:73
 msgctxt "admin menu"
 msgid "Zoho Recruit Jobs"
 msgstr ""
 
-#: includes/class-post-type.php:73
+#: includes/class-post-type.php:74
 msgctxt "add new on admin bar"
 msgid "Job"
 msgstr ""
 
-#: includes/class-post-type.php:74
+#: includes/class-post-type.php:75
 msgid "Add New"
 msgstr ""
 
-#: includes/class-post-type.php:75
+#: includes/class-post-type.php:76
 msgid "Add New Job"
 msgstr ""
 
-#: includes/class-post-type.php:76
+#: includes/class-post-type.php:77
 msgid "New Job"
 msgstr ""
 
-#: includes/class-post-type.php:77
+#: includes/class-post-type.php:78
 msgid "Edit Job"
 msgstr ""
 
-#: includes/class-post-type.php:78
+#: includes/class-post-type.php:79
 #: includes/class-template-tags.php:101
 #: includes/class-template-tags.php:228
 #: templates/card.php:121
 msgid "View Job"
 msgstr ""
 
-#: includes/class-post-type.php:79
+#: includes/class-post-type.php:80
 msgid "View Jobs"
 msgstr ""
 
-#: includes/class-post-type.php:80
+#: includes/class-post-type.php:81
 msgid "All Jobs"
 msgstr ""
 
-#: includes/class-post-type.php:81
+#: includes/class-post-type.php:82
 msgid "Search Jobs"
 msgstr ""
 
-#: includes/class-post-type.php:82
+#: includes/class-post-type.php:83
 msgid "No jobs found."
 msgstr ""
 
-#: includes/class-post-type.php:83
+#: includes/class-post-type.php:84
 msgid "No jobs found in Trash."
 msgstr ""
 
-#: includes/class-post-type.php:84
+#: includes/class-post-type.php:85
 msgid "Job Archives"
 msgstr ""
 
-#: includes/class-post-type.php:85
+#: includes/class-post-type.php:86
 msgid "Job published."
 msgstr ""
 
-#: includes/class-post-type.php:86
+#: includes/class-post-type.php:87
 msgid "Job updated."
 msgstr ""
 
-#: includes/class-post-type.php:87
+#: includes/class-post-type.php:88
 msgid "Job image"
 msgstr ""
 
-#: includes/class-post-type.php:88
+#: includes/class-post-type.php:89
 msgid "Set job image"
 msgstr ""
 
-#: includes/class-post-type.php:89
+#: includes/class-post-type.php:90
 msgid "Remove job image"
 msgstr ""
 
-#: includes/class-post-type.php:94
+#: includes/class-post-type.php:95
 msgid "Job openings synchronized from Zoho Recruit."
 msgstr ""
 
-#: includes/class-post-type.php:172
-#: includes/class-post-type.php:174
+#: includes/class-post-type.php:173
+#: includes/class-post-type.php:175
 #: includes/class-settings.php:827
 #: blocks/job-meta/build/index.js:1
 #: blocks/job-meta/src/index.js:24
@@ -2322,24 +2322,24 @@ msgstr ""
 msgid "Department"
 msgstr ""
 
-#: includes/class-post-type.php:175
+#: includes/class-post-type.php:176
 msgid "Departments"
 msgstr ""
 
-#: includes/class-post-type.php:184
+#: includes/class-post-type.php:185
 msgid "Locations"
 msgstr ""
 
-#: includes/class-post-type.php:190
-#: includes/class-post-type.php:192
+#: includes/class-post-type.php:191
+#: includes/class-post-type.php:193
 msgid "Employment Type"
 msgstr ""
 
-#: includes/class-post-type.php:193
+#: includes/class-post-type.php:194
 msgid "Employment Types"
 msgstr ""
 
-#: includes/class-post-type.php:199
+#: includes/class-post-type.php:200
 #: includes/class-settings.php:835
 #: blocks/job-meta/build/index.js:1
 #: blocks/job-meta/src/index.js:36
@@ -2348,16 +2348,16 @@ msgstr ""
 msgid "Category"
 msgstr ""
 
-#: includes/class-post-type.php:201
+#: includes/class-post-type.php:202
 msgid "Job Category"
 msgstr ""
 
-#: includes/class-post-type.php:202
+#: includes/class-post-type.php:203
 msgid "Job Categories"
 msgstr ""
 
-#: includes/class-post-type.php:208
-#: includes/class-post-type.php:210
+#: includes/class-post-type.php:209
+#: includes/class-post-type.php:211
 #: includes/class-settings.php:834
 #: blocks/job-meta/build/index.js:1
 #: blocks/job-meta/src/index.js:40
@@ -2366,7 +2366,7 @@ msgstr ""
 msgid "Experience"
 msgstr ""
 
-#: includes/class-post-type.php:211
+#: includes/class-post-type.php:212
 msgid "Experience Levels"
 msgstr ""
 

@@ -59,6 +59,14 @@ and behaves exactly as it did.
 
 ### Fixed
 
+- **"Plain text with paragraphs" no longer runs a description into one
+  paragraph.** Zoho sends rich text as compact HTML with no newlines, and the
+  transform stripped the tags before `wpautop()` could see any line breaks, so
+  a whole job description became a single `<p>`. Paragraphs, headings, `<br>`,
+  Zoho's one-`<div>`-per-line markup and list items (with a bullet) now become
+  paragraphs and line breaks. Plain text with no block markup is handled
+  exactly as before. Re-sync to rewrite existing jobs. For links, bold and
+  real lists, use the HTML or Raw HTML transform instead.
 - Filtering a listing on a page whose URL already carried a query string (for
   example a tracking parameter) produced a URL with two question marks. The
   filter form now replaces the query string instead of appending to it.

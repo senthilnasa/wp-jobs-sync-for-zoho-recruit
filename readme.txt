@@ -185,6 +185,7 @@ No. Every write path resolves the job by its Zoho record ID through a single loo
 * A "Raw HTML" mapping transform that keeps Zoho's inline styles and spacing instead of tidying them. Scripts and frames are still removed.
 * Custom card and job-details HTML may now contain inline SVG icons, buttons and responsive images, and inline styles keep `list-style`, `inset` and `transition`. Scripts, event handlers and frames are still removed.
 * New `jszr_allowed_template_css` and `jszr_named_templates` filters.
+* Fixed: the "Plain text with paragraphs" transform ran a rich-text description into a single paragraph. It now keeps Zoho's paragraphs, line breaks and list items.
 * Fixed: filtering a listing on a page whose URL already had a query string produced a URL with two question marks.
 * Fixed: moving between listing pages could show "Unable to load jobs" on sites where the in-place request is blocked or altered. The request now looks exactly like a normal page visit, and if it still fails the script falls back to a normal page load and logs the reason to the browser console.
 * Fixed: when a site's rewrite rules lose the job post type, every job URL that bypasses the page cache returns 404 and page changes fail. The plugin now notices and regenerates its rules automatically.

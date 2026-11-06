@@ -291,6 +291,20 @@ anywhere, deliberately.
   own id, counted per page in `listing.php`) so every path lands on the
   listing; the in-place swap scrolls with `window.scrollTo`, because
   `scrollIntoView` did nothing in the embedded test browser.
+- **"Plain text with paragraphs" must turn markup into line breaks before it
+  strips it.** In November 2026 Krea reported job descriptions with no
+  formatting. The REST output on `dev.krea.edu.in` showed each description
+  stored as one `<p>` ending in `\n` -- `wpautop()`'s signature, so their
+  Job Description row uses `autop`, not `html` (which trims). Zoho sends
+  compact HTML with no newlines, so stripping first left nothing for
+  `wpautop()` to split on. `Field_Mapper::html_to_text()` now maps block tags
+  to blank lines, `<div>` and `<br>` to line breaks and `<li>` to `• `, and
+  only when line-level markup is present; plain text keeps the old path. Links
+  and bold still go -- that is what the transform is. The real answer for a
+  rich description is the `html` or `raw_html` transform plus Sync Now.
+- **The listing button label is a setting, not a code change.** "Search Jobs"
+  for Krea is Settings → Display → Filter button label; the plugin default
+  stays "Filter".
 - **Slugs may be paths.** `Settings::sanitize_slug_path()` keeps
   `careers/openings`; `sanitize_title()` alone would have flattened it. Needed
   so Krea's sub-pages can be children of `/careers/` without the post type
@@ -302,7 +316,8 @@ anywhere, deliberately.
 
 **Verified in a live WordPress 7.1 / PHP 8.1 (wp-env)**
 - PHPCS: 0 errors, 0 warnings across 63 files. PHPCompatibility clean for 8.1+.
-- PHPUnit: 216 tests single site, 216 multisite (`npm run test:php:multisite`).
+- PHPUnit: 226 tests single site (7 multisite-only skips) on 2026-11-06;
+  216 multisite at the last multisite run (`npm run test:php:multisite`).
   `tests/phpunit/listing-options-test.php` (22 tests) covers the 1.1.0 options:
   each one proves the default output is unchanged first, then what the option
   adds — named templates, pills, labels, the gated status and location filters,
@@ -430,6 +445,10 @@ anywhere, deliberately.
    (`blocks/jobs`) does not yet expose `template`, `related` or `exclude` in its
    inspector; the shortcode does. Add them to `blocks/jobs/src/index.js` and
    `block.json` if block-based sites ask.
+   **Krea settings still to change on their site (Nov 2026)**: Filter button
+   label → `Search Jobs`; Job Description row → HTML (sanitized) or Raw HTML,
+   then Sync Now. Until the mapping changes, the `autop` fix keeps the lines
+   but not the links (the application-form link is lost under `autop`).
 
 ---
 

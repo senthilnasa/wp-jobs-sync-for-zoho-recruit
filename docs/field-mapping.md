@@ -63,7 +63,7 @@ A transform decides how a raw Zoho value becomes a WordPress value.
 | Plain text | `sanitize_text_field()`. The safe default |
 | HTML (sanitized) | `wp_kses_post()`, with inline `style` attributes and empty paragraphs stripped, so the description takes the site's typography |
 | Raw HTML | `wp_kses_post()` only. Keeps Zoho's inline styles, spacing and tables as written, for a site that wants the description to look exactly as it does in Zoho. Scripts, event handlers and frames are still removed — "raw" means unformatted, not unfiltered |
-| Plain text with paragraphs | `wpautop()` — for description fields Zoho stores as plain text |
+| Plain text with paragraphs | All markup removed, then `wpautop()`. For fields Zoho stores as plain text. Handed HTML, it turns paragraphs, headings, `<div>` lines, `<br>` and list items (prefixed with •) into paragraphs and line breaks first, so the lines survive; links, bold and real lists do not — use HTML for those |
 | Date (Y-m-d) | Parses the Zoho value and renders `Y-m-d` in the site timezone |
 | Date and time | Parses and stores an ISO-8601 timestamp, offset-correct |
 | Number | Float |

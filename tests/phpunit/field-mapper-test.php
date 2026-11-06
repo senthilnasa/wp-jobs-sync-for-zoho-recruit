@@ -164,6 +164,53 @@ class JSZR_Field_Mapper_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * "Plain text with paragraphs" keeps the lines of a rich-text description.
+	 *
+	 * Zoho sends compact HTML with no newlines. Stripping the tags first used to
+	 * leave one run of text, so the whole description became a single <p>.
+	 */
+	public function test_autop_keeps_the_structure_of_html() {
+		$zoho = '<div><b>Job title:</b> Manager</div><div>Work Location: Sri City</div><div><br></div>'
+			. '<div><b>Key Responsibilities</b></div><ul><li>Drive the strategy.</li><li>Manage the lifecycle.</li></ul>'
+			. '<p>Click <a href="https://example.com/form">here</a> &amp; apply.</p>';
+
+		$html = Field_Mapper::transform( $zoho, 'autop' );
+
+		$this->assertGreaterThanOrEqual( 3, substr_count( $html, '<p>' ), $html );
+		$this->assertStringContainsString( "Job title: Manager<br />\nWork Location: Sri City", $html );
+		$this->assertStringContainsString( "\u{2022} Drive the strategy.<br />\n\u{2022} Manage the lifecycle.", $html );
+		$this->assertStringContainsString( 'Click here &amp; apply.', $html );
+		$this->assertStringNotContainsString( '<a ', $html );
+		$this->assertStringNotContainsString( '<b>', $html );
+	}
+
+	/**
+	 * Plain text through the same transform is unchanged from before.
+	 */
+	public function test_autop_leaves_plain_text_alone() {
+		$this->assertSame(
+			"<p>Line one<br />\nLine two</p>\n<p>Salary &lt; 5 LPA</p>\n",
+			Field_Mapper::transform( "Line one\nLine two\n\nSalary < 5 LPA", 'autop' )
+		);
+
+		// Inline markup alone does not switch to HTML handling, so the
+		// newlines still decide the lines.
+		$this->assertSame(
+			"<p>Bold line<br />\nNext</p>\n",
+			Field_Mapper::transform( "<strong>Bold</strong> line\nNext", 'autop' )
+		);
+	}
+
+	/**
+	 * Script contents never become visible text, and nothing executable survives.
+	 */
+	public function test_autop_drops_scripts_and_escapes() {
+		$html = Field_Mapper::transform( '<p>Hi</p><script>alert(1)</script><p onclick="x()">There</p>', 'autop' );
+
+		$this->assertSame( "<p>Hi</p>\n<p>There</p>\n", $html );
+	}
+
+	/**
 	 * A full record maps into post fields, meta and terms.
 	 */
 	public function test_map_produces_post_meta_and_terms() {

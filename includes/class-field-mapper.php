@@ -545,9 +545,7 @@ class Field_Mapper {
 				return self::raw_html( self::stringify( $value ) );
 
 			case 'autop':
-				$text = wp_strip_all_tags( self::stringify( $value ) );
-
-				return wpautop( esc_html( $text ) );
+				return wpautop( esc_html( self::html_to_text( self::stringify( $value ) ) ) );
 
 			case 'date':
 				return self::to_date( $value );
@@ -850,6 +848,69 @@ class Field_Mapper {
 		$stripped = preg_replace( '#<(script|style)\b[^>]*>.*$#is', '', $stripped );
 
 		return is_string( $stripped ) ? $stripped : $html;
+	}
+
+	/**
+	 * Turn HTML into plain text without losing where its lines break.
+	 *
+	 * The "Plain text with paragraphs" transform used to strip tags straight
+	 * away. Zoho sends a rich-text description as compact HTML with no newlines
+	 * in it, so stripping left one unbroken run of text and wpautop() wrapped the
+	 * whole description in a single paragraph -- every heading, line and bullet
+	 * point run together. A live site shipped that on every job. Block
+	 * boundaries become blank lines, `<br>` and list items become line breaks,
+	 * and list items keep a bullet, so wpautop() has something to work with.
+	 *
+	 * Text with no line-level markup in it is handled exactly as before: tags
+	 * stripped, newlines kept.
+	 *
+	 * @param string $html Raw value from Zoho.
+	 * @return string Plain text; tags removed, entities left for esc_html().
+	 */
+	public static function html_to_text( $html ) {
+		$html = (string) $html;
+
+		if ( ! preg_match( '#<(?:br|p|div|li|ul|ol|h[1-6]|table|tr|blockquote)\b#i', $html ) ) {
+			return wp_strip_all_tags( $html );
+		}
+
+		$text = self::strip_code_blocks( $html );
+
+		// In HTML a newline in the source is only a space; the markup says where
+		// lines break. Without /u so invalid UTF-8 cannot null the string.
+		$text = (string) preg_replace( '/\s+/', ' ', $text );
+
+		$blocks = 'p|h[1-6]|ul|ol|dl|dt|dd|table|thead|tbody|tfoot|tr|blockquote|pre|section|article|header|footer|figure|figcaption|hr';
+
+		// Zoho's editor writes one <div> per line and <div><br></div> for a
+		// blank one, so a div is a line break, not a paragraph.
+		$replacements = array(
+			'#</div\s*>\s*<div\b[^>]*>#i'       => "\n",
+			'#</?div\b[^>]*>#i'                 => "\n",
+			'#<br\b[^>]*>#i'                    => "\n",
+			'#<li\b[^>]*>#i'                    => "\n\u{2022} ",
+			'#</?(?:' . $blocks . ')\b[^>]*>#i' => "\n\n",
+			'#</t[dh]\s*>#i'                    => ' ',
+		);
+
+		foreach ( $replacements as $pattern => $replacement ) {
+			$replaced = preg_replace( $pattern, $replacement, $text );
+			$text     = is_string( $replaced ) ? $replaced : $text;
+		}
+
+		$text = wp_strip_all_tags( $text );
+		$text = str_replace( array( '&nbsp;', '&#160;', "\u{00A0}" ), ' ', $text );
+
+		// Tidy what the markup left behind: spaces around line breaks, runs of
+		// spaces, and more than one blank line in a row.
+		$text = (string) preg_replace( '/[ \t]+/', ' ', $text );
+		$text = (string) preg_replace( '/ ?\n ?/', "\n", $text );
+		$text = (string) preg_replace( '/\n{3,}/', "\n\n", $text );
+
+		// A list item whose text sat in its own paragraph keeps its bullet.
+		$text = str_replace( array( "\u{2022}\n\n", "\u{2022}\n" ), "\u{2022} ", $text );
+
+		return trim( $text );
 	}
 
 	/**

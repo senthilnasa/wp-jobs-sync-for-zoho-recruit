@@ -43,6 +43,12 @@ The staff card also shows **Functional area** and **School**. In this guide:
 Whichever you choose, set the visitor-facing names under **Settings → Display →
 Filter labels**: Department → "Functional area", Category → "School".
 
+Keep the **Job Description → Post: Description** row on **HTML (sanitized)**,
+or **Raw HTML** if the page should look exactly as it does in Zoho. **Plain
+text with paragraphs** is for fields Zoho stores as plain text: it removes
+headings, bold, links (the application-form link included) and real lists.
+After changing the transform, run **Sync Now** so every job is rewritten.
+
 ## 2. URLs
 
 Recommended structure, which matches the breadcrumb in the design:
@@ -83,6 +89,7 @@ Settings → **Display**:
 | Search label | `Search by keyword` |
 | Search placeholder | `Search by keyword` (faculty pages) or `e.g. Web application developer` (staff) |
 | Search looks in | Job title, Summary, Job code (untick Description to avoid matching "reports to the manager") |
+| Filter button label | `Search Jobs` |
 | Location search | on; placeholder `Location` |
 | Pagination | **Load more**, label `Load more listings` |
 | Custom CSS | contents of `krea.css` |
