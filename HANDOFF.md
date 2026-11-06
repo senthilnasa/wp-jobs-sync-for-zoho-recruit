@@ -231,6 +231,12 @@ anywhere, deliberately.
 - **What ships is the `files` allow-list in `package.json`,** consumed by
   `wp-scripts plugin-zip`. There is no `.distignore` any more — one source of
   truth, and a new dev file cannot reach a release by accident.
+- **wp-env runs MariaDB, CI runs MySQL 8.0, and they disagree on temporary
+  tables.** The core test suite creates tables as `TEMPORARY`; MariaDB lists
+  those in `SHOW TABLES`, MySQL does not. A `SHOW TABLES` check in a PHPUnit
+  test therefore passes locally and fails in CI -- the multisite job failed
+  that way on every push from October to 2026-11-06. Check a table in tests
+  by selecting from it (`multisite-test.php` `table_exists()`).
 - **PHPUnit is pinned to `^9.6`** because that is what the WordPress core test
   suite supports; 10 cannot discover the test classes.
 - **TypeScript is pinned to `^5`** because TypeScript 7 breaks the ts-api-utils

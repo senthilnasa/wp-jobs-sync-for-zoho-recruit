@@ -40,16 +40,34 @@ class JSZR_Multisite_Test extends WP_UnitTestCase {
 	/**
 	 * Whether a table exists on the current site.
 	 *
+	 * The core test suite turns CREATE TABLE into CREATE TEMPORARY TABLE, and
+	 * MySQL leaves temporary tables out of SHOW TABLES. MariaDB lists them,
+	 * which is why a SHOW TABLES check passed in wp-env and failed in CI.
+	 * Selecting from the table works on both.
+	 *
 	 * @param string $suffix Table name without the prefix.
 	 * @return bool
 	 */
 	private function table_exists( $suffix ) {
 		global $wpdb;
 
-		$table = $wpdb->prefix . $suffix;
+		$table    = $wpdb->prefix . $suffix;
+		$suppress = $wpdb->suppress_errors( true );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Test-time schema check.
-		return (bool) $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Test-time schema check.
+		$result = $wpdb->query( $wpdb->prepare( 'SELECT 1 FROM %i LIMIT 0', $table ) );
+
+		$wpdb->suppress_errors( $suppress );
+
+		return false !== $result;
+	}
+
+	/**
+	 * The table check must be able to say no, or every assertion on it is empty.
+	 */
+	public function test_table_check_reports_a_missing_table() {
+		$this->assertFalse( $this->table_exists( 'jszr_no_such_table' ) );
+		$this->assertTrue( $this->table_exists( 'posts' ) );
 	}
 
 	/**
