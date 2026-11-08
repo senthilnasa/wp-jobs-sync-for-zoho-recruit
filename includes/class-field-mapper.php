@@ -944,8 +944,16 @@ class Field_Mapper {
 	/**
 	 * Remove the clutter Zoho's editor leaves in description HTML.
 	 *
-	 * Inline styles go unless `jszr_strip_inline_styles` says otherwise, and
-	 * empty paragraphs and spans vanish. The Raw HTML transform skips this.
+	 * Inline styles go unless `jszr_strip_inline_styles` says otherwise. Line
+	 * breaks and blank lines stay: an inline wrapper holding only a `<br>` or a
+	 * space is unwrapped, never deleted, and a paragraph holding only `&nbsp;`
+	 * or `<br>` -- how Zoho's editor writes a blank line -- becomes
+	 * `<p>&nbsp;</p>`. Blank lines at the very start and end go, and so do
+	 * paragraphs with nothing in them at all. The Raw HTML transform skips this.
+	 *
+	 * Deleting every element whose content was only a break used to drop Zoho's
+	 * blank lines, and joined two lines whenever the `<br>` between them sat in
+	 * a `<span>` of its own.
 	 *
 	 * @param string $html Sanitized HTML.
 	 * @return string
@@ -959,12 +967,55 @@ class Field_Mapper {
 		 * @param bool $strip Whether to strip inline styles.
 		 */
 		if ( apply_filters( 'jszr_strip_inline_styles', true ) ) {
-			$html = preg_replace( '/\s+style\s*=\s*(("[^"]*")|(\'[^\']*\'))/i', '', $html );
+			$html = (string) preg_replace( '/\s+style\s*=\s*(("[^"]*")|(\'[^\']*\'))/i', '', $html );
 		}
 
-		$html = preg_replace( '#<(p|div|span)[^>]*>(\s|&nbsp;|<br\s*/?>)*</\1>#i', '', $html );
+		/**
+		 * Filter whether blank lines in a description are kept.
+		 *
+		 * Line breaks inside text are always kept. Return false to drop the
+		 * empty paragraphs Zoho's editor uses as blank lines instead.
+		 *
+		 * @param bool $keep Whether to keep blank lines. Default true.
+		 */
+		$keep_blank_lines = (bool) apply_filters( 'jszr_keep_blank_lines', true );
 
-		return is_string( $html ) ? trim( $html ) : '';
+		// Whitespace, a no-break space as an entity or as UTF-8, or a line break.
+		// Without /u so invalid UTF-8 cannot null the string. The # is escaped
+		// because it is the patterns' delimiter.
+		$blank      = '(?:\s|&nbsp;|&\#160;|\xC2\xA0|<br\s*/?>)';
+		$blank_line = $keep_blank_lines ? '<p>&nbsp;</p>' : '';
+
+		$patterns = array(
+			// An inline wrapper around nothing but breaks or spaces is unwrapped,
+			// so the break or space it held survives.
+			'#<(span|strong|b|em|i|u|font)\b[^>]*>(' . $blank . '*)</\1>#i' => '$2',
+			// A paragraph with nothing in it at all.
+			'#<(p|div)\b[^>]*>\s*</\1>#i'             => '',
+			// A paragraph holding only a break or a no-break space: a blank line.
+			'#<(p|div)\b[^>]*>' . $blank . '+</\1>#i' => $blank_line,
+		);
+
+		// Zoho nests wrappers several deep, and each pass peels one layer.
+		for ( $pass = 0; $pass < 5; $pass++ ) {
+			$before = $html;
+
+			foreach ( $patterns as $pattern => $replacement ) {
+				$replaced = preg_replace( $pattern, $replacement, $html );
+				$html     = is_string( $replaced ) ? $replaced : $html;
+			}
+
+			if ( $before === $html ) {
+				break;
+			}
+		}
+
+		// No blank lines before the first line or after the last.
+		$edges = '(?:\s*<p>&nbsp;</p>|\s*<br\s*/?>)+';
+		$html  = (string) preg_replace( '#^' . $edges . '#i', '', $html );
+		$html  = (string) preg_replace( '#' . $edges . '\s*$#i', '', $html );
+
+		return trim( $html );
 	}
 
 	/**

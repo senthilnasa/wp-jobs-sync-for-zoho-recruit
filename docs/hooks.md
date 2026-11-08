@@ -108,9 +108,16 @@ apply_filters( 'jszr_status_mapping',        array $map );
 apply_filters( 'jszr_record_status',         string $status, array $record );
 apply_filters( 'jszr_post_status_for_job_status', string $post_status, string $status );
 apply_filters( 'jszr_strip_inline_styles',   bool $strip );
+apply_filters( 'jszr_keep_blank_lines',      bool $keep );
 apply_filters( 'jszr_record_query_args',     array $query, string $record_id );
 apply_filters( 'jszr_apply_url_fields',      array $keys );
 ```
+
+`jszr_strip_inline_styles` and `jszr_keep_blank_lines` shape the **HTML
+(sanitized)** transform. Line breaks inside text are always kept. Blank lines
+(a Zoho paragraph holding only `&nbsp;` or `<br>`) are kept as `<p>&nbsp;</p>`
+by default; return `false` from `jszr_keep_blank_lines` to drop them. Changes
+apply from the next sync.
 
 `jszr_record_query_args` filters the query string of a Get Record by ID
 request. It defaults to `publish_URL=true`, which is what makes Zoho include

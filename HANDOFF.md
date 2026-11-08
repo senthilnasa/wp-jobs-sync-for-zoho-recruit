@@ -308,6 +308,17 @@ anywhere, deliberately.
   only when line-level markup is present; plain text keeps the old path. Links
   and bold still go -- that is what the transform is. The real answer for a
   rich description is the `html` or `raw_html` transform plus Sync Now.
+- **The HTML transform keeps line breaks and blank lines (Nov 2026).**
+  `tidy_html()` used to delete any `p`/`div`/`span` holding only whitespace,
+  `&nbsp;` or `<br>`. On Zoho's real markup (checked against a live Zoho
+  career page: `<span class="size"><br></span>`, `<p><span class="EOP">&nbsp;
+  </span><br></p>` for a blank line) that dropped blank lines and could join
+  lines. Inline wrappers around only a break or space are now unwrapped, a
+  blank-looking paragraph becomes `<p>&nbsp;</p>` (survives `wpautop()` on
+  `the_content`, tested), and blank lines at the edges are trimmed. Filter
+  `jszr_keep_blank_lines`. Zoho formats with classes (`zw-paragraph`,
+  `size`), not inline styles, so its look does not carry over in either
+  transform; the theme's typography applies.
 - **The listing button label is a setting, not a code change.** "Search Jobs"
   for Krea is Settings → Display → Filter button label; the plugin default
   stays "Filter".
@@ -322,8 +333,8 @@ anywhere, deliberately.
 
 **Verified in a live WordPress 7.1 / PHP 8.1 (wp-env)**
 - PHPCS: 0 errors, 0 warnings across 63 files. PHPCompatibility clean for 8.1+.
-- PHPUnit: 226 tests single site (7 multisite-only skips) on 2026-11-06;
-  216 multisite at the last multisite run (`npm run test:php:multisite`).
+- PHPUnit: 231 tests single site (8 multisite-only skips) and 231 multisite
+  (`npm run test:php:multisite`) on 2026-11-08. CI (MySQL 8.0) green.
   `tests/phpunit/listing-options-test.php` (22 tests) covers the 1.1.0 options:
   each one proves the default output is unchanged first, then what the option
   adds — named templates, pills, labels, the gated status and location filters,

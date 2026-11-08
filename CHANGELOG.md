@@ -59,6 +59,14 @@ and behaves exactly as it did.
 
 ### Fixed
 
+- **The HTML transform keeps line breaks and blank lines.** It deleted every
+  element whose only content was a `<br>` or `&nbsp;`, which removed the blank
+  lines Zoho's editor writes as empty paragraphs and joined two lines whenever
+  the `<br>` between them sat in a `<span>` of its own. A wrapper around only a
+  break or space is now unwrapped instead, and an empty-looking paragraph
+  becomes `<p>&nbsp;</p>`. Blank lines at the start and end still go.
+  `jszr_keep_blank_lines` filter to drop blank lines. Re-sync to rewrite
+  existing jobs.
 - **"Plain text with paragraphs" no longer runs a description into one
   paragraph.** Zoho sends rich text as compact HTML with no newlines, and the
   transform stripped the tags before `wpautop()` could see any line breaks, so

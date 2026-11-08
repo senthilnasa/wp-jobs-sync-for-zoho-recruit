@@ -418,6 +418,72 @@ class JSZR_Field_Mapper_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Zoho's description markup, as its career site serves it, abridged.
+	 *
+	 * @return string
+	 */
+	private function zoho_description() {
+		return '<p class="zw-paragraph heading0"><span><span class="size">We are seeking a </span></span><span><span class="size">Solution Consultant.</span></span><span class="size"><br></span></p>'
+			. '<p class="zw-paragraph heading0"><span class="EOP"><span class="size">&nbsp;</span></span><span class="size"><br></span></p>'
+			. '<p class="zw-paragraph heading0"><span class="size">First line</span><span class="size"><br></span><span class="size">second line</span></p>'
+			. '<ul><li><p class="zw-list zw-paragraph heading0"><span><span class="size">Run demos.</span></span><span class="size"><br></span></p></li></ul>'
+			. '<p class="zw-paragraph heading0"><span class="EOP"><span class="size">&nbsp;</span></span><span class="size"><br></span></p>'
+			. '<p class="zw-paragraph heading0"><span class="EOP"><span class="size">&nbsp;</span></span><span class="size"><br></span></p><div><br></div>';
+	}
+
+	/**
+	 * Sanitized HTML keeps line breaks and Zoho's blank lines.
+	 */
+	public function test_html_transform_keeps_line_breaks_and_blank_lines() {
+		$html = Field_Mapper::transform( $this->zoho_description(), 'html' );
+
+		// The <br> between two lines sat in a span of its own, which used to be
+		// deleted and run the lines together.
+		$this->assertMatchesRegularExpression( '#First line</span><br\s*/?><span class="size">second line#', $html );
+
+		// The blank line between the first two paragraphs is one empty paragraph.
+		$this->assertMatchesRegularExpression( '#Solution Consultant\.</span></span><br\s*/?></p><p>&nbsp;</p><p class#', $html );
+		$this->assertSame( 1, substr_count( $html, '<p>&nbsp;</p>' ), $html );
+
+		// Trailing blank lines go; the list is untouched.
+		$this->assertStringEndsWith( '</ul>', $html );
+		$this->assertStringContainsString( 'Run demos.', $html );
+		$this->assertStringNotContainsString( 'class="EOP"', $html );
+	}
+
+	/**
+	 * The filter drops blank lines but never a break inside text.
+	 */
+	public function test_blank_lines_can_be_turned_off() {
+		add_filter( 'jszr_keep_blank_lines', '__return_false' );
+		$html = Field_Mapper::transform( $this->zoho_description(), 'html' );
+		remove_filter( 'jszr_keep_blank_lines', '__return_false' );
+
+		$this->assertStringNotContainsString( '&nbsp;', $html );
+		$this->assertMatchesRegularExpression( '#First line</span><br\s*/?><span class="size">second line#', $html );
+	}
+
+	/**
+	 * A space in a wrapper of its own still separates the words around it.
+	 */
+	public function test_html_transform_keeps_a_wrapped_space() {
+		$html = Field_Mapper::transform( '<p>Solution<span>&nbsp;</span>Consultant</p><p></p>', 'html' );
+
+		$this->assertSame( '<p>Solution&nbsp;Consultant</p>', $html );
+	}
+
+	/**
+	 * The breaks survive the_content, which runs wpautop() on the single page.
+	 */
+	public function test_line_breaks_survive_the_content() {
+		$html     = Field_Mapper::transform( $this->zoho_description(), 'html' );
+		$rendered = apply_filters( 'the_content', $html );
+
+		$this->assertStringContainsString( '<p>&nbsp;</p>', $rendered );
+		$this->assertMatchesRegularExpression( '#First line</span><br\s*/?>\s*<span class="size">second line#', $rendered );
+	}
+
+	/**
 	 * "Raw" is unformatted, never unfiltered.
 	 */
 	public function test_raw_html_still_strips_scripts() {
