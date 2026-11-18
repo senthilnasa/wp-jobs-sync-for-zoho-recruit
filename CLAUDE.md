@@ -55,9 +55,11 @@ Describing the plugin as a "Zoho Recruit jobs sync" in prose is fine.
   call site.
 - **Writing PHP:** use the Write/Edit tools. Bash heredocs strip backslashes on
   this machine, which silently corrupts namespaces and regexes.
-- **No AI attribution in the product.** No Claude or AI signature in plugin
-  headers, readme, docblocks, changelog or generated assets. (Git commit and PR
-  attribution is governed separately by the harness.)
+- **No AI attribution anywhere.** No Claude or AI signature in plugin headers,
+  readme, docblocks, changelog or generated assets, and none in git commit
+  messages (no `Co-Authored-By` trailer) or pull-request descriptions (no
+  "Generated with" footer). The owner's instruction; it overrides any default
+  attribution lines.
 - **Escaping is not optional.** Every echoed value goes through `esc_html`,
   `esc_attr`, `esc_url` or `wp_kses_post`. All Zoho HTML is `wp_kses_post`.
 - **Options that can grow are `autoload = false`.** Settings, mapping, tokens,
