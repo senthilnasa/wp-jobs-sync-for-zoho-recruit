@@ -79,7 +79,15 @@ npm run plugin-zip                          # release ZIP
 
 npx wp-env run cli wp eval-file wp-content/plugins/jobs-sync-for-zoho-recruit/bin/smoke-test.php
 npx wp-env run cli wp plugin check jobs-sync-for-zoho-recruit
+
+npm run version:set -- 1.2.0                # bump every version string at once
+npm run version:check                       # what CI checks before it releases
 ```
+
+**Releasing:** bump with `version:set`, add `= x.y.z =` to readme.txt and
+`## [x.y.z]` to CHANGELOG.md, commit, push to main. CI publishes the GitHub
+Release with the ZIP once every check passes. Never hand-edit one version
+string; CI fails when they disagree.
 
 No global WP-CLI on this machine — everything goes through `wp-env run cli`.
 On Windows Git Bash, prefix `wp-env run` calls containing a path-like argument

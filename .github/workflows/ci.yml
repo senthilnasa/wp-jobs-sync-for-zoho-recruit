@@ -3,17 +3,46 @@ name: CI
 on:
   push:
     branches: [ main ]
+    tags: [ 'v*' ]
   pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
 
+# Superseded pull-request runs are cancelled. Pushes to main and tags are not:
+# cancelling one mid-release would leave a tag without its ZIP.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  version:
+    name: Version numbers agree
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # The plugin header, the VERSION constant, readme.txt's Stable tag and
+      # package.json must match, and the version needs a changelog entry in
+      # both readme.txt and CHANGELOG.md. On a tag push the tag must match too.
+      - name: Check the version
+        id: version
+        env:
+          TAG: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || '' }}
+        run: |
+          version="$(node bin/version.js check "$TAG")"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Plugin version: $version" >> "$GITHUB_STEP_SUMMARY"
+
+
   php-lint:
     name: PHP syntax (${{ matrix.php }})
     runs-on: ubuntu-latest
@@ -137,3 +166,136 @@ jobs:
 
       - name: Build block assets
         run: npm run build
+
+  package:
+    name: Build the plugin ZIP
+    needs: version
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build block assets
+        run: npm run build
+
+      # blocks/*/build is committed. A release must ship exactly what was
+      # reviewed, so a source change without a rebuild fails here instead of
+      # going out with stale editor code.
+      - name: Check the committed block build is up to date
+        run: |
+          if ! git diff --exit-code --stat -- 'blocks/*/build'; then
+            echo "::error::blocks/*/build is out of date. Run npm run build and commit the result."
+            exit 1
+          fi
+
+      # What ships is the "files" allow-list in package.json.
+      - name: Build the ZIP
+        run: |
+          npm run plugin-zip
+          mkdir -p dist
+          mv jobs-sync-for-zoho-recruit.zip "dist/jobs-sync-for-zoho-recruit-${VERSION}.zip"
+
+      - name: Check the ZIP
+        run: |
+          zip="dist/jobs-sync-for-zoho-recruit-${VERSION}.zip"
+          listing="$(unzip -Z1 "$zip")"
+
+          echo "$listing" | grep -qx 'jobs-sync-for-zoho-recruit/jobs-sync-for-zoho-recruit.php' \
+            || { echo "::error::The main plugin file is not at jobs-sync-for-zoho-recruit/ in the ZIP."; exit 1; }
+
+          if echo "$listing" | grep -E '^jobs-sync-for-zoho-recruit/(vendor|node_modules|tests|bin|examples|\.wordpress-org|\.github)/'; then
+            echo "::error::Development files reached the ZIP."
+            exit 1
+          fi
+
+          shipped="$(unzip -p "$zip" jobs-sync-for-zoho-recruit/jobs-sync-for-zoho-recruit.php | sed -n 's/^[[:space:]]*\*[[:space:]]*Version:[[:space:]]*//p' | tr -d '\r')"
+          if [ "$shipped" != "$VERSION" ]; then
+            echo "::error::The ZIP's plugin header says $shipped, expected $VERSION."
+            exit 1
+          fi
+
+          echo "Built jobs-sync-for-zoho-recruit-${VERSION}.zip ($(echo "$listing" | wc -l) files)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: jobs-sync-for-zoho-recruit-${{ env.VERSION }}-${{ github.sha }}
+          path: dist/jobs-sync-for-zoho-recruit-${{ env.VERSION }}.zip
+          if-no-files-found: error
+          retention-days: 30
+
+  # Publishes a GitHub Release with the ZIP attached, once per version number,
+  # and only after every check above has passed. Bumping the version (npm run
+  # version:set -- x.y.z) and pushing to main is what releases; a push that
+  # leaves the version alone finds the release already there and does nothing.
+  # Pushing a v-tag by hand works too.
+  release:
+    name: Release
+    needs: [ version, php-lint, coding-standards, phpunit, javascript, package ]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: release
+      cancel-in-progress: false
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Is this version already released?
+        id: existing
+        run: |
+          if gh release view "v${VERSION}" > /dev/null 2>&1; then
+            echo "released=true" >> "$GITHUB_OUTPUT"
+            echo "v${VERSION} is already released; nothing to do. Bump the version to publish a new release." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "released=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download the ZIP
+        if: steps.existing.outputs.released == 'false'
+        uses: actions/download-artifact@v4
+        with:
+          name: jobs-sync-for-zoho-recruit-${{ env.VERSION }}-${{ github.sha }}
+          path: dist
+
+      - name: Set up Node
+        if: steps.existing.outputs.released == 'false'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Publish the release
+        if: steps.existing.outputs.released == 'false'
+        run: |
+          node bin/version.js notes "$VERSION" > release-notes.md
+
+          prerelease=''
+          case "$VERSION" in *-*) prerelease='--prerelease' ;; esac
+
+          # Two copies of one build: the versioned name for the archive, and the
+          # plain name WordPress expects when the ZIP is uploaded as a plugin.
+          cp "dist/jobs-sync-for-zoho-recruit-${VERSION}.zip" dist/jobs-sync-for-zoho-recruit.zip
+
+          gh release create "v${VERSION}" \
+            "dist/jobs-sync-for-zoho-recruit-${VERSION}.zip" \
+            dist/jobs-sync-for-zoho-recruit.zip \
+            --target "$GITHUB_SHA" \
+            --title "v${VERSION}" \
+            --notes-file release-notes.md \
+            $prerelease
+
+          echo "Released v${VERSION}." >> "$GITHUB_STEP_SUMMARY"

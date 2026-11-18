@@ -117,7 +117,8 @@ Three invariants the code is built around:
 `languages/jobs-sync-for-zoho-recruit.pot`, `composer.json`, `package.json`,
 `phpcs.xml`, `phpunit.xml.dist`, `.wp-env.json`, `.gitignore`, `.gitattributes`,
 `bin/install-wp-tests.sh`, `bin/smoke-test.php`, `bin/oauth-test.php`,
-`.github/workflows/ci.yml`,
+`bin/version.js` (get / check / notes / set the version),
+`.github/workflows/ci.yml` (checks, ZIP artifact, GitHub Release per version),
 `tests/phpunit/{bootstrap,field-mapper-test,sync-logic-test,rest-api-test}.php`
 
 `examples/krea-careers/` (not shipped, not in the `files` allow-list): the
@@ -228,6 +229,27 @@ anywhere, deliberately.
   Frontend components are scoped under `.jszr-scope`, and the accent colours
   carry `!important` -- pointed at variables, so `--jszr-accent` still restyles
   everything.
+- **Releases are cut by CI, once per version number (Nov 2026).**
+  `.github/workflows/ci.yml` gained three jobs. `version` runs
+  `bin/version.js check`: the plugin header, `const VERSION`, readme.txt's
+  Stable tag and package.json must agree, and the version needs a
+  `= x.y.z =` readme entry and a `## [x.y.z]` CHANGELOG.md section (on a
+  `v*` tag push the tag must match too). `package` runs `npm ci`, `npm run
+  build`, fails if `blocks/*/build` differs from what is committed, builds the
+  ZIP with `plugin-zip`, checks it (main file at
+  `jobs-sync-for-zoho-recruit/`, no vendor/tests/bin/examples, header version
+  matches) and uploads it as an artifact on every run, PRs included.
+  `release` runs on pushes to main and `v*` tags after *every* other job
+  passes: if GitHub has no `v<version>` release it creates one (tag on that
+  commit, notes from CHANGELOG.md, `-beta`-style versions marked
+  prerelease) with the ZIP attached twice -- `jobs-sync-for-zoho-recruit-x.y.z.zip`
+  and the plain `jobs-sync-for-zoho-recruit.zip` WordPress expects on
+  upload. A push that does not change the version finds the release and does
+  nothing. So: `npm run version:set -- x.y.z`, add the changelog entries,
+  commit, push. Concurrency no longer cancels main/tag runs, only PR runs.
+  The repo had **no tags or releases** when this landed, so the first green
+  push to main publishes `v1.1.0`. Never run on GitHub yet; YAML parsed and
+  the package steps dry-run locally only.
 - **What ships is the `files` allow-list in `package.json`,** consumed by
   `wp-scripts plugin-zip`. There is no `.distignore` any more — one source of
   truth, and a new dev file cannot reach a release by accident.
@@ -508,6 +530,10 @@ npm run test:php                            # PHPUnit inside wp-env
 npm run makepot                             # regenerate the .pot
 npm run plugin-zip                          # jobs-sync-for-zoho-recruit.zip
 
+# Releasing (see "Releases are cut by CI" in section 4)
+npm run version:set -- 1.2.0                # header, constant, Stable tag, package.json + lock
+npm run version:check                       # what CI runs: all agree + changelog entries exist
+node bin/version.js notes                   # the CHANGELOG.md section the release will carry
 
 # The live smoke test (writes real posts; dev sites only)
 npx wp-env run cli wp eval-file wp-content/plugins/jobs-sync-for-zoho-recruit/bin/smoke-test.php
