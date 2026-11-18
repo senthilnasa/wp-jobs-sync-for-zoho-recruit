@@ -158,6 +158,28 @@ anywhere, deliberately.
 - **`only_published` is on by default**, reading `Publish_in_Career_Website`.
   A job that has never been published is **skipped entirely**; one that loses the
   flag later is deactivated, not deleted.
+- **Formatted fields are read from Get Record by ID (Nov 2026, 1.2.1).**
+  Verified on the live Krea site: a bulk sync stored the job description as
+  one run of plain text whatever the transform (`html` or `raw_html`), while
+  the job's **Resync from Zoho** button -- which fetches by ID -- stored the
+  real HTML (`<p align="center"><b>…`). Zoho's list endpoint sends rich-text
+  fields with tags and line breaks stripped. The 1.0-1.2 diagnosis (mapping
+  changes never reaching unchanged jobs) was real but not the whole story;
+  this was the part that kept Krea's descriptions flat after every resync.
+  `Sync::process_record()` now fetches a list record by ID before mapping when
+  a field mapped with `html`/`raw_html`/`autop`
+  (`Field_Mapper::RICH_TEXT_TRANSFORMS`, `rich_text_fields()`) is present in
+  it, then treats it as `complete`, so the apply-link fetch is not repeated:
+  still one by-ID call per job, but now on every sync that returns the job,
+  not once ever. Incremental syncs only return modified jobs, so the cost is
+  mostly the weekly full sync (one credit per job). Not for dry runs, records
+  already `complete`, or plain-text mappings; filter
+  `jszr_fetch_full_record`. A failed fetch logs `full_record_fetch_failed`;
+  an existing job then keeps its stored formatted fields
+  (`Field_Mapper::without_rich_text()`, which hands meta targets their stored
+  value back because `overwrite_all` deletes meta a payload omits) while
+  everything else updates; a new job is created from the stripped copy.
+  Tests: `full-record-fetch-test.php` (the two core ones fail without it).
 - **The apply link is fetched by ID, with the career site as fallback.** Zoho
   Recruit support confirmed (September 2026) that the Job Apply URL is only
   included in a Get Record by ID response when the request carries

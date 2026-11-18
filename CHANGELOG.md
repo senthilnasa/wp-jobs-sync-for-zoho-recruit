@@ -5,6 +5,23 @@ All notable changes to Jobs Sync for Zoho Recruit are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2026-11-18
+
+### Fixed
+
+- **Job descriptions keep their formatting after a sync.** Zoho's list
+  endpoint sends rich-text fields such as the job description with their
+  formatting stripped -- no bold, no paragraphs, no line breaks -- so every
+  sync stored a description as one run of plain text, whatever the transform.
+  Only the per-job "Resync from Zoho" button, which reads the job by ID, got
+  the real HTML. A sync now reads each job by ID before mapping it whenever a
+  field is mapped with HTML, Raw HTML or Plain text with paragraphs. That is
+  one extra Zoho API call per job the sync returns; it also supplies the apply
+  link, so no second call is made for that. If the call fails, an existing
+  job keeps its formatted description and everything else still updates.
+  `jszr_fetch_full_record` filter to turn it off. Run **Sync now** after
+  updating to rewrite existing jobs.
+
 ## [1.2.0] - 2026-11-18
 
 Moving a careers setup to another site is now one file. Nothing changes on a
