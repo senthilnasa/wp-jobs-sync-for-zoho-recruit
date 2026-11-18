@@ -124,6 +124,14 @@ class Sync {
 			return new \WP_Error( 'jszr_sync_locked', __( 'Another sync process holds the lock. Try again shortly.', 'jobs-sync-for-zoho-recruit' ) );
 		}
 
+		// An incremental sync only sees records modified in Zoho, so a mapping
+		// change would never reach the jobs nobody edited there. Re-map them all.
+		if ( 'incremental' === $type && Field_Mapper::changed_at() > 0 ) {
+			$type = 'full';
+
+			Logger::info( 'mapping_changed_full_sync', 'The field mapping changed since the last full sync, so this sync runs as a full sync to apply it to every job.' );
+		}
+
 		$create_args = array(
 			'dry_run' => ! empty( $args['dry_run'] ),
 			'force'   => ! empty( $args['force'] ),
@@ -849,6 +857,10 @@ class Sync {
 
 		if ( ! $dry_run && 'completed' === $state ) {
 			$this->record_success( (string) $run->type );
+
+			if ( 'full' === $run->type ) {
+				Field_Mapper::clear_changed( (int) strtotime( (string) $run->started_at . ' UTC' ) );
+			}
 		}
 
 		$stats = Sync_Queue::stats( Sync_Queue::get( $run_id ) );

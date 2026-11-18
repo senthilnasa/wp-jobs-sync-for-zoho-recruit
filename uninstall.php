@@ -67,6 +67,7 @@ if ( ! function_exists( 'jszr_uninstall_site' ) ) {
 			'jszr_auth_failures',
 			'jszr_auth_state',
 			'jszr_field_mapping',
+			'jszr_mapping_changed',
 			'jszr_zoho_fields',
 			'jszr_sync_state',
 			'jszr_db_version',

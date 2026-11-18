@@ -24,6 +24,11 @@ class Field_Mapper {
 	const OPTION = 'jszr_field_mapping';
 
 	/**
+	 * Option holding when the mapping last changed, until a full sync applies it.
+	 */
+	const OPTION_CHANGED = 'jszr_mapping_changed';
+
+	/**
 	 * Runtime cache for the resolved mapping.
 	 *
 	 * @var array|null
@@ -236,11 +241,7 @@ class Field_Mapper {
 	 */
 	public static function get_mapping() {
 		if ( null === self::$cache ) {
-			$stored = get_option( self::OPTION, null );
-
-			self::$cache = is_array( $stored ) && ! empty( $stored )
-				? self::sanitize_mapping( $stored )
-				: self::default_mapping();
+			self::$cache = self::stored_mapping();
 		}
 
 		/**
@@ -258,8 +259,13 @@ class Field_Mapper {
 	 * @return bool
 	 */
 	public static function save_mapping( array $mapping ) {
+		$previous    = self::stored_mapping();
 		$clean       = self::sanitize_mapping( $mapping );
 		self::$cache = $clean;
+
+		if ( $previous !== $clean ) {
+			self::mark_changed();
+		}
 
 		return update_option( self::OPTION, $clean, false );
 	}
@@ -270,8 +276,67 @@ class Field_Mapper {
 	 * @return void
 	 */
 	public static function reset_mapping() {
+		$previous = self::stored_mapping();
+
 		delete_option( self::OPTION );
 		self::$cache = null;
+
+		if ( self::default_mapping() !== $previous ) {
+			self::mark_changed();
+		}
+	}
+
+	/**
+	 * The mapping as stored, before the `jszr_field_mapping` filter.
+	 *
+	 * @return array
+	 */
+	private static function stored_mapping() {
+		$stored = get_option( self::OPTION, null );
+
+		return is_array( $stored ) && ! empty( $stored )
+			? self::sanitize_mapping( $stored )
+			: self::default_mapping();
+	}
+
+	/**
+	 * Record that the mapping changed, so the next sync re-maps every job.
+	 *
+	 * An incremental sync asks Zoho only for records modified since the last
+	 * run. A job nobody touched in Zoho never comes back, so a new transform or
+	 * target would never reach it -- a description switched to Raw HTML stayed
+	 * plain text on a live site for exactly this reason.
+	 *
+	 * @return void
+	 */
+	public static function mark_changed() {
+		update_option( self::OPTION_CHANGED, time(), false );
+	}
+
+	/**
+	 * When the mapping changed without a full sync since.
+	 *
+	 * @return int Unix timestamp, or 0 when every job reflects the mapping.
+	 */
+	public static function changed_at() {
+		return (int) get_option( self::OPTION_CHANGED, 0 );
+	}
+
+	/**
+	 * Forget a mapping change once a full sync that started after it finished.
+	 *
+	 * A change made while the run was already going may have missed records
+	 * processed before it, so only a run that started later clears it.
+	 *
+	 * @param int $run_started Unix timestamp the full sync started at.
+	 * @return void
+	 */
+	public static function clear_changed( $run_started ) {
+		$changed = self::changed_at();
+
+		if ( $changed > 0 && $changed < (int) $run_started ) {
+			delete_option( self::OPTION_CHANGED );
+		}
 	}
 
 	/**

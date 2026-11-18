@@ -185,6 +185,8 @@ No. Every write path resolves the job by its Zoho record ID through a single loo
 * A "Raw HTML" mapping transform that keeps Zoho's inline styles and spacing instead of tidying them. Scripts and frames are still removed.
 * Custom card and job-details HTML may now contain inline SVG icons, buttons and responsive images, and inline styles keep `list-style`, `inset` and `transition`. Scripts, event handlers and frames are still removed.
 * New `jszr_allowed_template_css` and `jszr_named_templates` filters.
+* Fixed: changing the field mapping did not reach jobs that had not changed in Zoho, because an incremental sync never fetched them. The next sync after a mapping change is now a full sync.
+* Fixed: a Raw HTML description lost some inline styles, such as `list-style`, when the sync ran from cron.
 * Fixed: the HTML transform removed blank lines and could join two lines of a description. Line breaks and blank lines are now kept; new `jszr_keep_blank_lines` filter.
 * Fixed: the "Plain text with paragraphs" transform ran a rich-text description into a single paragraph. It now keeps Zoho's paragraphs, line breaks and list items.
 * Fixed: filtering a listing on a page whose URL already had a query string produced a URL with two question marks.

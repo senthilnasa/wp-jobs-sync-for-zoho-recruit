@@ -743,7 +743,12 @@ class Admin {
 
 		Field_Mapper::save_mapping( $rows );
 
-		$this->notice( 'success', __( 'Field mapping saved.', 'jobs-sync-for-zoho-recruit' ) );
+		$this->notice(
+			'success',
+			Field_Mapper::changed_at() > 0
+				? __( 'Field mapping saved. The next sync runs as a full sync, so every job is updated with the new mapping.', 'jobs-sync-for-zoho-recruit' )
+				: __( 'Field mapping saved.', 'jobs-sync-for-zoho-recruit' )
+		);
 		$this->redirect( self::MAPPING_SLUG );
 	}
 

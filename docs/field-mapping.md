@@ -223,8 +223,13 @@ Only `active` jobs appear in listings and the public API by default. See
 ## Changing a mapping later
 
 Mapping changes apply from the next sync onward; they do not rewrite existing
-jobs on their own. To apply a change immediately, run a full sync — or use
-**Resync from Zoho** on one job to check the result before committing to it.
+jobs on their own. Saving a mapping that differs from the one stored — a new
+transform, target or row, an import, or a reset — makes the **next sync a full
+sync**, whatever kind was asked for. An incremental sync only fetches records
+modified in Zoho since the last run, so without this a job nobody edited in Zoho
+would keep its old values forever. The full sync clears the flag when it
+finishes successfully. To apply a change immediately, press **Sync now** — or
+use **Resync from Zoho** on one job to check the result before committing to it.
 
 Removing a row stops the plugin writing that field. It does **not** delete the
 values already stored on existing jobs.

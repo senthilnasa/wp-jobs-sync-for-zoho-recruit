@@ -144,6 +144,45 @@ class JSZR_Sync_Logic_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A cron sync has no user allowed unfiltered HTML, so WordPress filters the
+	 * content again on save. A Raw HTML description keeps its widened inline
+	 * styles through that second pass.
+	 */
+	public function test_raw_html_styles_survive_save_without_unfiltered_html() {
+		wp_set_current_user( 0 );
+		kses_init_filters();
+
+		$html = JobsSyncForZohoRecruit\Field_Mapper::transform(
+			'<ul style="list-style: none; padding-left: 0"><li style="color: #333">Handle procurement</li></ul>',
+			'raw_html'
+		);
+
+		$this->assertStringContainsString( 'list-style: none', $html );
+
+		$result = Job::upsert(
+			'4876000000654321',
+			array(
+				'post'   => array(
+					'post_title'   => 'Senior Executive-Procurement',
+					'post_content' => $html,
+				),
+				'meta'   => array(),
+				'terms'  => array(),
+				'mapped' => array(),
+			),
+			array( 'status' => 'active' )
+		);
+
+		kses_remove_filters();
+
+		$content = get_post_field( 'post_content', $result['post_id'] );
+
+		$this->assertStringContainsString( 'list-style: none', $content );
+		$this->assertStringContainsString( 'color: #333', $content );
+		$this->assertFalse( has_filter( 'safe_style_css', array( JobsSyncForZohoRecruit\Layouts::class, 'allowed_css_properties' ) ) );
+	}
+
+	/**
 	 * A published job keeps its slug when the Zoho title changes.
 	 */
 	public function test_slug_is_stable_across_title_changes() {
