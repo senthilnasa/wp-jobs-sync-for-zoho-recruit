@@ -252,7 +252,8 @@ anywhere, deliberately.
   published `v1.1.0` with the ZIP. From here, changes go under
   `## [Unreleased]` in CHANGELOG.md until someone bumps the version;
   `version:check` only looks for the current version's section, so an
-  Unreleased section never blocks CI.
+  Unreleased section never blocks CI. `v1.2.0` (2026-11-18) shipped the site
+  migration the same way: `version:set`, changelog entries, PR, merge.
 - **Site migration is one file, built by `Site_Migration` (Nov 2026).**
   Settings → Advanced → Move to another site (the old Export/Import settings
   buttons, same `admin_post` actions) and `wp jszr export-config [<file>]` /

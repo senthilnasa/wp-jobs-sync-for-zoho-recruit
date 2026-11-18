@@ -4,7 +4,7 @@ Tags: jobs, careers, recruitment, job board, hiring
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -173,6 +173,13 @@ No. Every write path resolves the job by its Zoho record ID through a single loo
 
 == Changelog ==
 
+= 1.2.0 =
+* Move to another site: Settings → Advanced exports one file with every setting, the card and job-details HTML templates, named card designs, custom CSS, the field mapping and the Zoho field list, and imports it on the new site.
+* Links to the old site in templates, CSS and settings can be pointed at the new address during the import.
+* Zoho credentials, tokens, the webhook secret and the notification email are never included in the file.
+* New WP-CLI commands `wp jszr export-config` and `wp jszr import-config`.
+* New `jszr_migration_export` filter and `jszr_migration_imported` action.
+
 = 1.1.0 =
 * Named card templates: save any number of card designs on the Display tab and pick one per listing with `template="name"`.
 * A Shortcodes panel on the Display tab with a ready-to-paste shortcode for every department, category, location, employment type and experience term.
@@ -202,6 +209,9 @@ No. Every write path resolves the job by its Zoho record ID through a single loo
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.2.0 =
+Adds a one-file move to another site under Settings → Advanced. Nothing changes on a site that does not use it.
 
 = 1.1.0 =
 New listing options: named card templates, pill filters, a location search box, "Load more" pagination and per-category shortcodes. Every one is off by default; existing sites look the same after updating.
