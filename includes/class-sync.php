@@ -513,7 +513,50 @@ class Sync {
 			return 'skipped';
 		}
 
+		// Zoho's list endpoint sends rich-text fields -- the job description
+		// above all -- with their formatting stripped: no tags and no line
+		// breaks. Only Get Record by ID returns the HTML. A live site's
+		// descriptions stayed one run of plain text whatever the transform,
+		// while "Resync from Zoho" (which fetches by ID) restored them. So a
+		// list record whose formatted fields matter is completed by ID first.
+		$keep_formatting_of = 0;
+
+		if ( ! $dry_run && empty( $options['complete'] ) && $this->needs_full_record( $record ) ) {
+			$full = $this->api->get_record( $zoho_id );
+
+			if ( is_array( $full ) && ! empty( $full ) ) {
+				$record              = array_merge( $record, $full );
+				$options['complete'] = true;
+			} else {
+				// Better to keep last sync's formatted copy than overwrite it
+				// with the stripped one. A new job still gets the stripped copy.
+				$keep_formatting_of = (int) Job::find_by_zoho_id( $zoho_id );
+
+				Logger::warning(
+					'full_record_fetch_failed',
+					'Could not fetch the job by ID, so its formatted fields were not updated this time.',
+					array(
+						'zoho_id' => $zoho_id,
+						'error'   => is_wp_error( $full ) ? $full->get_error_message() : 'empty response',
+					),
+					$run_id
+				);
+			}
+		}
+
 		$payload = $this->mapper->map( $record );
+
+		// The ID of the existing job whose formatted fields must be kept.
+		if ( $keep_formatting_of > 0 ) {
+			$current = array_map(
+				static function ( $values ) {
+					return maybe_unserialize( $values[0] ?? '' );
+				},
+				(array) get_post_meta( $keep_formatting_of )
+			);
+
+			$payload = Field_Mapper::without_rich_text( $payload, $current );
+		}
 
 		// Expiry is decided from the mapped closing date, not from Zoho's status.
 		if ( 'active' === $status && $this->is_past_closing( $payload ) ) {
@@ -664,6 +707,41 @@ class Sync {
 		}
 
 		return self::with_apply_url( $payload, $url );
+	}
+
+	/**
+	 * Whether a list record has to be fetched by ID before it is mapped.
+	 *
+	 * True when a field mapped with a formatting transform (HTML, Raw HTML,
+	 * Plain text with paragraphs) is in the record, because the list endpoint
+	 * strips that field's formatting.
+	 *
+	 * @param array $record Record from the list endpoint.
+	 * @return bool
+	 */
+	private function needs_full_record( array $record ) {
+		$needed = false;
+
+		foreach ( Field_Mapper::rich_text_fields() as $field ) {
+			if ( array_key_exists( $field, $record ) ) {
+				$needed = true;
+				break;
+			}
+		}
+
+		/**
+		 * Filter whether a record from the list endpoint is fetched again by ID
+		 * before it is mapped.
+		 *
+		 * Zoho's list endpoint strips the formatting from rich-text fields, so
+		 * this is on whenever a formatted field is mapped. Each fetch costs one
+		 * Zoho API credit; returning false saves it at the cost of plain-text
+		 * descriptions.
+		 *
+		 * @param bool  $needed Whether to fetch the full record.
+		 * @param array $record Record from the list endpoint.
+		 */
+		return (bool) apply_filters( 'jszr_fetch_full_record', $needed, $record );
 	}
 
 	/**

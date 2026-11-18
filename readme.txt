@@ -4,7 +4,7 @@ Tags: jobs, careers, recruitment, job board, hiring
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -173,6 +173,10 @@ No. Every write path resolves the job by its Zoho record ID through a single loo
 
 == Changelog ==
 
+= 1.2.1 =
+* Fixed: job descriptions lost their formatting (bold, paragraphs, line breaks) on every sync, because Zoho's job list sends rich-text fields as plain text. A sync now reads each job's full record from Zoho before saving it. Run Sync now after updating.
+* New `jszr_fetch_full_record` filter to turn the extra request off.
+
 = 1.2.0 =
 * Move to another site: Settings → Advanced exports one file with every setting, the card and job-details HTML templates, named card designs, custom CSS, the field mapping and the Zoho field list, and imports it on the new site.
 * Links to the old site in templates, CSS and settings can be pointed at the new address during the import.
@@ -209,6 +213,9 @@ No. Every write path resolves the job by its Zoho record ID through a single loo
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.2.1 =
+Job descriptions keep Zoho's formatting after a sync. Run Sync now after updating to rewrite existing jobs.
 
 = 1.2.0 =
 Adds a one-file move to another site under Settings → Advanced. Nothing changes on a site that does not use it.

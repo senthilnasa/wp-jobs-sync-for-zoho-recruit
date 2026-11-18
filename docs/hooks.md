@@ -128,7 +128,15 @@ apply_filters( 'jszr_strip_inline_styles',   bool $strip );
 apply_filters( 'jszr_keep_blank_lines',      bool $keep );
 apply_filters( 'jszr_record_query_args',     array $query, string $record_id );
 apply_filters( 'jszr_apply_url_fields',      array $keys );
+apply_filters( 'jszr_fetch_full_record',     bool $needed, array $record );
 ```
+
+`jszr_fetch_full_record` decides whether a record from Zoho's list endpoint is
+fetched again by ID before it is mapped. Zoho's list endpoint sends rich-text
+fields such as the job description with their formatting stripped, so this is
+`true` whenever a field mapped with HTML, Raw HTML or Plain text with
+paragraphs is in the record. Each fetch costs one Zoho API credit; return
+`false` to save it, at the cost of plain-text descriptions.
 
 `jszr_strip_inline_styles` and `jszr_keep_blank_lines` shape the **HTML
 (sanitized)** transform. Line breaks inside text are always kept. Blank lines

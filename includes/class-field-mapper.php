@@ -340,6 +340,72 @@ class Field_Mapper {
 	}
 
 	/**
+	 * Transforms whose output depends on the field's formatting.
+	 */
+	const RICH_TEXT_TRANSFORMS = array( 'html', 'raw_html', 'autop' );
+
+	/**
+	 * Zoho fields mapped with a transform that needs their formatting.
+	 *
+	 * Zoho's list endpoint strips formatting from rich-text fields, so these
+	 * are the fields a sync must read from Get Record by ID.
+	 *
+	 * @return string[] Zoho API names.
+	 */
+	public static function rich_text_fields() {
+		$fields = array();
+
+		foreach ( self::get_mapping() as $row ) {
+			if ( in_array( $row['transform'] ?? '', self::RICH_TEXT_TRANSFORMS, true ) ) {
+				$fields[] = (string) $row['zoho_field'];
+			}
+		}
+
+		return array_values( array_unique( $fields ) );
+	}
+
+	/**
+	 * Remove every value a formatting transform produced from a payload.
+	 *
+	 * Used when the full record could not be fetched: the job keeps the
+	 * formatted copy from the last sync instead of the stripped list copy.
+	 * Job::upsert() only writes the post fields the payload carries. Meta is
+	 * different -- the overwrite-all conflict mode deletes plugin meta a
+	 * payload leaves out -- so a meta target is given its stored value back.
+	 *
+	 * @param array $payload      Payload from map().
+	 * @param array $current_meta The job's stored meta, key => value.
+	 * @return array
+	 */
+	public static function without_rich_text( array $payload, array $current_meta = array() ) {
+		foreach ( self::get_mapping() as $row ) {
+			if ( ! in_array( $row['transform'] ?? '', self::RICH_TEXT_TRANSFORMS, true ) ) {
+				continue;
+			}
+
+			$target = (string) $row['target'];
+
+			if ( 0 === strpos( $target, 'meta:' ) ) {
+				$key = substr( $target, 5 );
+
+				if ( array_key_exists( $key, $current_meta ) ) {
+					$payload['meta'][ $key ] = $current_meta[ $key ];
+				} else {
+					unset( $payload['meta'][ $key ] );
+				}
+			} elseif ( 0 === strpos( $target, 'tax:' ) ) {
+				unset( $payload['terms'][ substr( $target, 4 ) ] );
+			} else {
+				unset( $payload['post'][ $target ] );
+			}
+
+			unset( $payload['mapped'][ $target ] );
+		}
+
+		return $payload;
+	}
+
+	/**
 	 * Clear the runtime cache.
 	 *
 	 * @return void
