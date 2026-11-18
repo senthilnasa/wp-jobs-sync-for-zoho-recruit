@@ -125,11 +125,47 @@ wp jszr logs --limit=20
 wp jszr logs --errors
 wp jszr cancel                  # stop a running sync
 wp jszr fields --refresh        # list the Zoho fields available for mapping
+wp jszr export-config careers.json            # the migration file (see below)
+wp jszr import-config careers.json            # add --skip-url-replace to keep old links
 wp jszr disconnect --yes
 ```
 
 CLI runs take the same lock as every other trigger, so a cron sync and a
 `wp jszr sync` can never run over each other.
+
+## Moving to another site
+
+**Settings → Advanced → Move to another site** exports one JSON file holding
+the whole setup and imports it on the new site. The same file comes from
+`wp jszr export-config` and goes into `wp jszr import-config`.
+
+| In the file | Not in the file |
+| --- | --- |
+| Every setting: sync, REST, frontend, display, structured data, advanced | Zoho Client ID, Client Secret, access and refresh tokens |
+| Card and job-details HTML templates, and every named card design | The webhook URL and its secret |
+| Custom CSS | The failure-notification email address |
+| Search, filter, sort and pagination options, button labels | Sync history and logs |
+| Job and archive URL slugs | The jobs themselves |
+| The field mapping | |
+| The Zoho field list (so custom fields show on the mapping screen before connecting) | |
+
+On the new site:
+
+1. Install and activate the plugin.
+2. Import the file. Leave **Rewrite links to the old site** ticked unless the
+   address is not changing: links in templates, CSS and settings that point at
+   the old site (a "Back to jobs" link, a background image, the organisation
+   URL) are changed to the new address. Only the old site's exact host is
+   rewritten, never a longer host that starts the same way.
+3. Add the new site's redirect URI to your Zoho API client (see
+   [OAuth setup](oauth-setup.md)), enter the Client ID and Secret, and connect.
+4. Press **Sync now**. The jobs come from Zoho, so nothing else needs copying.
+   Jobs created by hand in WordPress are not in the file; move them with
+   **Tools → Export**.
+
+Imported HTML and CSS go through the same sanitizing as the settings screen.
+A site that already loaded its own Zoho field list keeps it. Files from the
+older **Export settings** button import too.
 
 ## Updating
 

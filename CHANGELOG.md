@@ -5,6 +5,22 @@ All notable changes to Jobs Sync for Zoho Recruit are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Move to another site.** Settings → Advanced exports one migration file
+  with every setting, the card and job-details HTML templates, named card
+  designs, custom CSS, the field mapping and the Zoho field list, and imports
+  it on the new site. Links to the old site in templates, CSS and settings can
+  be rewritten to the new address on import (exact host only). Imported HTML
+  and CSS are sanitized like the settings screen; a site's own Zoho field list
+  is never overwritten; permalinks and the cron schedule are refreshed.
+  Credentials, tokens, the webhook secret and the notification email are
+  never included. `wp jszr export-config` and `wp jszr import-config`;
+  `jszr_migration_export` filter and `jszr_migration_imported` action. Files
+  from the older settings export still import.
+
 ## [1.1.0] - 2026-10-01
 
 Everything in this release is an option that is off by default, or an addition

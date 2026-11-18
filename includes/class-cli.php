@@ -325,6 +325,107 @@ class CLI {
 	}
 
 	/**
+	 * Export the migration file: settings, HTML templates, custom CSS, field
+	 * mapping and the Zoho field list. Credentials and tokens are never in it.
+	 *
+	 * ## OPTIONS
+	 *
+	 * [<file>]
+	 * : Write to this file instead of printing to the terminal.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp jszr export-config careers.json
+	 *     wp jszr export-config > careers.json
+	 *
+	 * @subcommand export-config
+	 *
+	 * @param array $args       Positional arguments.
+	 * @param array $assoc_args Flags.
+	 * @return void
+	 */
+	public function export_config( $args, $assoc_args ) {
+		unset( $assoc_args );
+
+		$json = Site_Migration::export_json();
+
+		if ( empty( $args[0] ) ) {
+			\WP_CLI::line( $json );
+
+			return;
+		}
+
+		$filesystem = $this->filesystem();
+
+		if ( ! $filesystem || ! $filesystem->put_contents( (string) $args[0], $json . "\n" ) ) {
+			\WP_CLI::error( sprintf( 'Could not write %s.', $args[0] ) );
+		}
+
+		\WP_CLI::success( sprintf( 'Exported the configuration to %s.', $args[0] ) );
+	}
+
+	/**
+	 * Import a migration file exported from another site.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <file>
+	 * : The JSON file from `wp jszr export-config` or the Advanced settings tab.
+	 *
+	 * [--skip-url-replace]
+	 * : Keep links to the old site as they are instead of pointing them at
+	 * this site.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp jszr import-config careers.json
+	 *
+	 * @subcommand import-config
+	 *
+	 * @param array $args       Positional arguments.
+	 * @param array $assoc_args Flags.
+	 * @return void
+	 */
+	public function import_config( $args, $assoc_args ) {
+		$file       = (string) $args[0];
+		$filesystem = $this->filesystem();
+		$json       = $filesystem && $filesystem->exists( $file ) ? $filesystem->get_contents( $file ) : false;
+
+		if ( false === $json ) {
+			\WP_CLI::error( sprintf( 'Could not read %s.', $file ) );
+		}
+
+		$report = Site_Migration::import_json(
+			(string) $json,
+			array( 'replace_urls' => empty( $assoc_args['skip-url-replace'] ) )
+		);
+
+		if ( is_wp_error( $report ) ) {
+			\WP_CLI::error( $report->get_error_message() );
+		}
+
+		\WP_CLI::success( Site_Migration::summarize( $report ) );
+	}
+
+	/**
+	 * The direct filesystem, for reading and writing files named on the
+	 * command line.
+	 *
+	 * @return \WP_Filesystem_Base|null
+	 */
+	private function filesystem() {
+		global $wp_filesystem;
+
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+
+		if ( ! WP_Filesystem() ) {
+			return null;
+		}
+
+		return $wp_filesystem;
+	}
+
+	/**
 	 * Disconnect the site from Zoho Recruit.
 	 *
 	 * ## OPTIONS

@@ -68,7 +68,7 @@ Only active jobs are returned by default, and only the fields an administrator h
 
 **WP-CLI**
 
-`wp jszr sync --full`, `wp jszr sync --incremental --dry-run`, `wp jszr status`, `wp jszr expire`, `wp jszr logs`, `wp jszr cancel`, `wp jszr fields`, `wp jszr disconnect`.
+`wp jszr sync --full`, `wp jszr sync --incremental --dry-run`, `wp jszr status`, `wp jszr expire`, `wp jszr logs`, `wp jszr cancel`, `wp jszr fields`, `wp jszr export-config`, `wp jszr import-config`, `wp jszr disconnect`.
 
 == Third-party service disclosure ==
 
