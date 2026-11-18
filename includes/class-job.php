@@ -196,10 +196,17 @@ class Job {
 				$post_args[ $field ] = $value;
 			}
 
+			// A sync run by cron has no user allowed unfiltered HTML, so WordPress
+			// filters the content again on save with its narrower CSS list. That
+			// stripped list-style and friends a Raw HTML description had kept.
+			add_filter( 'safe_style_css', array( Layouts::class, 'allowed_css_properties' ) );
+
 			if ( $is_create ) {
 				$post_args['post_author'] = self::author_id();
 
 				$post_id = wp_insert_post( wp_slash( $post_args ), true );
+
+				remove_filter( 'safe_style_css', array( Layouts::class, 'allowed_css_properties' ) );
 
 				if ( is_wp_error( $post_id ) ) {
 					return $post_id;
@@ -220,6 +227,8 @@ class Job {
 				}
 
 				$result = wp_update_post( wp_slash( $post_args ), true );
+
+				remove_filter( 'safe_style_css', array( Layouts::class, 'allowed_css_properties' ) );
 
 				if ( is_wp_error( $result ) ) {
 					return $result;
@@ -246,6 +255,7 @@ class Job {
 				'action'  => $is_create ? 'created' : 'updated',
 			);
 		} finally {
+			remove_filter( 'safe_style_css', array( Layouts::class, 'allowed_css_properties' ) );
 			self::release_lock( $lock_key );
 		}
 	}

@@ -129,6 +129,7 @@ All non-autoloaded, so a page that never touches the plugin pays nothing.
 | --- | --- |
 | `jszr_settings` | Every setting, one array |
 | `jszr_field_mapping` | The mapping rows |
+| `jszr_mapping_changed` | When the mapping last changed, until a full sync applies it; while set, the next sync runs full |
 | `jszr_tokens` | Encrypted client secret, refresh token, access token, expiry and a key fingerprint |
 | `jszr_zoho_fields` | Cached Zoho field list |
 | `jszr_sync_state` | Last sync time, last successful sync time, last error |

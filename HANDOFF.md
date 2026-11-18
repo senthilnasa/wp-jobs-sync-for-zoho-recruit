@@ -319,6 +319,26 @@ anywhere, deliberately.
   `jszr_keep_blank_lines`. Zoho formats with classes (`zw-paragraph`,
   `size`), not inline styles, so its look does not carry over in either
   transform; the theme's typography applies.
+- **A mapping change forces the next sync to be full (Nov 2026).** Krea set
+  Job Description → Raw HTML and the live page stayed plain text: REST showed
+  `post_content` as one run of text with tags and newlines gone, which is the
+  `text` transform's `sanitize_text_field()` output. "Sync now" from the
+  incremental button sends `If-Modified-Since`, so a job unchanged in Zoho was
+  never re-fetched and never re-mapped. `Field_Mapper::save_mapping()` and
+  `reset_mapping()` now set the `jszr_mapping_changed` option (unix time,
+  autoload off) when the stored mapping actually differs; `Sync::start()`
+  upgrades `incremental` to `full` while it is set; `finalize()` clears it
+  after a completed, non-dry-run full sync that *started after* the change
+  (strictly later, so a same-second save costs one extra full sync rather
+  than a missed job). Every trigger -- admin, cron, webhook, REST, CLI -- goes
+  through `start()`.
+- **`Job::upsert()` widens `safe_style_css` around the save.** In cron there
+  is no user with `unfiltered_html`, so `kses_init_filters()` is active and
+  `wp_insert_post()` re-filters content with WordPress's CSS list, undoing the
+  `list-style`/`inset`/`transition` Raw HTML keeps. Same filter as
+  `raw_html()`, removed again in `finally`. Test:
+  `test_raw_html_styles_survive_save_without_unfiltered_html` (fails without
+  the fix).
 - **The listing button label is a setting, not a code change.** "Search Jobs"
   for Krea is Settings → Display → Filter button label; the plugin default
   stays "Filter".
@@ -487,6 +507,7 @@ npm run env:start                           # WordPress on :8888
 npm run test:php                            # PHPUnit inside wp-env
 npm run makepot                             # regenerate the .pot
 npm run plugin-zip                          # jobs-sync-for-zoho-recruit.zip
+
 
 # The live smoke test (writes real posts; dev sites only)
 npx wp-env run cli wp eval-file wp-content/plugins/jobs-sync-for-zoho-recruit/bin/smoke-test.php

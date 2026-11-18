@@ -59,6 +59,15 @@ and behaves exactly as it did.
 
 ### Fixed
 
+- **A changed mapping now reaches every job.** An incremental sync asks Zoho
+  only for records modified since the last run, so switching the description
+  to Raw HTML never reached a job nobody had edited in Zoho -- it stayed plain
+  text. Saving a different mapping (or importing or resetting one) now makes
+  the next sync a full sync, and the save notice says so.
+- **Raw HTML keeps its inline styles when a sync runs from cron.** WordPress
+  filters post content again on save when no user with unfiltered HTML is
+  logged in, using its narrower CSS list, which stripped `list-style` and the
+  other properties Raw HTML had kept.
 - **The HTML transform keeps line breaks and blank lines.** It deleted every
   element whose only content was a `<br>` or `&nbsp;`, which removed the blank
   lines Zoho's editor writes as empty paragraphs and joined two lines whenever
