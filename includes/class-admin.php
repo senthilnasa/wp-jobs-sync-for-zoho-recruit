@@ -894,36 +894,24 @@ class Admin {
 	}
 
 	/**
-	 * Download settings and mapping as JSON.
+	 * Download the migration file: settings, HTML templates, custom CSS,
+	 * mapping and the Zoho field list. Credentials and tokens are never in it.
 	 *
 	 * @return void
 	 */
 	public function handle_export_settings() {
 		jszr_verify_admin_request( 'jszr_export_settings' );
 
-		$settings = Settings::all();
-
-		// Credentials and tokens are never exported.
-		unset( $settings['notify_email'] );
-
-		$payload = array(
-			'plugin'   => 'jobs-sync-for-zoho-recruit',
-			'version'  => VERSION,
-			'exported' => gmdate( 'c' ),
-			'settings' => $settings,
-			'mapping'  => Field_Mapper::get_mapping(),
-		);
-
 		nocache_headers();
 		header( 'Content-Type: application/json; charset=utf-8' );
-		header( 'Content-Disposition: attachment; filename=jobs-sync-for-zoho-recruit-settings.json' );
+		header( 'Content-Disposition: attachment; filename=' . Site_Migration::filename() );
 
-		echo wp_json_encode( $payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
+		echo Site_Migration::export_json(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON download.
 		exit;
 	}
 
 	/**
-	 * Import settings and mapping from JSON.
+	 * Import a migration file (or an older settings export).
 	 *
 	 * @return void
 	 */
@@ -937,23 +925,19 @@ class Admin {
 			$this->redirect( self::SETTINGS_SLUG, array( 'tab' => 'advanced' ) );
 		}
 
-		$data = json_decode( $json, true );
+		$report = Site_Migration::import_json(
+			$json,
+			array(
+				'replace_urls' => ! empty( $_POST['jszr_replace_urls'] ), // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce and capability verified by jszr_verify_admin_request() above.
+			)
+		);
 
-		if ( ! is_array( $data ) ) {
-			$this->notice( 'error', __( 'The uploaded file is not valid JSON.', 'jobs-sync-for-zoho-recruit' ) );
-			$this->redirect( self::SETTINGS_SLUG, array( 'tab' => 'advanced' ) );
+		if ( is_wp_error( $report ) ) {
+			$this->notice( 'error', $report->get_error_message() );
+		} else {
+			$this->notice( 'success', Site_Migration::summarize( $report ) );
 		}
 
-		if ( isset( $data['settings'] ) && is_array( $data['settings'] ) ) {
-			Settings::replace( Settings::sanitize( $data['settings'] ) );
-			Cron::schedule();
-		}
-
-		if ( isset( $data['mapping'] ) && is_array( $data['mapping'] ) ) {
-			Field_Mapper::save_mapping( $data['mapping'] );
-		}
-
-		$this->notice( 'success', __( 'Settings imported. Credentials and tokens were not changed.', 'jobs-sync-for-zoho-recruit' ) );
 		$this->redirect( self::SETTINGS_SLUG, array( 'tab' => 'advanced' ) );
 	}
 

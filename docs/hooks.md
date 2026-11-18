@@ -65,6 +65,23 @@ add_action( 'jszr_sync_completed', function ( $stats ) {
 } );
 ```
 
+### Site migration
+
+```php
+do_action( 'jszr_migration_imported', array $report, array $data );
+apply_filters( 'jszr_migration_export', array $payload );
+```
+
+`jszr_migration_imported` fires after a migration file is imported, from the
+Advanced tab or `wp jszr import-config`. `$report` holds `from`, `to`,
+`settings`, `templates`, `custom_css`, `mapping_rows`, `fields`, `fields_kept`,
+`urls_replaced`, `newer_export` and `exported_version`; `$data` is the decoded
+file. Use it to copy along anything of your own you added with
+`jszr_migration_export`.
+
+`jszr_migration_export` filters the file before it is downloaded. Never add a
+secret to it: the file is made to be emailed and attached to tickets.
+
 ---
 
 ## Filters

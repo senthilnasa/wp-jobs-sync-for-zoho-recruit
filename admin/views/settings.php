@@ -1511,21 +1511,40 @@ $jszr_input = static function ( $key, $values, $type = 'text', $help = '', $attr
 
 		<?php if ( 'advanced' === $active ) : ?>
 			<hr />
-			<h2><?php esc_html_e( 'Import and export', 'jobs-sync-for-zoho-recruit' ); ?></h2>
-			<p><?php esc_html_e( 'Move configuration between staging and production. Credentials and tokens are never included.', 'jobs-sync-for-zoho-recruit' ); ?></p>
+			<h2><?php esc_html_e( 'Move to another site', 'jobs-sync-for-zoho-recruit' ); ?></h2>
+			<p><?php esc_html_e( 'Export this site\'s setup as one file and import it on the new site, or between staging and production.', 'jobs-sync-for-zoho-recruit' ); ?></p>
+
+			<ul class="ul-disc">
+				<li><?php esc_html_e( 'Included: every setting, the card and job-details HTML templates, named card designs, custom CSS, filter and search options, URL slugs, the field mapping and the Zoho field list.', 'jobs-sync-for-zoho-recruit' ); ?></li>
+				<li><?php esc_html_e( 'Not included: Zoho credentials and tokens, the webhook URL, the failure-notification email and the jobs themselves. Connect the new site to Zoho Recruit (add its redirect URI to your Zoho API client) and run a sync to bring the jobs in.', 'jobs-sync-for-zoho-recruit' ); ?></li>
+			</ul>
 
 			<p class="jszr-actions">
 				<a class="button" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=jszr_export_settings' ), 'jszr_export_settings' ) ); ?>">
-					<?php esc_html_e( 'Export settings', 'jobs-sync-for-zoho-recruit' ); ?>
+					<?php esc_html_e( 'Export migration file', 'jobs-sync-for-zoho-recruit' ); ?>
 				</a>
 			</p>
 
-			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" enctype="multipart/form-data" class="jszr-inline-form">
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" enctype="multipart/form-data">
 				<?php wp_nonce_field( 'jszr_import_settings' ); ?>
 				<input type="hidden" name="action" value="jszr_import_settings" />
-				<label for="jszr-settings-file" class="screen-reader-text"><?php esc_html_e( 'Settings JSON file', 'jobs-sync-for-zoho-recruit' ); ?></label>
-				<input type="file" id="jszr-settings-file" name="jszr_settings_file" accept="application/json,.json" required />
-				<button type="submit" class="button"><?php esc_html_e( 'Import settings', 'jobs-sync-for-zoho-recruit' ); ?></button>
+				<p class="jszr-inline-form">
+					<label for="jszr-settings-file" class="screen-reader-text"><?php esc_html_e( 'Migration JSON file', 'jobs-sync-for-zoho-recruit' ); ?></label>
+					<input type="file" id="jszr-settings-file" name="jszr_settings_file" accept="application/json,.json" required />
+					<button type="submit" class="button"><?php esc_html_e( 'Import migration file', 'jobs-sync-for-zoho-recruit' ); ?></button>
+				</p>
+				<p>
+					<label>
+						<input type="checkbox" name="jszr_replace_urls" value="1" checked />
+						<?php
+						printf(
+							/* translators: %s: this site's address. */
+							esc_html__( 'Rewrite links to the old site in templates, CSS and settings so they point to %s', 'jobs-sync-for-zoho-recruit' ),
+							'<code>' . esc_html( untrailingslashit( home_url() ) ) . '</code>'
+						);
+						?>
+					</label>
+				</p>
 			</form>
 
 			<hr />
