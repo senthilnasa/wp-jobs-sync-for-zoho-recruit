@@ -462,6 +462,19 @@ $jszr_input = static function ( $key, $values, $type = 'text', $help = '', $attr
 							</td>
 						</tr>
 						<tr>
+							<th scope="row"><?php esc_html_e( 'Description line breaks', 'jobs-sync-for-zoho-recruit' ); ?></th>
+							<td>
+								<?php
+								$jszr_checkbox(
+									'unwrap_soft_breaks',
+									$settings,
+									__( 'Rejoin lines that were wrapped mid-sentence', 'jobs-sync-for-zoho-recruit' ),
+									__( 'A description pasted into Zoho from Word or a PDF keeps a hard line break at the end of every line of the original, so sentences break in odd places however wide the page is. This rejoins those, and leaves the breaks that separate label lines and bullets alone. Takes effect on the next sync.', 'jobs-sync-for-zoho-recruit' )
+								);
+								?>
+							</td>
+						</tr>
+						<tr>
 							<th scope="row"><?php esc_html_e( 'Failure notifications', 'jobs-sync-for-zoho-recruit' ); ?></th>
 							<td>
 								<?php

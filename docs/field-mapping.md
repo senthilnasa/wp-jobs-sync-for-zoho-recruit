@@ -73,6 +73,21 @@ A transform decides how a raw Zoho value becomes a WordPress value.
 | Use lookup name | For lookup and owner objects: takes the `name` from `{"id":…,"name":…}` |
 | URL | `esc_url_raw()`, rejecting anything that is not a URL |
 
+### Descriptions pasted from Word
+
+A description written in Word or a PDF and pasted into Zoho keeps a hard line
+break at the end of every line of the *original* document. The text then
+re-wraps at that column no matter how wide your page is, so sentences break in
+odd places -- "Job / Summary:", "The Senior / Executive will ...".
+
+**Settings -> Sync -> Description line breaks -> Rejoin lines that were wrapped
+mid-sentence** joins those back up on the next sync. Breaks that end a
+sentence, start a bold label line, or separate a bullet are left alone, so
+"Job Title: ... / Department: ..." keeps its shape.
+
+It is off by default, because no rule about this is right for every account.
+Developers can force it either way with `jszr_rejoin_wrapped_lines`.
+
 Picking the wrong one is usually harmless and always reversible — change it and
 run a sync.
 

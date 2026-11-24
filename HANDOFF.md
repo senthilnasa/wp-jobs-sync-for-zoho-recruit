@@ -80,7 +80,7 @@ Three invariants the code is built around:
 | `Zoho_API` | `get_records`, `get_record` (always sends `publish_URL=true`, filter `jszr_record_query_args`), `get_deleted_records`, `get_fields`, `test_connection`; 204/304 as success, 429 with `Retry-After`, backoff, one forced refresh on 401 |
 | `Field_Metadata` | Fields API discovery, cached with a 12h freshness transient, bundled fallback list |
 | `Site_Migration` | The migration file: `export()`, `import()` (settings, templates, CSS, mapping, field list), old-site link rewriting, `summarize()` for the notice and CLI |
-| `Field_Mapper` | Mapping rows, 12 transforms (`raw_html` keeps Zoho's inline styles; still `wp_kses_post()`), salary parsing, timezone-correct dates, hierarchical location path, `find_apply_url()` (the Job Apply URL detector, filter `jszr_apply_url_fields`), JSON export/import. **Pure — no DB writes. Best unit-test surface** |
+| `Field_Mapper` | Mapping rows, 12 transforms (`raw_html` keeps Zoho's inline styles; still `wp_kses_post()`), `rejoin_wrapped_lines()` for Word-pasted descriptions, salary parsing, timezone-correct dates, hierarchical location path, `find_apply_url()` (the Job Apply URL detector, filter `jszr_apply_url_fields`), JSON export/import. **Pure — no DB writes. Best unit-test surface** |
 | `Job` | `find_by_zoho_id`, `upsert`, term writing, conflict modes, `deactivate`/`expire`/`orphan`, `is_active`, `get_apply_url`, `counts`. The single writer |
 | `Sync` | `start`, `run_now`, `process_batch`, `process_page`, `process_record`, `determine_status`, `is_unpublished`, `finalize`, `deactivate_missing`, `process_deleted_records`, `expire_due_jobs`, `sync_single` |
 | `Sync_Queue` | `{prefix}jszr_sync_runs` table, checkpointing, global lock with stale recovery, batch scheduling, cancel, prune |
@@ -158,6 +158,17 @@ anywhere, deliberately.
 - **`only_published` is on by default**, reading `Publish_in_Career_Website`.
   A job that has never been published is **skipped entirely**; one that loses the
   flag later is deactivated, not deleted.
+- **Hard line breaks in a pasted description are a content problem, not a CSS
+  one (Nov 2026).** Krea reported sentences breaking in odd places. The live
+  description for `senior-executive-procurement` carries **63 `<br>`** -- one
+  at the end of every line of the Word document it was pasted from -- so the
+  text re-wraps at the original column however wide the page is
+  (`Job<br>Summary:`, `The Senior<br>Executive ...`). `Field_Mapper::rejoin_wrapped_lines()`
+  removes the ones that land mid-phrase and keeps the ones that end a
+  sentence, open a bold label line or separate a bullet; on that description
+  it removed 52 and kept all 11 deliberate ones. **Off by default**
+  (`unwrap_soft_breaks`, filter `jszr_rejoin_wrapped_lines`) because no such
+  rule is right for every account.
 - **Formatted fields are read from Get Record by ID (Nov 2026, 1.2.1).**
   Verified on the live Krea site: a bulk sync stored the job description as
   one run of plain text whatever the transform (`html` or `raw_html`), while

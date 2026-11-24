@@ -670,10 +670,10 @@ class Field_Mapper {
 			case 'html':
 				$html = wp_kses_post( self::strip_code_blocks( self::stringify( $value ) ) );
 
-				return self::tidy_html( $html );
+				return self::tidy_html( self::maybe_rejoin( $html ) );
 
 			case 'raw_html':
-				return self::raw_html( self::stringify( $value ) );
+				return self::raw_html( self::maybe_rejoin( self::stringify( $value ) ) );
 
 			case 'autop':
 				return wpautop( esc_html( self::html_to_text( self::stringify( $value ) ) ) );
@@ -1070,6 +1070,138 @@ class Field_Mapper {
 		remove_filter( 'safe_style_css', array( Layouts::class, 'allowed_css_properties' ) );
 
 		return trim( $html );
+	}
+
+	/**
+	 * Rejoin wrapped lines when the site has asked for it.
+	 *
+	 * @param string $html Description HTML.
+	 * @return string
+	 */
+	private static function maybe_rejoin( $html ) {
+		/**
+		 * Filter whether lines wrapped mid-sentence are rejoined.
+		 *
+		 * Follows the Rejoin wrapped lines setting, which is off by default.
+		 *
+		 * @param bool $rejoin Whether to rejoin wrapped lines.
+		 */
+		$rejoin = (bool) apply_filters(
+			'jszr_rejoin_wrapped_lines',
+			(bool) Settings::get( 'unwrap_soft_breaks', false )
+		);
+
+		return $rejoin ? self::rejoin_wrapped_lines( $html ) : $html;
+	}
+
+	/**
+	 * Join lines a word processor wrapped, keeping the breaks that mean something.
+	 *
+	 * A description pasted into Zoho from Word or a PDF arrives with a hard
+	 * `<br>` at the end of every visual line of the original document, so the
+	 * text re-wraps at that column no matter how wide the page is: "Job<br>
+	 * Summary:" and "The Senior<br>Executive - Procurement will ..." render as
+	 * orphaned fragments. The breaks that separate label lines or bullets are
+	 * the same tag and must survive, so each one is judged on its context
+	 * rather than all of them being removed.
+	 *
+	 * Off unless the Rejoin wrapped lines setting is on, because no heuristic
+	 * can be right about every account's content.
+	 *
+	 * @param string $html Description HTML.
+	 * @return string
+	 */
+	public static function rejoin_wrapped_lines( $html ) {
+		$html = (string) $html;
+
+		if ( '' === $html || false === stripos( $html, '<br' ) ) {
+			return $html;
+		}
+
+		$result = preg_replace_callback(
+			'#<br\s*/?>#i',
+			static function ( $found ) use ( $html ) {
+				$tag    = $found[0][0];
+				$offset = (int) $found[0][1];
+
+				$before = substr( $html, 0, $offset );
+				$after  = substr( $html, $offset + strlen( $tag ) );
+
+				if ( ! self::is_wrap_artifact( $before, $after ) ) {
+					return $tag;
+				}
+
+				// The break usually already has a space beside it, so adding
+				// another would leave a visible gap mid-sentence.
+				$spaced = preg_match( '/\s$/', $before ) || preg_match( '/^\s/', $after );
+
+				return $spaced ? '' : ' ';
+			},
+			$html,
+			-1,
+			$count,
+			PREG_OFFSET_CAPTURE
+		);
+
+		return is_string( $result ) ? $result : $html;
+	}
+
+	/**
+	 * Whether one break is a word processor's wrap rather than a real one.
+	 *
+	 * Deliberate breaks end something: a sentence, a label, a bullet. Wrap
+	 * artifacts land in the middle of a phrase, wherever the original document
+	 * happened to run out of width. Everything this is unsure about it keeps,
+	 * because a kept break is a cosmetic flaw and a removed one loses meaning.
+	 *
+	 * @param string $before Markup before the break.
+	 * @param string $after  Markup after the break.
+	 * @return bool
+	 */
+	private static function is_wrap_artifact( $before, $after ) {
+		// Two breaks together are a blank line somebody wanted.
+		if ( preg_match( '#<br\s*/?>\s*$#i', $before ) || preg_match( '#^\s*<br\s*/?>#i', $after ) ) {
+			return false;
+		}
+
+		// A block boundary follows, so the break is structural, not a wrap.
+		if ( preg_match( '#^\s*</?(?:p|div|li|ul|ol|h[1-6]|table|tr|td|blockquote)\b#i', $after ) ) {
+			return false;
+		}
+
+		// A bold run starts straight after: the next label line, as in
+		// "Job Title: ...<br><b>Department:</b> ...".
+		if ( preg_match( '#^(?:\s|&nbsp;|&\#160;)*(?:<(?:span|font|em|i|u)\b[^>]*>\s*)*<(?:b|strong)\b#i', $after ) ) {
+			return false;
+		}
+
+		$tail = self::visible_tail( $before );
+
+		// Nothing before it to join onto.
+		if ( '' === $tail ) {
+			return false;
+		}
+
+		// A finished sentence, a label, or a bullet glyph: all deliberate. The
+		// bullet bytes are the UTF-8 for the characters Word pastes in.
+		if ( preg_match( '#(?:[.:;!?]["\')\]]?|\xE2\x80\xA2|\xC2\xB7|\xEF\x82\xA7|-)$#', $tail ) ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * The visible text at the end of a chunk of markup.
+	 *
+	 * @param string $markup Markup to read the tail of.
+	 * @return string
+	 */
+	private static function visible_tail( $markup ) {
+		$text = preg_replace( '#<[^>]*>#', '', (string) $markup );
+		$text = str_replace( array( '&nbsp;', '&#160;', "\xC2\xA0" ), ' ', (string) $text );
+
+		return rtrim( (string) $text );
 	}
 
 	/**
