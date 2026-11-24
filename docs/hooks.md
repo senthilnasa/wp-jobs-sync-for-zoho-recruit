@@ -127,6 +127,7 @@ apply_filters( 'jszr_post_status_for_job_status', string $post_status, string $s
 apply_filters( 'jszr_strip_inline_styles',   bool $strip );
 apply_filters( 'jszr_keep_blank_lines',      bool $keep );
 apply_filters( 'jszr_rejoin_wrapped_lines',  bool $rejoin );
+apply_filters( 'jszr_lists_from_pasted_bullets', bool $listify );
 apply_filters( 'jszr_record_query_args',     array $query, string $record_id );
 apply_filters( 'jszr_apply_url_fields',      array $keys );
 apply_filters( 'jszr_fetch_full_record',     bool $needed, array $record );
@@ -152,6 +153,14 @@ the original document, so it re-wraps at that column however wide the page is.
 Turning this on joins those back up while leaving the breaks that end a
 sentence, start a bold label line, or separate a bullet alone. Return `true` or
 `false` to decide per site regardless of the setting.
+
+`jszr_lists_from_pasted_bullets` follows the **Rebuild pasted bullet lists**
+setting, also off by default. Word pastes a list as one paragraph per item,
+each opening with a Symbol-font bullet character and some no-break spaces
+instead of as a real list, so the page shows stray dots and no indent. Turning
+this on folds consecutive paragraphs like that into one `<ul>` of `<li>`, which
+then takes the theme's list styling. A middle dot inside a sentence, or a glyph
+with no words after it, is left alone.
 
 `jszr_record_query_args` filters the query string of a Get Record by ID
 request. It defaults to `publish_URL=true`, which is what makes Zoho include

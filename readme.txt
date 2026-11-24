@@ -4,7 +4,7 @@ Tags: jobs, careers, recruitment, job board, hiring
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.2.1
+Stable tag: 1.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -173,6 +173,10 @@ No. Every write path resolves the job by its Zoho record ID through a single loo
 
 == Changelog ==
 
+= 1.3.0 =
+* New: "Rebuild bullet lists that were pasted as characters" in Settings → Sync. Word pastes a list as one paragraph per item starting with a bullet character, not as a real list, so the page shows stray dots with no indent. Off by default.
+* New: "Rejoin lines that were wrapped mid-sentence" in Settings → Sync. A description pasted into Zoho from Word or a PDF keeps a hard line break at the end of every line of the original, so sentences break in odd places however wide the page is. Off by default. Run Sync now after turning it on.
+
 = 1.2.1 =
 * Fixed: job descriptions lost their formatting (bold, paragraphs, line breaks) on every sync, because Zoho's job list sends rich-text fields as plain text. A sync now reads each job's full record from Zoho before saving it. Run Sync now after updating.
 * New `jszr_fetch_full_record` filter to turn the extra request off.
@@ -213,6 +217,9 @@ No. Every write path resolves the job by its Zoho record ID through a single loo
 * Initial release.
 
 == Upgrade Notice ==
+
+= 1.3.0 =
+Two optional fixes for descriptions pasted from Word: lines that break mid-sentence, and bullet lists that arrive as plain characters. Turn them on in Settings → Sync, then run a full sync.
 
 = 1.2.1 =
 Job descriptions keep Zoho's formatting after a sync. Run Sync now after updating to rewrite existing jobs.

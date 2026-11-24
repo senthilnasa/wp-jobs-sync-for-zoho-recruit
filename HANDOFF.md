@@ -80,7 +80,7 @@ Three invariants the code is built around:
 | `Zoho_API` | `get_records`, `get_record` (always sends `publish_URL=true`, filter `jszr_record_query_args`), `get_deleted_records`, `get_fields`, `test_connection`; 204/304 as success, 429 with `Retry-After`, backoff, one forced refresh on 401 |
 | `Field_Metadata` | Fields API discovery, cached with a 12h freshness transient, bundled fallback list |
 | `Site_Migration` | The migration file: `export()`, `import()` (settings, templates, CSS, mapping, field list), old-site link rewriting, `summarize()` for the notice and CLI |
-| `Field_Mapper` | Mapping rows, 12 transforms (`raw_html` keeps Zoho's inline styles; still `wp_kses_post()`), `rejoin_wrapped_lines()` for Word-pasted descriptions, salary parsing, timezone-correct dates, hierarchical location path, `find_apply_url()` (the Job Apply URL detector, filter `jszr_apply_url_fields`), JSON export/import. **Pure — no DB writes. Best unit-test surface** |
+| `Field_Mapper` | Mapping rows, 12 transforms (`raw_html` keeps Zoho's inline styles; still `wp_kses_post()`), `rejoin_wrapped_lines()` and `lists_from_pasted_bullets()` for Word-pasted descriptions, salary parsing, timezone-correct dates, hierarchical location path, `find_apply_url()` (the Job Apply URL detector, filter `jszr_apply_url_fields`), JSON export/import. **Pure — no DB writes. Best unit-test surface** |
 | `Job` | `find_by_zoho_id`, `upsert`, term writing, conflict modes, `deactivate`/`expire`/`orphan`, `is_active`, `get_apply_url`, `counts`. The single writer |
 | `Sync` | `start`, `run_now`, `process_batch`, `process_page`, `process_record`, `determine_status`, `is_unpublished`, `finalize`, `deactivate_missing`, `process_deleted_records`, `expire_due_jobs`, `sync_single` |
 | `Sync_Queue` | `{prefix}jszr_sync_runs` table, checkpointing, global lock with stale recovery, batch scheduling, cancel, prune |
@@ -169,6 +169,23 @@ anywhere, deliberately.
   it removed 52 and kept all 11 deliberate ones. **Off by default**
   (`unwrap_soft_breaks`, filter `jszr_rejoin_wrapped_lines`) because no such
   rule is right for every account.
+- **Word pastes bullets as characters, not as a list (Nov 2026).** The same
+  description had **23 `·` (U+00B7) in Symbol-font spans** inside
+  `<p class="MsoListParagraphCxSpFirst">`, with `&nbsp;` runs for the indent,
+  and **zero `<li>`** -- so the page showed stray dots with no indent and
+  nothing for CSS to hook. `Field_Mapper::lists_from_pasted_bullets()` folds
+  consecutive such paragraphs into one `<ul>`; on that description, 23 glyphs
+  became 23 items across 3 lists. A mid-sentence middle dot
+  (`Engineering · Chennai`) and a glyph with no words after it are both left
+  alone. **Off by default** (`list_from_bullets`, filter
+  `jszr_lists_from_pasted_bullets`).
+- **A re-sync only rewrites descriptions when the by-ID fetch succeeds.**
+  Worth knowing when either cleanup "does nothing": `Sync::process_record()`
+  completes a rich-text record by ID (1.2.1) and, if that call fails, calls
+  `Field_Mapper::without_rich_text()` to keep the stored copy rather than
+  overwrite it with Zoho's stripped list copy. Verified locally -- with no
+  connection the description never changes; with `complete => true` it does.
+  Look for `full_record_fetch_failed` in the log before suspecting the setting.
 - **Formatted fields are read from Get Record by ID (Nov 2026, 1.2.1).**
   Verified on the live Krea site: a bulk sync stored the job description as
   one run of plain text whatever the transform (`html` or `raw_html`), while

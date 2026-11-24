@@ -472,6 +472,15 @@ $jszr_input = static function ( $key, $values, $type = 'text', $help = '', $attr
 									__( 'A description pasted into Zoho from Word or a PDF keeps a hard line break at the end of every line of the original, so sentences break in odd places however wide the page is. This rejoins those, and leaves the breaks that separate label lines and bullets alone. Takes effect on the next sync.', 'jobs-sync-for-zoho-recruit' )
 								);
 								?>
+								<br />
+								<?php
+								$jszr_checkbox(
+									'list_from_bullets',
+									$settings,
+									__( 'Rebuild bullet lists that were pasted as characters', 'jobs-sync-for-zoho-recruit' ),
+									__( 'Word pastes a list as one paragraph per item, each starting with a bullet character and some spacing, rather than as a real list. That shows as stray dots with no indent. This turns runs of them back into a proper list. Takes effect on the next sync.', 'jobs-sync-for-zoho-recruit' )
+								);
+								?>
 							</td>
 						</tr>
 						<tr>

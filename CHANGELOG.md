@@ -5,7 +5,7 @@ All notable changes to Jobs Sync for Zoho Recruit are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.3.0] - 2026-11-24
 
 ### Added
 
@@ -17,6 +17,13 @@ the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html
   a bold label line, or separate a bullet alone. On a live description with 63
   breaks it removed 52 and kept all 11 deliberate ones. `jszr_rejoin_wrapped_lines`
   overrides it either way.
+- **Rebuild bullet lists that were pasted as characters**, the same again for
+  the other half of a Word paste. Word pastes a list as one paragraph per item,
+  each opening with a Symbol-font bullet character and some no-break spaces
+  rather than as a real list, so the page shows stray dots with no indent. Runs
+  of those become one `<ul>`. On the same live description it turned 23 pasted
+  glyphs into 23 list items across three lists.
+  `jszr_lists_from_pasted_bullets` overrides it.
 
 ## [1.2.1] - 2026-11-18
 

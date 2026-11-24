@@ -1091,7 +1091,206 @@ class Field_Mapper {
 			(bool) Settings::get( 'unwrap_soft_breaks', false )
 		);
 
-		return $rejoin ? self::rejoin_wrapped_lines( $html ) : $html;
+		if ( $rejoin ) {
+			$html = self::rejoin_wrapped_lines( $html );
+		}
+
+		/**
+		 * Filter whether pasted bullet characters become real lists.
+		 *
+		 * Follows the Rebuild pasted bullet lists setting, off by default.
+		 *
+		 * @param bool $listify Whether to rebuild bullet lists.
+		 */
+		$listify = (bool) apply_filters(
+			'jszr_lists_from_pasted_bullets',
+			(bool) Settings::get( 'list_from_bullets', false )
+		);
+
+		return $listify ? self::lists_from_pasted_bullets( $html ) : $html;
+	}
+
+	/**
+	 * The bullet characters a word processor leaves behind, as UTF-8 bytes.
+	 *
+	 * Word writes its bullets as Symbol-font text rather than as a list, so
+	 * what arrives is a middle dot, a bullet, a section sign, or one of the
+	 * private-use glyphs Symbol maps those to. Matched as bytes because the
+	 * patterns run without /u, so invalid UTF-8 cannot null the subject.
+	 */
+	const BULLET_GLYPHS = '(?:\xC2\xB7|\xE2\x80\xA2|\xC2\xA7|\xEF\x82\xB7|\xEF\x82\xA7|\xE2\x97\x8F|\xE2\x80\xA3)';
+
+	/**
+	 * Whitespace, including the shapes a no-break space arrives in.
+	 */
+	const BULLET_SPACE = '(?:\s|&nbsp;|&\#160;|\xC2\xA0)';
+
+	/**
+	 * Turn paragraphs that start with a pasted bullet into a real list.
+	 *
+	 * Word does not paste a list. It pastes one paragraph per item, each
+	 * opening with a Symbol-font bullet character and a run of no-break spaces
+	 * standing in for the indent:
+	 *
+	 *     <p class="MsoListParagraphCxSpFirst">
+	 *       <span style="font-family:Symbol"><span>&middot;&nbsp;&nbsp; </span></span>
+	 *       <span>Handle end-to-end procurement activities.</span>
+	 *     </p>
+	 *
+	 * So the browser shows stray dots and no list at all: no indent, no
+	 * markers of its own, and nothing a stylesheet can hook. Consecutive
+	 * paragraphs like that become one `<ul>` of `<li>`, which then picks up
+	 * the theme's list styling.
+	 *
+	 * @param string $html Description HTML.
+	 * @return string
+	 */
+	public static function lists_from_pasted_bullets( $html ) {
+		$html = (string) $html;
+
+		if ( '' === $html || false === stripos( $html, '<p' ) ) {
+			return $html;
+		}
+
+		$found = preg_match_all(
+			'#<p\b([^>]*)>(.*?)</p>#is',
+			$html,
+			$matches,
+			PREG_OFFSET_CAPTURE | PREG_SET_ORDER
+		);
+
+		if ( ! $found ) {
+			return $html;
+		}
+
+		$out    = '';
+		$cursor = 0;
+		$open   = false;
+
+		foreach ( $matches as $paragraph ) {
+			$whole = $paragraph[0][0];
+			$start = (int) $paragraph[0][1];
+			$inner = $paragraph[2][0];
+
+			$between = substr( $html, $cursor, $start - $cursor );
+			$cursor  = $start + strlen( $whole );
+
+			$item = self::bullet_item( $inner );
+
+			if ( null === $item ) {
+				if ( $open ) {
+					$out .= '</ul>';
+					$open = false;
+				}
+
+				$out .= $between . $whole;
+				continue;
+			}
+
+			// Anything but whitespace between two items ends the list.
+			if ( $open && '' !== trim( wp_strip_all_tags( $between ) ) ) {
+				$out .= '</ul>';
+				$open = false;
+			}
+
+			if ( ! $open ) {
+				$out .= $between . '<ul>';
+				$open = true;
+			}
+
+			$out .= '<li>' . $item . '</li>';
+		}
+
+		if ( $open ) {
+			$out .= '</ul>';
+		}
+
+		return $out . substr( $html, $cursor );
+	}
+
+	/**
+	 * The contents of a bullet paragraph, with the pasted marker removed.
+	 *
+	 * @param string $inner Inner HTML of one paragraph.
+	 * @return string|null Null when the paragraph is not a pasted bullet.
+	 */
+	private static function bullet_item( $inner ) {
+		$text = str_replace(
+			array( '&nbsp;', '&#160;', "\xC2\xA0" ),
+			' ',
+			(string) preg_replace( '#<[^>]*>#', '', $inner )
+		);
+
+		// A marker, then a space: without the space a middle dot could be part
+		// of the sentence rather than standing in front of it.
+		if ( ! preg_match( '#^\s*' . self::BULLET_GLYPHS . '(?:\s|$)#', $text ) ) {
+			return null;
+		}
+
+		// An item with no words is a stray glyph, not a list.
+		if ( '' === trim( preg_replace( '#^\s*' . self::BULLET_GLYPHS . '#', '', $text ) ) ) {
+			return null;
+		}
+
+		$parts = preg_split( '#(<[^>]*>)#', $inner, -1, PREG_SPLIT_DELIM_CAPTURE );
+		$state = 'marker';
+
+		foreach ( $parts as $index => $part ) {
+			if ( 'done' === $state ) {
+				break;
+			}
+
+			// Tags are kept exactly as they are.
+			if ( '' === $part || '<' === $part[0] ) {
+				continue;
+			}
+
+			if ( 'marker' === $state ) {
+				$stripped = preg_replace(
+					'#^' . self::BULLET_SPACE . '*' . self::BULLET_GLYPHS . '#',
+					'',
+					$part,
+					1,
+					$removed
+				);
+
+				if ( ! $removed ) {
+					continue;
+				}
+
+				$part  = (string) $stripped;
+				$state = 'indent';
+			}
+
+			// The no-break spaces standing in for the indent go with it.
+			$part = (string) preg_replace( '#^' . self::BULLET_SPACE . '+#', '', $part );
+
+			if ( '' !== trim( $part ) ) {
+				$state = 'done';
+			}
+
+			$parts[ $index ] = $part;
+		}
+
+		$item = implode( '', $parts );
+
+		// The wrappers that held only the marker are empty now, and an empty
+		// <span> around nothing still counts as content to wp_kses_post().
+		for ( $pass = 0; $pass < 5; $pass++ ) {
+			$before = $item;
+
+			$item = (string) preg_replace(
+				'#<(span|font|b|strong|em|i|u)\b[^>]*>' . self::BULLET_SPACE . '*</\1>#i',
+				'',
+				$item
+			);
+
+			if ( $before === $item ) {
+				break;
+			}
+		}
+
+		return trim( $item );
 	}
 
 	/**

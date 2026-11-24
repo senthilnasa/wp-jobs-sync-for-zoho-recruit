@@ -72,6 +72,8 @@ file names follow the WordPress convention.
 | `tests/phpunit/layouts-test.php` | Token substitution and conditionals, template and CSS sanitization, layout selection, the apply link |
 | `tests/phpunit/extensibility-test.php` | Custom taxonomies reaching REST, shortcodes and mapping; the SEO title and description filters |
 | `tests/phpunit/purge-test.php` | Deleting synchronized jobs and orphan terms, and leaving manual jobs alone |
+| `tests/phpunit/rejoin-lines-test.php` | Telling a word processor's wrap from a deliberate break |
+| `tests/phpunit/pasted-bullets-test.php` | Rebuilding a list Word pasted as bullet characters |
 | `tests/phpunit/multisite-test.php` | Per-site activation, tables, settings, jobs and logging. Skipped on single site |
 
 `Field_Mapper` is the best unit-test surface in the plugin: it writes nothing to

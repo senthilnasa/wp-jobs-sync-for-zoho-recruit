@@ -85,8 +85,16 @@ mid-sentence** joins those back up on the next sync. Breaks that end a
 sentence, start a bold label line, or separate a bullet are left alone, so
 "Job Title: ... / Department: ..." keeps its shape.
 
-It is off by default, because no rule about this is right for every account.
-Developers can force it either way with `jszr_rejoin_wrapped_lines`.
+**Rebuild bullet lists that were pasted as characters**, beside it, fixes the
+other half. Word does not paste a list: it pastes one paragraph per item, each
+starting with a Symbol-font bullet character and a run of no-break spaces
+standing in for the indent. The page then shows stray dots with no indent and
+no list markers of its own. This folds runs of those back into a real `<ul>`,
+which picks up your theme's list styling.
+
+Both are off by default, because no rule about this is right for every
+account, and both take effect on the next sync. Developers can force either
+with `jszr_rejoin_wrapped_lines` and `jszr_lists_from_pasted_bullets`.
 
 Picking the wrong one is usually harmless and always reversible — change it and
 run a sync.

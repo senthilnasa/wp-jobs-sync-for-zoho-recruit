@@ -137,6 +137,7 @@ class Settings {
 			'conflict_mode'                 => 'mapped_only',
 			'store_raw'                     => true,
 			'unwrap_soft_breaks'            => false,
+			'list_from_bullets'             => false,
 			'notify_on_failure'             => true,
 			'notify_email'                  => '',
 
@@ -377,6 +378,7 @@ class Settings {
 			'only_published',
 			'store_raw',
 			'unwrap_soft_breaks',
+			'list_from_bullets',
 			'notify_on_failure',
 			'rest_enabled',
 			'rest_allow_inactive',
